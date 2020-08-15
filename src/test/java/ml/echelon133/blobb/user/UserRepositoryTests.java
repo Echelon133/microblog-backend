@@ -132,4 +132,31 @@ public class UserRepositoryTests {
         assertEquals(1, usersFollowingU1.size());
         assertEquals(1, usersFollowingU1.stream().filter(u -> u.getUuid() == u2.getUuid()).count());
     }
+
+    @Test
+    public void usersCanCheckTheirRelationshipsCounters() {
+        User u1 = userRepository.findByUsername("user1").orElse(null);
+        User u2 = userRepository.findByUsername("user2").orElse(null);
+        User u3 = userRepository.findByUsername("user3").orElse(null);
+
+        UserProfileInfo u1ProfileInfo = userRepository.getUserProfileInfo(u1.getUuid()).orElse(null);
+
+        // both followedBy and follows counters should be 0
+        assertEquals(0, u1ProfileInfo.getFollowedBy());
+        assertEquals(0, u1ProfileInfo.getFollows());
+
+        // u2 and u3 follow u1
+        userRepository.followUserWithUuid(u2.getUuid(), u1.getUuid());
+        userRepository.followUserWithUuid(u3.getUuid(), u1.getUuid());
+
+        // u1 follows u3
+        userRepository.followUserWithUuid(u1.getUuid(), u3.getUuid());
+
+        // update profile info
+        u1ProfileInfo = userRepository.getUserProfileInfo(u1.getUuid()).orElse(null);
+
+        // u1 is followed by two people (u2, u3) and follows one user (u3)
+        assertEquals(2, u1ProfileInfo.getFollowedBy());
+        assertEquals(1, u1ProfileInfo.getFollows());
+    }
 }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -197,5 +198,28 @@ public class UserRepositoryTests {
         assertEquals(1, skip0limit1.size());
         assertEquals(2, skip0limit5.size());
         assertEquals(1, skip1limit5.size());
+    }
+
+    @Test
+    public void checkIfUserWithUuidFollows_Works() {
+        User u1 = userRepository.findByUsername("user1").orElse(null);
+        User u2 = userRepository.findByUsername("user2").orElse(null);
+
+        Optional<Long> u1FollowsU2 = userRepository.checkIfUserWithUuidFollows(u1.getUuid(), u2.getUuid());
+        Optional<Long> u2FollowsU1 = userRepository.checkIfUserWithUuidFollows(u2.getUuid(), u1.getUuid());
+
+        assertTrue(u1FollowsU2.isEmpty());
+        assertTrue(u2FollowsU1.isEmpty());
+
+        // u1 follows u2
+        userRepository.followUserWithUuid(u1.getUuid(), u2.getUuid());
+        // u2 follows u1
+        userRepository.followUserWithUuid(u2.getUuid(), u1.getUuid());
+
+        u1FollowsU2 = userRepository.checkIfUserWithUuidFollows(u1.getUuid(), u2.getUuid());
+        u2FollowsU1 = userRepository.checkIfUserWithUuidFollows(u2.getUuid(), u1.getUuid());
+
+        assertTrue(u1FollowsU2.isPresent());
+        assertTrue(u2FollowsU1.isPresent());
     }
 }

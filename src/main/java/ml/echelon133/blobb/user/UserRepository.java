@@ -16,6 +16,11 @@ public interface UserRepository extends Neo4jRepository<User, UUID> {
             "RETURN id(f)")
     Optional<Long> followUserWithUuid(UUID uuidOfFollower, UUID uuidOfFollowed);
 
+    @Query( "MATCH(u1:User)-[f:FOLLOWS]->(u2:User) " +
+            "WHERE u1.uuid = $uuidOfFollower AND u2.uuid = $uuidOfFollowed " +
+            "RETURN id(f)")
+    Optional<Long> checkIfUserWithUuidFollows(UUID uuidOfFollower, UUID uuidOfFollowed);
+
     @Query( "MATCH (u1:User)-[f:FOLLOWS]->(u2:User) " +
             "WHERE u1.uuid = $uuidOfFollower AND u2.uuid = $uuidOfFollowed " +
             "DELETE f")

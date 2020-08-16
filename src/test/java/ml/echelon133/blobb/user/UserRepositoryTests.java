@@ -159,4 +159,43 @@ public class UserRepositoryTests {
         assertEquals(2, u1ProfileInfo.getFollowedBy());
         assertEquals(1, u1ProfileInfo.getFollows());
     }
+
+    @Test
+    public void findAllFollowedByUserWithUuid_LimitAndSkipArgumentsWork() {
+        User u1 = userRepository.findByUsername("user1").orElse(null);
+        User u2 = userRepository.findByUsername("user2").orElse(null);
+        User u3 = userRepository.findByUsername("user3").orElse(null);
+
+        // u1 follows u2, u3
+        userRepository.followUserWithUuid(u1.getUuid(), u2.getUuid());
+        userRepository.followUserWithUuid(u1.getUuid(), u3.getUuid());
+
+        List<User> skip0limit1 = userRepository.findAllFollowedByUserWithUuid(u1.getUuid(), 0L, 1L);
+        List<User> skip0limit5 = userRepository.findAllFollowedByUserWithUuid(u1.getUuid(), 0L, 5L);
+        List<User> skip1limit5 = userRepository.findAllFollowedByUserWithUuid(u1.getUuid(), 1L, 5L);
+
+        assertEquals(1, skip0limit1.size());
+        assertEquals(2, skip0limit5.size());
+        assertEquals(1, skip1limit5.size());
+    }
+
+    @Test
+    public void findAllFollowingUserWithUuid_LimitAndSkipArgumentsWork() {
+        User u1 = userRepository.findByUsername("user1").orElse(null);
+        User u2 = userRepository.findByUsername("user2").orElse(null);
+        User u3 = userRepository.findByUsername("user3").orElse(null);
+
+        // u3 follows u1
+        userRepository.followUserWithUuid(u3.getUuid(), u1.getUuid());
+        // u2 follows u1
+        userRepository.followUserWithUuid(u2.getUuid(), u1.getUuid());
+
+        List<User> skip0limit1 = userRepository.findAllFollowingUserWithUuid(u1.getUuid(), 0L, 1L);
+        List<User> skip0limit5 = userRepository.findAllFollowingUserWithUuid(u1.getUuid(), 0L, 5L);
+        List<User> skip1limit5 = userRepository.findAllFollowingUserWithUuid(u1.getUuid(), 1L, 5L);
+
+        assertEquals(1, skip0limit1.size());
+        assertEquals(2, skip0limit5.size());
+        assertEquals(1, skip1limit5.size());
+    }
 }

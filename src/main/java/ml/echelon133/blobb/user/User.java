@@ -96,6 +96,10 @@ public class User implements UserDetails {
         this.aviURL = aviURL;
     }
 
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
     @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {

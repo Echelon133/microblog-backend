@@ -34,9 +34,13 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public boolean followUserWithUuid(User user, UUID followUuid) throws UserDoesntExistException {
+    public boolean followUserWithUuid(User user, UUID followUuid) throws UserDoesntExistException, IllegalArgumentException {
         throwIfUserDoesntExist(followUuid);
         Optional<Long> following = userRepository.checkIfUserWithUuidFollows(user.getUuid(), followUuid);
+
+        if (user.getUuid().equals(followUuid)) {
+            throw new IllegalArgumentException("Users cannot follow themselves.");
+        }
 
         // only follow if there is no already existing 'follows' relationship
         // between these users

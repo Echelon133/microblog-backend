@@ -24,6 +24,16 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public User findByUuid(UUID uuid) throws UserDoesntExistException {
+        throwIfUserDoesntExist(uuid);
+        Optional<User> user = userRepository.findById(uuid);
+        if (user.isPresent()) {
+            return user.get();
+        }
+        throw new UserDoesntExistException(uuid);
+    }
+
+    @Override
     public boolean followUserWithUuid(User user, UUID followUuid) throws UserDoesntExistException {
         throwIfUserDoesntExist(followUuid);
         Optional<Long> following = userRepository.checkIfUserWithUuidFollows(user.getUuid(), followUuid);

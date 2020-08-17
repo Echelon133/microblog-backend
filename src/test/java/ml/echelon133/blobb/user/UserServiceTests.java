@@ -343,4 +343,53 @@ public class UserServiceTests {
         assertEquals(20L, profileInfo.getFollows());
         assertEquals(10L, profileInfo.getFollowedBy());
     }
+
+    @Test
+    public void findByUuid_ThrowsWhenUserDoesntExist() {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userRepository.existsById(uuid)).willReturn(false);
+
+        // then
+        String message = assertThrows(UserDoesntExistException.class, () -> {
+            userService.findByUuid(uuid);
+        }).getMessage();
+
+        assertEquals(String.format("User with UUID %s doesn't exist", uuid), message);
+    }
+
+    @Test
+    public void findByUuid_ThrowsWhenDatabaseFails() {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userRepository.existsById(uuid)).willReturn(true);
+        given(userRepository.findById(uuid)).willReturn(Optional.empty());
+
+        // then
+        String message = assertThrows(UserDoesntExistException.class, () -> {
+            userService.findByUuid(uuid);
+        }).getMessage();
+
+        assertEquals(String.format("User with UUID %s doesn't exist", uuid), message);
+    }
+
+    @Test
+    public void findByUuid_ReturnsObject() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        User user = new User();
+        user.setUuid(uuid);
+
+        // given
+        given(userRepository.existsById(uuid)).willReturn(true);
+        given(userRepository.findById(uuid)).willReturn(Optional.of(user));
+
+        // when
+        User foundUser = userService.findByUuid(uuid);
+
+        //then
+        assertNotNull(foundUser);
+        assertEquals(uuid, foundUser.getUuid());
+    }
 }

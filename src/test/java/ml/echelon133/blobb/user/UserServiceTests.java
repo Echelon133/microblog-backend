@@ -98,6 +98,24 @@ public class UserServiceTests {
     }
 
     @Test
+    public void followUserWithUuid_ThrowsWhenUserFollowsThemselves() throws Exception {
+        UUID u1Uuid = UUID.randomUUID();
+        User user = new User("test1", "mail@test.com", "", "");
+        user.setUuid(u1Uuid);
+
+        // given
+        given(userRepository.existsById(u1Uuid)).willReturn(true);
+        given(userRepository.checkIfUserWithUuidFollows(u1Uuid, u1Uuid)).willReturn(Optional.empty());
+
+        // then
+        String message = assertThrows(IllegalArgumentException.class, () -> {
+            userService.followUserWithUuid(user, u1Uuid);
+        }).getMessage();
+
+        assertEquals("Users cannot follow themselves.", message);
+    }
+
+    @Test
     public void unfollowUserWithUuid_ThrowsWhenUserDoesntExist() {
         UUID u1Uuid = UUID.randomUUID();
         User user = new User("test1", "mail@test.com", "", "");

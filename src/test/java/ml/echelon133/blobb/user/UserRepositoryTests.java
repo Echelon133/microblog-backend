@@ -143,7 +143,7 @@ public class UserRepositoryTests {
         UserProfileInfo u1ProfileInfo = userRepository.getUserProfileInfo(u1.getUuid()).orElse(null);
 
         // both followedBy and follows counters should be 0
-        assertEquals(0, u1ProfileInfo.getFollowedBy());
+        assertEquals(0, u1ProfileInfo.getFollowers());
         assertEquals(0, u1ProfileInfo.getFollows());
 
         // u2 and u3 follow u1
@@ -157,7 +157,7 @@ public class UserRepositoryTests {
         u1ProfileInfo = userRepository.getUserProfileInfo(u1.getUuid()).orElse(null);
 
         // u1 is followed by two people (u2, u3) and follows one user (u3)
-        assertEquals(2, u1ProfileInfo.getFollowedBy());
+        assertEquals(2, u1ProfileInfo.getFollowers());
         assertEquals(1, u1ProfileInfo.getFollows());
     }
 

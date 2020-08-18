@@ -11,7 +11,7 @@ public class UserProfileInfo {
     @Convert(value = UuidStringConverter.class)
     private UUID uuid;
     private Long follows;
-    private Long followedBy;
+    private Long followers;
 
     public UUID getUuid() {
         return uuid;
@@ -21,8 +21,8 @@ public class UserProfileInfo {
         return follows;
     }
 
-    public Long getFollowedBy() {
-        return followedBy;
+    public Long getFollowers() {
+        return followers;
     }
 
     public void setUuid(UUID uuid) {
@@ -33,7 +33,7 @@ public class UserProfileInfo {
         this.follows = follows;
     }
 
-    public void setFollowedBy(Long followedBy) {
-        this.followedBy = followedBy;
+    public void setFollowers(Long followers) {
+        this.followers = followers;
     }
 }

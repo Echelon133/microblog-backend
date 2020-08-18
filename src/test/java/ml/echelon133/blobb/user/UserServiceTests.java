@@ -337,7 +337,7 @@ public class UserServiceTests {
         // then
         assertNull(profileInfo.getUuid());
         assertNull(profileInfo.getFollows());
-        assertNull(profileInfo.getFollowedBy());
+        assertNull(profileInfo.getFollowers());
     }
 
     @Test
@@ -346,7 +346,7 @@ public class UserServiceTests {
 
         UserProfileInfo mockProfileInfo = new UserProfileInfo();
         mockProfileInfo.setUuid(uUuid);
-        mockProfileInfo.setFollowedBy(10L);
+        mockProfileInfo.setFollowers(10L);
         mockProfileInfo.setFollows(20L);
 
         // given
@@ -359,7 +359,7 @@ public class UserServiceTests {
         // then
         assertEquals(uUuid, profileInfo.getUuid());
         assertEquals(20L, profileInfo.getFollows());
-        assertEquals(10L, profileInfo.getFollowedBy());
+        assertEquals(10L, profileInfo.getFollowers());
     }
 
     @Test

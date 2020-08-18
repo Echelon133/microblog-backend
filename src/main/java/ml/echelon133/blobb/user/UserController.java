@@ -22,4 +22,9 @@ public class UserController {
     public ResponseEntity<User> getUser(@PathVariable String uuid) throws Exception {
         return new ResponseEntity<>(userService.findByUuid(UUID.fromString(uuid)), HttpStatus.OK);
     }
+
+    @GetMapping("{uuid}/profile")
+    public ResponseEntity<UserProfileInfo> getUserProfile(@PathVariable String uuid) throws Exception {
+        return new ResponseEntity<>(userService.getUserProfileInfo(UUID.fromString(uuid)), HttpStatus.OK);
+    }
 }

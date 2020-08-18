@@ -31,14 +31,14 @@ public interface UserRepository extends Neo4jRepository<User, UUID> {
             "RETURN followed " +
             "SKIP $skip " +
             "LIMIT $limit")
-    List<User> findAllFollowedByUserWithUuid(UUID uuid, Long skip, Long limit);
+    List<User> findAllFollowsOfUserWithUuid(UUID uuid, Long skip, Long limit);
 
     @Query( "MATCH (following)-[:FOLLOWS]->(u:User) " +
             "WHERE u.uuid = $uuid " +
             "RETURN following " +
             "SKIP $skip " +
             "LIMIT $limit")
-    List<User> findAllFollowingUserWithUuid(UUID uuid, Long skip, Long limit);
+    List<User> findAllFollowersOfUserWithUuid(UUID uuid, Long skip, Long limit);
 
     @Query( "MATCH (user:User) " +
             "WHERE user.uuid = $uuid " +

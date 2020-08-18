@@ -59,21 +59,21 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<User> findAllFollowedBy(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException {
+    public List<User> findAllFollowsOfUser(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException {
         throwIfUserDoesntExist(uuid);
         if (skip < 0 || limit < 0) {
             throw new IllegalArgumentException("Invalid skip and/or limit values.");
         }
-        return userRepository.findAllFollowedByUserWithUuid(uuid, skip, limit);
+        return userRepository.findAllFollowsOfUserWithUuid(uuid, skip, limit);
     }
 
     @Override
-    public List<User> findAllFollowing(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException {
+    public List<User> findAllFollowersOfUser(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException {
         throwIfUserDoesntExist(uuid);
         if (skip < 0 || limit < 0) {
             throw new IllegalArgumentException("Invalid skip and/or limit values.");
         }
-        return userRepository.findAllFollowingUserWithUuid(uuid, skip, limit);
+        return userRepository.findAllFollowersOfUserWithUuid(uuid, skip, limit);
     }
 
     @Override

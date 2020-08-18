@@ -8,7 +8,7 @@ public interface IUserService {
     boolean checkIfUserFollows(User user, UUID followedUuid) throws UserDoesntExistException;
     boolean followUserWithUuid(User user, UUID followUuid) throws UserDoesntExistException, IllegalArgumentException;
     boolean unfollowUserWithUuid(User user, UUID unfollowUuid) throws UserDoesntExistException;
-    List<User> findAllFollowedBy(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException;
-    List<User> findAllFollowing(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException;
+    List<User> findAllFollowsOfUser(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException;
+    List<User> findAllFollowersOfUser(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException;
     UserProfileInfo getUserProfileInfo(UUID uuid) throws UserDoesntExistException;
 }

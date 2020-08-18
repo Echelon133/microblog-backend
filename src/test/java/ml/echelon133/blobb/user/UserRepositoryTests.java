@@ -40,15 +40,15 @@ public class UserRepositoryTests {
     }
 
     @Test
-    public void usersCanFollowEachOther() {
+    public void followUserWithUuid_LetsUsersFollowEachOther() {
         User u1 = userRepository.findByUsername("user1").orElse(null);
         User u2 = userRepository.findByUsername("user2").orElse(null);
         User u3 = userRepository.findByUsername("user3").orElse(null);
 
         // All these lists should be empty, because we don't have any relationships between users
-        List<User> usersFollowedByU1 = userRepository.findAllFollowedByUserWithUuid(u1.getUuid(), 0L, 5L);
-        List<User> usersFollowedByU2 = userRepository.findAllFollowedByUserWithUuid(u2.getUuid(), 0L, 5L);
-        List<User> usersFollowedByU3 = userRepository.findAllFollowedByUserWithUuid(u3.getUuid(), 0L, 5L);
+        List<User> usersFollowedByU1 = userRepository.findAllFollowsOfUserWithUuid(u1.getUuid(), 0L, 5L);
+        List<User> usersFollowedByU2 = userRepository.findAllFollowsOfUserWithUuid(u2.getUuid(), 0L, 5L);
+        List<User> usersFollowedByU3 = userRepository.findAllFollowsOfUserWithUuid(u3.getUuid(), 0L, 5L);
 
         assertEquals(0, usersFollowedByU1.size());
         assertEquals(0, usersFollowedByU2.size());
@@ -65,9 +65,9 @@ public class UserRepositoryTests {
         userRepository.followUserWithUuid(u3.getUuid(), u1.getUuid());
 
         // query the database again
-        usersFollowedByU1 = userRepository.findAllFollowedByUserWithUuid(u1.getUuid(), 0L, 5L);
-        usersFollowedByU2 = userRepository.findAllFollowedByUserWithUuid(u2.getUuid(), 0L, 5L);
-        usersFollowedByU3 = userRepository.findAllFollowedByUserWithUuid(u3.getUuid(), 0L, 5L);
+        usersFollowedByU1 = userRepository.findAllFollowsOfUserWithUuid(u1.getUuid(), 0L, 5L);
+        usersFollowedByU2 = userRepository.findAllFollowsOfUserWithUuid(u2.getUuid(), 0L, 5L);
+        usersFollowedByU3 = userRepository.findAllFollowsOfUserWithUuid(u3.getUuid(), 0L, 5L);
 
         // check if u1 follows u2, u3
         assertEquals(2, usersFollowedByU1.size());
@@ -84,7 +84,7 @@ public class UserRepositoryTests {
     }
 
     @Test
-    public void usersCanUnfollowEachOther() {
+    public void unfollowUserWithUuid_LetsUsersUnfollowEachOther() {
         User u1 = userRepository.findByUsername("user1").orElse(null);
         User u2 = userRepository.findByUsername("user2").orElse(null);
 
@@ -92,8 +92,8 @@ public class UserRepositoryTests {
         userRepository.followUserWithUuid(u1.getUuid(), u2.getUuid());
         userRepository.followUserWithUuid(u2.getUuid(), u1.getUuid());
 
-        List<User> usersFollowedByU1 = userRepository.findAllFollowedByUserWithUuid(u1.getUuid(), 0L, 5L);
-        List<User> usersFollowedByU2 = userRepository.findAllFollowedByUserWithUuid(u2.getUuid(), 0L, 5L);
+        List<User> usersFollowedByU1 = userRepository.findAllFollowsOfUserWithUuid(u1.getUuid(), 0L, 5L);
+        List<User> usersFollowedByU2 = userRepository.findAllFollowsOfUserWithUuid(u2.getUuid(), 0L, 5L);
 
         // check if u1 follows u2, and u2 follows u1
         assertEquals(1, usersFollowedByU1.size());
@@ -106,8 +106,8 @@ public class UserRepositoryTests {
         userRepository.unfollowUserWithUuid(u2.getUuid(), u1.getUuid());
 
         // check the database again
-        usersFollowedByU1 = userRepository.findAllFollowedByUserWithUuid(u1.getUuid(), 0L, 5L);
-        usersFollowedByU2 = userRepository.findAllFollowedByUserWithUuid(u2.getUuid(), 0L, 5L);
+        usersFollowedByU1 = userRepository.findAllFollowsOfUserWithUuid(u1.getUuid(), 0L, 5L);
+        usersFollowedByU2 = userRepository.findAllFollowsOfUserWithUuid(u2.getUuid(), 0L, 5L);
 
         // check if both lists are empty
         assertEquals(0, usersFollowedByU1.size());
@@ -115,19 +115,19 @@ public class UserRepositoryTests {
     }
 
     @Test
-    public void usersCanCheckWhoFollowsThem() {
+    public void findAllFollowersOfUserWithUuid_ReturnsCorrectListOfFollowers() {
         User u1 = userRepository.findByUsername("user1").orElse(null);
         User u2 = userRepository.findByUsername("user2").orElse(null);
 
         // list of all who follow u1
-        List<User> usersFollowingU1 = userRepository.findAllFollowingUserWithUuid(u1.getUuid(), 0L, 5L);
+        List<User> usersFollowingU1 = userRepository.findAllFollowersOfUserWithUuid(u1.getUuid(), 0L, 5L);
         assertEquals(0, usersFollowingU1.size());
 
         // follow u1 as u2
         userRepository.followUserWithUuid(u2.getUuid(), u1.getUuid());
 
         // refresh the list
-        usersFollowingU1 = userRepository.findAllFollowingUserWithUuid(u1.getUuid(), 0L, 5L);
+        usersFollowingU1 = userRepository.findAllFollowersOfUserWithUuid(u1.getUuid(), 0L, 5L);
 
         // check if the list of u1 followers contains u2
         assertEquals(1, usersFollowingU1.size());
@@ -135,7 +135,7 @@ public class UserRepositoryTests {
     }
 
     @Test
-    public void usersCanCheckTheirRelationshipsCounters() {
+    public void getUserProfileInfo_ReturnsCorrectCounterValues() {
         User u1 = userRepository.findByUsername("user1").orElse(null);
         User u2 = userRepository.findByUsername("user2").orElse(null);
         User u3 = userRepository.findByUsername("user3").orElse(null);
@@ -162,7 +162,7 @@ public class UserRepositoryTests {
     }
 
     @Test
-    public void findAllFollowedByUserWithUuid_LimitAndSkipArgumentsWork() {
+    public void findAllFollowsOfUserWithUuid_LimitAndSkipArgumentsWork() {
         User u1 = userRepository.findByUsername("user1").orElse(null);
         User u2 = userRepository.findByUsername("user2").orElse(null);
         User u3 = userRepository.findByUsername("user3").orElse(null);
@@ -171,9 +171,9 @@ public class UserRepositoryTests {
         userRepository.followUserWithUuid(u1.getUuid(), u2.getUuid());
         userRepository.followUserWithUuid(u1.getUuid(), u3.getUuid());
 
-        List<User> skip0limit1 = userRepository.findAllFollowedByUserWithUuid(u1.getUuid(), 0L, 1L);
-        List<User> skip0limit5 = userRepository.findAllFollowedByUserWithUuid(u1.getUuid(), 0L, 5L);
-        List<User> skip1limit5 = userRepository.findAllFollowedByUserWithUuid(u1.getUuid(), 1L, 5L);
+        List<User> skip0limit1 = userRepository.findAllFollowsOfUserWithUuid(u1.getUuid(), 0L, 1L);
+        List<User> skip0limit5 = userRepository.findAllFollowsOfUserWithUuid(u1.getUuid(), 0L, 5L);
+        List<User> skip1limit5 = userRepository.findAllFollowsOfUserWithUuid(u1.getUuid(), 1L, 5L);
 
         assertEquals(1, skip0limit1.size());
         assertEquals(2, skip0limit5.size());
@@ -181,7 +181,7 @@ public class UserRepositoryTests {
     }
 
     @Test
-    public void findAllFollowingUserWithUuid_LimitAndSkipArgumentsWork() {
+    public void findAllFollowersOfUserWithUuid_LimitAndSkipArgumentsWork() {
         User u1 = userRepository.findByUsername("user1").orElse(null);
         User u2 = userRepository.findByUsername("user2").orElse(null);
         User u3 = userRepository.findByUsername("user3").orElse(null);
@@ -191,9 +191,9 @@ public class UserRepositoryTests {
         // u2 follows u1
         userRepository.followUserWithUuid(u2.getUuid(), u1.getUuid());
 
-        List<User> skip0limit1 = userRepository.findAllFollowingUserWithUuid(u1.getUuid(), 0L, 1L);
-        List<User> skip0limit5 = userRepository.findAllFollowingUserWithUuid(u1.getUuid(), 0L, 5L);
-        List<User> skip1limit5 = userRepository.findAllFollowingUserWithUuid(u1.getUuid(), 1L, 5L);
+        List<User> skip0limit1 = userRepository.findAllFollowersOfUserWithUuid(u1.getUuid(), 0L, 1L);
+        List<User> skip0limit5 = userRepository.findAllFollowersOfUserWithUuid(u1.getUuid(), 0L, 5L);
+        List<User> skip1limit5 = userRepository.findAllFollowersOfUserWithUuid(u1.getUuid(), 1L, 5L);
 
         assertEquals(1, skip0limit1.size());
         assertEquals(2, skip0limit5.size());

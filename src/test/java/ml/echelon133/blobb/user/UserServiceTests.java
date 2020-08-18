@@ -171,7 +171,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void findAllFollowedBy_ThrowsWhenUserDoesntExist() {
+    public void findAllFollowsOfUser_ThrowsWhenUserDoesntExist() {
         UUID uUuid = UUID.randomUUID();
 
         // given
@@ -179,7 +179,7 @@ public class UserServiceTests {
 
         // when
         String message = assertThrows(UserDoesntExistException.class, () -> {
-            userService.findAllFollowedBy(uUuid, 0L, 5L);
+            userService.findAllFollowsOfUser(uUuid, 0L, 5L);
         }).getMessage();
 
         // then
@@ -187,7 +187,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void findAllFollowedBy_ThrowsWhenSkipAndLimitArgumentsNegative() {
+    public void findAllFollowsOfUser_ThrowsWhenSkipAndLimitArgumentsNegative() {
         UUID uUuid = UUID.randomUUID();
 
         // given
@@ -195,52 +195,52 @@ public class UserServiceTests {
 
         // then
         Exception ex = assertThrows(IllegalArgumentException.class, () -> {
-            userService.findAllFollowedBy(uUuid, -1L, 0L);
+            userService.findAllFollowsOfUser(uUuid, -1L, 0L);
         });
 
         assertEquals("Invalid skip and/or limit values.", ex.getMessage());
 
         ex = assertThrows(IllegalArgumentException.class, () -> {
-            userService.findAllFollowedBy(uUuid, 0L, -1L);
+            userService.findAllFollowsOfUser(uUuid, 0L, -1L);
         });
 
         assertEquals("Invalid skip and/or limit values.", ex.getMessage());
     }
 
     @Test
-    public void findAllFollowedBy_ReturnsEmptyListIfNobodyFollowed() throws Exception {
+    public void findAllFollowsOfUser_ReturnsEmptyListIfNobodyFollowed() throws Exception {
         UUID uUuid = UUID.randomUUID();
 
         // given
         given(userRepository.existsById(uUuid)).willReturn(true);
-        given(userRepository.findAllFollowedByUserWithUuid(uUuid, 0L, 5L)).willReturn(List.of());
+        given(userRepository.findAllFollowsOfUserWithUuid(uUuid, 0L, 5L)).willReturn(List.of());
 
         // when
-        List<User> followedBy = userService.findAllFollowedBy(uUuid, 0L, 5L);
+        List<User> followedBy = userService.findAllFollowsOfUser(uUuid, 0L, 5L);
 
         // then
         assertEquals(0, followedBy.size());
     }
 
     @Test
-    public void findAllFollowedBy_ReturnsListOfFollowers() throws Exception {
+    public void findAllFollowsOfUser_ReturnsListOfFollowers() throws Exception {
         UUID uUuid = UUID.randomUUID();
 
         List<User> mockList = List.of(new User(), new User(), new User());
 
         // given
         given(userRepository.existsById(uUuid)).willReturn(true);
-        given(userRepository.findAllFollowedByUserWithUuid(uUuid, 0L, 5L)).willReturn(mockList);
+        given(userRepository.findAllFollowsOfUserWithUuid(uUuid, 0L, 5L)).willReturn(mockList);
 
         // when
-        List<User> followedBy = userService.findAllFollowedBy(uUuid, 0L, 5L);
+        List<User> followedBy = userService.findAllFollowsOfUser(uUuid, 0L, 5L);
 
         // then
         assertEquals(3, followedBy.size());
     }
 
     @Test
-    public void findAllFollowing_ThrowsWhenUserDoesntExist() {
+    public void findAllFollowersOfUser_ThrowsWhenUserDoesntExist() {
         UUID uUuid = UUID.randomUUID();
 
         // given
@@ -248,7 +248,7 @@ public class UserServiceTests {
 
         // when
         String message = assertThrows(UserDoesntExistException.class, () -> {
-            userService.findAllFollowing(uUuid, 0L, 5L);
+            userService.findAllFollowersOfUser(uUuid, 0L, 5L);
         }).getMessage();
 
         // then
@@ -256,7 +256,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void findAllFollowing_ThrowsWhenSkipAndLimitArgumentsNegative() {
+    public void findAllFollowersOfUser_ThrowsWhenSkipAndLimitArgumentsNegative() {
         UUID uUuid = UUID.randomUUID();
 
         // given
@@ -264,45 +264,45 @@ public class UserServiceTests {
 
         // then
         Exception ex = assertThrows(IllegalArgumentException.class, () -> {
-            userService.findAllFollowing(uUuid, -1L, 0L);
+            userService.findAllFollowersOfUser(uUuid, -1L, 0L);
         });
 
         assertEquals("Invalid skip and/or limit values.", ex.getMessage());
 
         ex = assertThrows(IllegalArgumentException.class, () -> {
-            userService.findAllFollowing(uUuid, 0L, -1L);
+            userService.findAllFollowersOfUser(uUuid, 0L, -1L);
         });
 
         assertEquals("Invalid skip and/or limit values.", ex.getMessage());
     }
 
     @Test
-    public void findAllFollowing_ReturnsListOfFollowers() throws Exception {
+    public void findAllFollowersOfUser_ReturnsListOfFollowers() throws Exception {
         UUID uUuid = UUID.randomUUID();
 
         List<User> mockList = List.of(new User(), new User(), new User());
 
         // given
         given(userRepository.existsById(uUuid)).willReturn(true);
-        given(userRepository.findAllFollowingUserWithUuid(uUuid, 0L, 5L)).willReturn(mockList);
+        given(userRepository.findAllFollowersOfUserWithUuid(uUuid, 0L, 5L)).willReturn(mockList);
 
         // when
-        List<User> following = userService.findAllFollowing(uUuid, 0L, 5L);
+        List<User> following = userService.findAllFollowersOfUser(uUuid, 0L, 5L);
 
         // then
         assertEquals(3, following.size());
     }
 
     @Test
-    public void findAllFollowing_ReturnsEmptyListIfNobodyFollowed() throws Exception {
+    public void findAllFollowersOfUser_ReturnsEmptyListIfNobodyFollowed() throws Exception {
         UUID uUuid = UUID.randomUUID();
 
         // given
         given(userRepository.existsById(uUuid)).willReturn(true);
-        given(userRepository.findAllFollowingUserWithUuid(uUuid, 0L, 5L)).willReturn(List.of());
+        given(userRepository.findAllFollowersOfUserWithUuid(uUuid, 0L, 5L)).willReturn(List.of());
 
         // when
-        List<User> following = userService.findAllFollowing(uUuid, 0L, 5L);
+        List<User> following = userService.findAllFollowersOfUser(uUuid, 0L, 5L);
 
         // then
         assertEquals(0, following.size());

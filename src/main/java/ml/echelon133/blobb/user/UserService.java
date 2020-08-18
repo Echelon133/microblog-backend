@@ -81,4 +81,10 @@ public class UserService implements IUserService {
         throwIfUserDoesntExist(uuid);
         return userRepository.getUserProfileInfo(uuid).orElse(new UserProfileInfo());
     }
+
+    @Override
+    public boolean checkIfUserFollows(User user, UUID followedUuid) throws UserDoesntExistException {
+        throwIfUserDoesntExist(followedUuid);
+        return userRepository.checkIfUserWithUuidFollows(user.getUuid(), followedUuid).isPresent();
+    }
 }

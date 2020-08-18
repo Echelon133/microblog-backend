@@ -410,4 +410,51 @@ public class UserServiceTests {
         assertNotNull(foundUser);
         assertEquals(uuid, foundUser.getUuid());
     }
+
+    @Test
+    public void checkIfUserFollows_ThrowsWhenUserDoesntExist() {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userRepository.existsById(uuid)).willReturn(false);
+
+        // then
+        String message = assertThrows(UserDoesntExistException.class, () -> {
+            userService.checkIfUserFollows(any(User.class), uuid);
+        }).getMessage();
+
+        assertEquals(String.format("User with UUID %s doesn't exist", uuid), message);
+    }
+
+    @Test
+    public void checkIfUserFollows_ReturnsFalseWhenThereIsNoFollow() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        User user = new User("test1", "mail@test.com", "", "");
+
+        // given
+        given(userRepository.existsById(uuid)).willReturn(true);
+        given(userRepository.checkIfUserWithUuidFollows(user.getUuid(), uuid)).willReturn(Optional.empty());
+
+        // when
+        boolean result = userService.checkIfUserFollows(user, uuid);
+
+        // then
+        assertFalse(result);
+    }
+
+    @Test
+    public void checkIfUserFollows_ReturnsTrueWhenThereIsFollow() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        User user = new User("test1", "mail@test.com", "", "");
+
+        // given
+        given(userRepository.existsById(uuid)).willReturn(true);
+        given(userRepository.checkIfUserWithUuidFollows(user.getUuid(), uuid)).willReturn(Optional.of(1L));
+
+        // when
+        boolean result = userService.checkIfUserFollows(user, uuid);
+
+        // then
+        assertTrue(result);
+    }
 }

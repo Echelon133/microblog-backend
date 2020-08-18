@@ -71,7 +71,7 @@ public class UserControllerTests {
         UUID uuid = UUID.randomUUID();
 
         // given
-        given(userService.findByUuid(any()))
+        given(userService.findByUuid(uuid))
                 .willThrow(new UserDoesntExistException(uuid));
 
         // when
@@ -96,7 +96,7 @@ public class UserControllerTests {
         JsonContent<User> json = jsonUser.write(user);
 
         // given
-        given(userService.findByUuid(any())).willReturn(user);
+        given(userService.findByUuid(uuid)).willReturn(user);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(

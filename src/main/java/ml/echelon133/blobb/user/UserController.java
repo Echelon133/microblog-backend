@@ -1,17 +1,25 @@
 package ml.echelon133.blobb.user;
 
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+import java.util.UUID;
 
 @RestController
+@RequestMapping("/api/users/")
 public class UserController {
 
-    @GetMapping(path = "/api/me")
-    public UserDetails userInfo(Principal principal) {
-        return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    private IUserService userService;
+
+    @Autowired
+    public UserController(IUserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping("{uuid}")
+    public ResponseEntity<User> getUser(@PathVariable String uuid) throws Exception {
+        return new ResponseEntity<>(userService.findByUuid(UUID.fromString(uuid)), HttpStatus.OK);
     }
 }

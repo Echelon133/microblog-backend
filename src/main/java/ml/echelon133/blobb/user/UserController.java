@@ -72,4 +72,19 @@ public class UserController {
                 userService.findAllFollowersOfUser(UUID.fromString(uuid), skip, limit),
                 HttpStatus.OK);
     }
+
+    @GetMapping("{uuid}/follows")
+    public ResponseEntity<List<User>> getFollows(@PathVariable String uuid,
+                                                 @RequestParam(required = false) Long skip,
+                                                 @RequestParam(required = false) Long limit) throws Exception {
+        if (skip == null) {
+            skip = 0L;
+        }
+        if (limit == null) {
+            limit = 5L;
+        }
+        return new ResponseEntity<>(
+                userService.findAllFollowsOfUser(UUID.fromString(uuid), skip, limit),
+                HttpStatus.OK);
+    }
 }

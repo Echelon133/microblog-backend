@@ -3,8 +3,10 @@ package ml.echelon133.blobb.user;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -27,4 +29,14 @@ public class UserController {
     public ResponseEntity<UserProfileInfo> getUserProfile(@PathVariable String uuid) throws Exception {
         return new ResponseEntity<>(userService.getUserProfileInfo(UUID.fromString(uuid)), HttpStatus.OK);
     }
+
+    @GetMapping("{uuid}/follow")
+    public ResponseEntity<Map<String, Boolean>> checkIfFollowed(@PathVariable String uuid) throws Exception {
+        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Boolean result = userService.checkIfUserFollows(loggedUser, UUID.fromString(uuid));
+
+        Map<String, Boolean> response = Map.of("followed", result);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }

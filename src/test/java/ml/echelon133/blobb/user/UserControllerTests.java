@@ -573,4 +573,151 @@ public class UserControllerTests {
         assertThat(response.getContentAsString())
                 .contains(json.getJson());
     }
+
+    @Test
+    public void getFollows_HandlesInvalidUuid() throws Exception {
+        String invalidUuid = "asdf";
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + invalidUuid + "/follows")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Invalid UUID string");
+    }
+
+    @Test
+    public void getFollows_DoesntExist() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userService.findAllFollowsOfUser(uuid, 0L, 5L))
+                .willThrow(new UserDoesntExistException(uuid));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + uuid + "/follows")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(response.getContentAsString())
+                .contains(String.format("User with UUID %s doesn't exist", uuid.toString()));
+    }
+
+    @Test
+    public void getFollows_NoSkipSetsSkipValueToDefault() throws Exception {
+        List<User> follows = List.of(
+                new User("test1", "","",""),
+                new User("test2", "", "", ""));
+
+        UUID uuid = UUID.randomUUID();
+
+        // expected json
+        JsonContent<List<User>> json = jsonUsers.write(follows);
+
+        // given
+        given(userService.findAllFollowsOfUser(uuid, 0L, 20L))
+                .willReturn(follows);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + uuid + "/follows")
+                        .accept(APPLICATION_JSON)
+                        .param("limit", "20")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains(json.getJson());
+    }
+
+    @Test
+    public void getFollows_NoLimitSetsLimitValueToDefault() throws Exception {
+        List<User> follows = List.of(
+                new User("test1", "","",""),
+                new User("test2", "", "", ""));
+
+        UUID uuid = UUID.randomUUID();
+
+        // expected json
+        JsonContent<List<User>> json = jsonUsers.write(follows);
+
+        // given
+        given(userService.findAllFollowsOfUser(uuid, 10L, 5L))
+                .willReturn(follows);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + uuid + "/follows")
+                        .accept(APPLICATION_JSON)
+                        .param("skip", "10")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains(json.getJson());
+    }
+
+    @Test
+    public void getFollows_DefaultSkipAndLimitIsCorrect() throws Exception {
+        List<User> follows = List.of(
+                new User("test1", "","",""),
+                new User("test2", "", "", ""));
+
+        UUID uuid = UUID.randomUUID();
+
+        // expected json
+        JsonContent<List<User>> json = jsonUsers.write(follows);
+
+        // given
+        given(userService.findAllFollowsOfUser(uuid, 0L, 5L))
+                .willReturn(follows);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + uuid + "/follows")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains(json.getJson());
+    }
+
+    @Test
+    public void getFollows_ProvidedSkipAndLimitAreUsed() throws Exception {
+        List<User> follows = List.of(
+                new User("test1", "","",""),
+                new User("test2", "", "", ""));
+
+        UUID uuid = UUID.randomUUID();
+
+        // expected json
+        JsonContent<List<User>> json = jsonUsers.write(follows);
+
+        // given
+        given(userService.findAllFollowsOfUser(uuid, 10L, 20L))
+                .willReturn(follows);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + uuid + "/follows")
+                        .param("skip", "10")
+                        .param("limit", "20")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains(json.getJson());
+    }
 }

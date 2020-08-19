@@ -39,4 +39,12 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @PostMapping("{uuid}/follow")
+    public ResponseEntity<Map<String, Boolean>> followUser(@PathVariable String uuid) throws Exception {
+        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Boolean result = userService.followUserWithUuid(loggedUser, UUID.fromString(uuid));
+
+        Map<String, Boolean> response = Map.of("followed", result);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

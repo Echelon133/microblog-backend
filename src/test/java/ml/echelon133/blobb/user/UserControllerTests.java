@@ -1,6 +1,7 @@
 package ml.echelon133.blobb.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,20 +12,23 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.web.context.SecurityContextPersistenceFilter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 
 
 @ExtendWith(MockitoExtension.class)
 public class UserControllerTests {
+
+    static User testUser;
 
     private MockMvc mockMvc;
 
@@ -41,13 +45,26 @@ public class UserControllerTests {
 
     private JacksonTester<UserProfileInfo> jsonUserProfileInfo;
 
+    @BeforeAll
+    public static void beforeAll() {
+        testUser = new User("user1", "", "","");
+        testUser.setUuid(UUID.randomUUID());
+    }
+
     @BeforeEach
     public void beforeEach() {
         JacksonTester.initFields(this, new ObjectMapper());
 
+        // custom filter that lets us use
+        // SecurityMockMvcRequestPostProcessors.user(UserDetails user)
+        // while doing test request
+        SecurityContextPersistenceFilter filter;
+        filter = new SecurityContextPersistenceFilter();
+
         mockMvc = MockMvcBuilders
                 .standaloneSetup(userController)
                 .setControllerAdvice(userExceptionHandler)
+                .addFilter(filter)
                 .build();
     }
 
@@ -167,5 +184,81 @@ public class UserControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString()).isEqualTo(json.getJson());
+    }
+
+    @Test
+    public void checkIfFollowed_HandlesInvalidUuid() throws Exception {
+        String invalidUuid = "asdf";
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + invalidUuid + "/follow")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Invalid UUID string");
+    }
+
+    @Test
+    public void checkIfFollowed_DoesntExist() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userService.checkIfUserFollows(testUser, uuid))
+                .willThrow(new UserDoesntExistException(uuid));
+
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + uuid + "/follow")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(response.getContentAsString())
+                .contains(String.format("User with UUID %s doesn't exist", uuid.toString()));
+    }
+
+    @Test
+    public void checkIfFollowed_UserDoesntFollow() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userService.checkIfUserFollows(testUser, uuid))
+                .willReturn(false);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + uuid + "/follow")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains("{\"followed\":false}");
+    }
+
+    @Test
+    public void checkIfFollowed_UserFollows() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userService.checkIfUserFollows(testUser, uuid))
+                .willReturn(true);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + uuid + "/follow")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains("{\"followed\":true}");
     }
 }

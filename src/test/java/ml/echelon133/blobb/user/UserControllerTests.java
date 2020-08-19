@@ -210,6 +210,7 @@ public class UserControllerTests {
         given(userService.checkIfUserFollows(testUser, uuid))
                 .willThrow(new UserDoesntExistException(uuid));
 
+        // when
         MockHttpServletResponse response = mockMvc.perform(
                 get("/api/users/" + uuid + "/follow")
                         .accept(APPLICATION_JSON)
@@ -230,6 +231,7 @@ public class UserControllerTests {
         given(userService.checkIfUserFollows(testUser, uuid))
                 .willReturn(false);
 
+        // when
         MockHttpServletResponse response = mockMvc.perform(
                 get("/api/users/" + uuid + "/follow")
                         .accept(APPLICATION_JSON)
@@ -250,6 +252,7 @@ public class UserControllerTests {
         given(userService.checkIfUserFollows(testUser, uuid))
                 .willReturn(true);
 
+        // when
         MockHttpServletResponse response = mockMvc.perform(
                 get("/api/users/" + uuid + "/follow")
                         .accept(APPLICATION_JSON)
@@ -286,6 +289,7 @@ public class UserControllerTests {
         given(userService.followUserWithUuid(testUser, uuid))
                 .willThrow(new UserDoesntExistException(uuid));
 
+        // when
         MockHttpServletResponse response = mockMvc.perform(
                 post("/api/users/" + uuid + "/follow")
                         .accept(APPLICATION_JSON)
@@ -306,6 +310,7 @@ public class UserControllerTests {
         given(userService.followUserWithUuid(testUser, uuid))
                 .willReturn(false);
 
+        // when
         MockHttpServletResponse response = mockMvc.perform(
                 post("/api/users/" + uuid + "/follow")
                         .accept(APPLICATION_JSON)
@@ -326,6 +331,7 @@ public class UserControllerTests {
         given(userService.followUserWithUuid(testUser, uuid))
                 .willReturn(true);
 
+        // when
         MockHttpServletResponse response = mockMvc.perform(
                 post("/api/users/" + uuid + "/follow")
                         .accept(APPLICATION_JSON)
@@ -336,5 +342,84 @@ public class UserControllerTests {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
                 .contains("{\"followed\":true}");
+    }
+
+    @Test
+    public void unfollowUser_HandlesInvalidUuid() throws Exception {
+        String invalidUuid = "asdf";
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/users/" + invalidUuid + "/unfollow")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Invalid UUID string");
+    }
+
+    @Test
+    public void unfollowUser_DoesntExist() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userService.unfollowUserWithUuid(testUser, uuid))
+                .willThrow(new UserDoesntExistException(uuid));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/users/" + uuid + "/unfollow")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(response.getContentAsString())
+                .contains(String.format("User with UUID %s doesn't exist", uuid.toString()));
+    }
+
+    @Test
+    public void unfollowUser_Failure() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userService.unfollowUserWithUuid(testUser, uuid))
+                .willReturn(false);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/users/" + uuid + "/unfollow")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains("{\"unfollowed\":false}");
+    }
+
+    @Test
+    public void unfollowUser_Success() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userService.unfollowUserWithUuid(testUser, uuid))
+                .willReturn(true);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/users/" + uuid + "/unfollow")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains("{\"unfollowed\":true}");
     }
 }

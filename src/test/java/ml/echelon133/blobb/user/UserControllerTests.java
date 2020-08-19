@@ -261,4 +261,80 @@ public class UserControllerTests {
         assertThat(response.getContentAsString())
                 .contains("{\"followed\":true}");
     }
+
+    @Test
+    public void followUser_HandlesInvalidUuid() throws Exception {
+        String invalidUuid = "asdf";
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/users/" + invalidUuid + "/follow")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Invalid UUID string");
+    }
+
+    @Test
+    public void followUser_DoesntExist() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userService.followUserWithUuid(testUser, uuid))
+                .willThrow(new UserDoesntExistException(uuid));
+
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/users/" + uuid + "/follow")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(response.getContentAsString())
+                .contains(String.format("User with UUID %s doesn't exist", uuid.toString()));
+    }
+
+    @Test
+    public void followUser_Failure() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userService.followUserWithUuid(testUser, uuid))
+                .willReturn(false);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/users/" + uuid + "/follow")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains("{\"followed\":false}");
+    }
+
+    @Test
+    public void followUser_Success() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userService.followUserWithUuid(testUser, uuid))
+                .willReturn(true);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/users/" + uuid + "/follow")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains("{\"followed\":true}");
+    }
 }

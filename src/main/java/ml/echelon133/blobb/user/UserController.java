@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -55,5 +56,20 @@ public class UserController {
 
         Map<String, Boolean> response = Map.of("unfollowed", result);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("{uuid}/followers")
+    public ResponseEntity<List<User>> getFollowers(@PathVariable String uuid,
+                                                   @RequestParam(required = false) Long skip,
+                                                   @RequestParam(required = false) Long limit) throws Exception {
+        if (skip == null) {
+            skip = 0L;
+        }
+        if (limit == null) {
+            limit = 5L;
+        }
+        return new ResponseEntity<>(
+                userService.findAllFollowersOfUser(UUID.fromString(uuid), skip, limit),
+                HttpStatus.OK);
     }
 }

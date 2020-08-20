@@ -457,4 +457,35 @@ public class UserServiceTests {
         // then
         assertTrue(result);
     }
+
+    @Test
+    public void findByUsername_ThrowsWhenUserDoesntExist() {
+        String invalidUsername = "test321";
+
+        // given
+        given(userRepository.findByUsername(invalidUsername)).willReturn(Optional.empty());
+
+        // then
+        String message = assertThrows(UserDoesntExistException.class, () -> {
+            userService.findByUsername(invalidUsername);
+        }).getMessage();
+
+        assertEquals(String.format("User %s doesn't exist", invalidUsername), message);
+    }
+
+    @Test
+    public void findByUsername_ReturnsExistingObject() throws Exception {
+        String username = "test321";
+        User user = new User(username, "", "", "");
+
+        // given
+        given(userRepository.findByUsername(username))
+                .willReturn(Optional.of(user));
+
+        // when
+        User receivedUser = userService.findByUsername(username);
+
+        // then
+        assertEquals(user, receivedUser);
+    }
 }

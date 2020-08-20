@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/users/")
+@RequestMapping("/api/users")
 public class UserController {
 
     private IUserService userService;
@@ -21,17 +21,23 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("{uuid}")
+    @GetMapping
+    public ResponseEntity<User> getUserByUsername(@RequestParam String username) throws Exception {
+        User user = userService.findByUsername(username);
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @GetMapping("/{uuid}")
     public ResponseEntity<User> getUser(@PathVariable String uuid) throws Exception {
         return new ResponseEntity<>(userService.findByUuid(UUID.fromString(uuid)), HttpStatus.OK);
     }
 
-    @GetMapping("{uuid}/profile")
+    @GetMapping("/{uuid}/profile")
     public ResponseEntity<UserProfileInfo> getUserProfile(@PathVariable String uuid) throws Exception {
         return new ResponseEntity<>(userService.getUserProfileInfo(UUID.fromString(uuid)), HttpStatus.OK);
     }
 
-    @GetMapping("{uuid}/follow")
+    @GetMapping("/{uuid}/follow")
     public ResponseEntity<Map<String, Boolean>> checkIfFollowed(@PathVariable String uuid) throws Exception {
         User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Boolean result = userService.checkIfUserFollows(loggedUser, UUID.fromString(uuid));
@@ -40,7 +46,7 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("{uuid}/follow")
+    @PostMapping("/{uuid}/follow")
     public ResponseEntity<Map<String, Boolean>> followUser(@PathVariable String uuid) throws Exception {
         User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Boolean result = userService.followUserWithUuid(loggedUser, UUID.fromString(uuid));
@@ -49,7 +55,7 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("{uuid}/unfollow")
+    @PostMapping("/{uuid}/unfollow")
     public ResponseEntity<Map<String, Boolean>> unfollowUser(@PathVariable String uuid) throws Exception {
         User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Boolean result = userService.unfollowUserWithUuid(loggedUser, UUID.fromString(uuid));
@@ -58,7 +64,7 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("{uuid}/followers")
+    @GetMapping("/{uuid}/followers")
     public ResponseEntity<List<User>> getFollowers(@PathVariable String uuid,
                                                    @RequestParam(required = false) Long skip,
                                                    @RequestParam(required = false) Long limit) throws Exception {
@@ -73,7 +79,7 @@ public class UserController {
                 HttpStatus.OK);
     }
 
-    @GetMapping("{uuid}/follows")
+    @GetMapping("/{uuid}/follows")
     public ResponseEntity<List<User>> getFollows(@PathVariable String uuid,
                                                  @RequestParam(required = false) Long skip,
                                                  @RequestParam(required = false) Long limit) throws Exception {

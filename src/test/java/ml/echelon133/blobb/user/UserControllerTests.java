@@ -720,4 +720,61 @@ public class UserControllerTests {
         assertThat(response.getContentAsString())
                 .contains(json.getJson());
     }
+
+    @Test
+    public void getUserByUsername_DoesntExist() throws Exception {
+        String invalidUsername = "test321";
+
+        // given
+        given(userService.findByUsername(invalidUsername))
+                .willThrow(new UserDoesntExistException(invalidUsername));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users")
+                        .param("username", invalidUsername)
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(response.getContentAsString())
+                .contains(String.format("User %s doesn't exist", invalidUsername));
+    }
+
+    @Test
+    public void getUserByUsername_ReturnsUser() throws Exception {
+        String username = "test1";
+        User user = new User(username, "", "", "");
+
+        // expected json
+        JsonContent<User> json = jsonUser.write(user);
+
+        // given
+        given(userService.findByUsername(username))
+                .willReturn(user);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users")
+                        .param("username", username)
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(json.getJson());
+    }
+
+    @Test
+    public void getUserByUsername_NoRequiredParameter() throws Exception {
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
 }

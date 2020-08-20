@@ -24,6 +24,15 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public User findByUsername(String username) throws UserDoesntExistException {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            return user.get();
+        }
+        throw new UserDoesntExistException(username);
+    }
+
+    @Override
     public User findByUuid(UUID uuid) throws UserDoesntExistException {
         throwIfUserDoesntExist(uuid);
         Optional<User> user = userRepository.findById(uuid);

@@ -255,4 +255,88 @@ public class BlobbRepositoryTests {
             assertTrue(test3Contents.contains(c.toString()));
         });
     }
+
+    @Test
+    public void getBlobbWithUuid_ReturnsEmptyObjectWhenUuidDoesNotExistInDb() {
+
+        // when
+        Optional<FeedBlobb> blobb = blobbRepository.getBlobbWithUuid(UUID.randomUUID());
+
+        // then
+        assertTrue(blobb.isEmpty());
+    }
+
+    @Test
+    public void getBlobbWithUuid_ReturnsCorrectObjectWhenUuidExistsInDb() {
+        // setup a user with one post
+        User u = new User("user", "", "", "");
+        User savedUser = userRepository.save(u);
+
+        Blobb b = new Blobb(savedUser, "this is a test blobb");
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // when
+        Optional<FeedBlobb> blobb = blobbRepository.getBlobbWithUuid(savedBlobb.getUuid());
+
+        // then
+        assertTrue(blobb.isPresent());
+
+        FeedBlobb feedBlobb = blobb.get();
+        assertEquals(savedBlobb.getUuid(), feedBlobb.getUuid());
+        assertEquals(savedBlobb.getAuthor(), feedBlobb.getAuthor());
+        assertEquals(savedBlobb.getContent(), feedBlobb.getContent());
+        assertEquals(savedBlobb.getCreationDate(), feedBlobb.getDate());
+    }
+
+    @Test
+    public void getBlobbWithUuid_HoldsUuidOfParentBlobb() {
+        // setup a user with one post and one response to that post
+        User u = new User("user", "", "", "");
+        User savedUser = userRepository.save(u);
+
+        Blobb b = new Blobb(savedUser, "this is a test blobb");
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // this blobb responds to the blobb above.
+        // when we retrieve this response blobb from the database
+        // its field 'respondsTo' should hold UUID of the previous blobb
+        Blobb r = new ResponseBlobb(savedUser, "response", savedBlobb);
+        Blobb savedResponse = blobbRepository.save(r);
+
+        // when
+        // find the response
+        Optional<FeedBlobb> blobb = blobbRepository.getBlobbWithUuid(savedResponse.getUuid());
+
+        // then
+        assertTrue(blobb.isPresent());
+
+        FeedBlobb feedBlobb = blobb.get();
+        UUID parentUuid = savedBlobb.getUuid();
+        assertEquals(parentUuid, feedBlobb.getRespondsTo());
+    }
+
+    @Test
+    public void getBlobbWithUuid_HoldsUuidOfReferencedBlobb() {
+        // setup a user with one post and one reblobb of that post
+        User u = new User("user", "", "", "");
+        User savedUser = userRepository.save(u);
+
+        Blobb b = new Blobb(savedUser, "this is a test blobb");
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // this blobb references the blobb above
+        Blobb r = new Reblobb(savedUser, "reblobb", savedBlobb);
+        Blobb savedReblobb = blobbRepository.save(r);
+
+        // when
+        // find the reblobb
+        Optional<FeedBlobb> blobb = blobbRepository.getBlobbWithUuid(savedReblobb.getUuid());
+
+        // then
+        assertTrue(blobb.isPresent());
+
+        FeedBlobb feedBlobb = blobb.get();
+        UUID referencedUuid = savedBlobb.getUuid();
+        assertEquals(referencedUuid, feedBlobb.getReblobbs());
+    }
 }

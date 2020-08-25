@@ -339,4 +339,72 @@ public class BlobbRepositoryTests {
         UUID referencedUuid = savedBlobb.getUuid();
         assertEquals(referencedUuid, feedBlobb.getReblobbs());
     }
+
+    @Test
+    public void likeBlobbWithUuid_IsEmptyWhenUuidInvalid() {
+        // when
+        Optional<Long> result = blobbRepository.likeBlobbWithUuid(UUID.randomUUID(), UUID.randomUUID());
+
+        // then
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void likeBlobbWithUuid_Works() {
+        // create two users
+        User u1 = new User("u1", "", "", "");
+        User u2 = new User("u2", "", "", "");
+        User savedU1 = userRepository.save(u1);
+        User savedU2 = userRepository.save(u2);
+
+        // u2 creates a post
+        Blobb b = new Blobb(savedU2, "test");
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // check if u1 likes the post that u2 made
+        Optional<Long> result = blobbRepository
+                .checkIfUserWithUuidLikes(savedU1.getUuid(), savedBlobb.getUuid());
+
+        assertTrue(result.isEmpty());
+
+        // now, as the u1, like the post that u2 made
+        blobbRepository.likeBlobbWithUuid(savedU1.getUuid(), savedBlobb.getUuid());
+
+        // check again if u1 likes the post
+        result = blobbRepository
+                .checkIfUserWithUuidLikes(savedU1.getUuid(), savedBlobb.getUuid());
+
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    public void unlikeBlobbWithUuid_Works() {
+        // create two users
+        User u1 = new User("u1", "", "", "");
+        User u2 = new User("u2", "", "", "");
+        User savedU1 = userRepository.save(u1);
+        User savedU2 = userRepository.save(u2);
+
+        // u2 creates a post
+        Blobb b = new Blobb(savedU2, "test");
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // now, as the u1, like the post that u2 made
+        blobbRepository.likeBlobbWithUuid(savedU1.getUuid(), savedBlobb.getUuid());
+
+        // check if the like was registered
+        Optional<Long> result = blobbRepository
+                .checkIfUserWithUuidLikes(savedU1.getUuid(), savedBlobb.getUuid());
+
+        assertTrue(result.isPresent());
+
+        // now unlike that post
+        blobbRepository.unlikeBlobbWithUuid(savedU1.getUuid(), savedBlobb.getUuid());
+
+        // check if the unlike was registered
+        result = blobbRepository
+                .checkIfUserWithUuidLikes(savedU1.getUuid(), savedBlobb.getUuid());
+
+        assertTrue(result.isEmpty());
+    }
 }

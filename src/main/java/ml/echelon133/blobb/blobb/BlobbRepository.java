@@ -33,4 +33,20 @@ public interface BlobbRepository extends Neo4jRepository<Blobb, UUID> {
             "RETURN blobb.uuid AS uuid, blobb.content AS content, blobb.creationDate AS date, u AS author, " +
             "reblobbs.uuid AS reblobbs, respondsTo.uuid AS respondsTo ")
     Optional<FeedBlobb> getBlobbWithUuid(UUID uuid);
+
+    @Query( "MATCH (u:User) WHERE u.uuid = $uuidOfUser " +
+            "MATCH (b:Blobb) WHERE b.uuid = $uuidOfBlobb " +
+            "CREATE (u)-[l:LIKES]->(b) " +
+            "RETURN id(l)")
+    Optional<Long> likeBlobbWithUuid(UUID uuidOfUser, UUID uuidOfBlobb);
+
+    @Query( "MATCH (u:User)-[l:LIKES]->(b:Blobb) " +
+            "WHERE u.uuid = $uuidOfUser AND b.uuid = $uuidOfBlobb " +
+            "RETURN id(l)")
+    Optional<Long> checkIfUserWithUuidLikes(UUID uuidOfUser, UUID uuidOfBlobb);
+
+    @Query( "MATCH (u:User)-[l:LIKES]->(b:Blobb) " +
+            "WHERE u.uuid = $uuidOfUser AND b.uuid = $uuidOfBlobb " +
+            "DELETE l")
+    void unlikeBlobbWithUuid(UUID uuidOfUser, UUID uuidOfBlobb);
 }

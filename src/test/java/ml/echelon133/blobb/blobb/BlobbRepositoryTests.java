@@ -407,4 +407,56 @@ public class BlobbRepositoryTests {
 
         assertTrue(result.isEmpty());
     }
+
+    @Test
+    public void getInfoAboutBlobbWithUuid_IsEmptyWhenUuidInvalid() {
+        // when
+        Optional<BlobbInfo> bInfo = blobbRepository.getInfoAboutBlobbWithUuid(UUID.randomUUID());
+
+        // then
+        assertTrue(bInfo.isEmpty());
+    }
+
+    @Test
+    public void getInfoAboutBlobbWithUuid_HoldsCorrectCounterValues() {
+        // create four users
+        User u1 = new User("u1", "", "", "");
+        User u2 = new User("u2", "", "", "");
+        User u3 = new User("u3", "", "", "");
+        User u4 = new User("u4", "", "", "");
+        User savedU1 = userRepository.save(u1);
+        User savedU2 = userRepository.save(u2);
+        User savedU3 = userRepository.save(u3);
+        User savedU4 = userRepository.save(u4);
+
+        // post a blobb as u1
+        Blobb u1Blobb = new Blobb(savedU1, "test");
+        Blobb savedU1Blobb = blobbRepository.save(u1Blobb);
+
+        // create two responses to that blobb
+        Blobb u2Response1 = new ResponseBlobb(savedU2, "test", savedU1Blobb);
+        Blobb u2Response2 = new ResponseBlobb(savedU2, "test", savedU1Blobb);
+        blobbRepository.save(u2Response1);
+        blobbRepository.save(u2Response2);
+
+        // create one reblobb
+        Blobb u2Reblobb = new Reblobb(savedU2, "test", savedU1Blobb);
+        blobbRepository.save(u2Reblobb);
+
+        // like the initial blobb as u2, u3, u4
+        blobbRepository.likeBlobbWithUuid(savedU2.getUuid(), savedU1Blobb.getUuid());
+        blobbRepository.likeBlobbWithUuid(savedU3.getUuid(), savedU1Blobb.getUuid());
+        blobbRepository.likeBlobbWithUuid(savedU4.getUuid(), savedU1Blobb.getUuid());
+
+        // when
+        Optional<BlobbInfo> bInfo = blobbRepository.getInfoAboutBlobbWithUuid(savedU1Blobb.getUuid());
+
+        // then
+        assertTrue(bInfo.isPresent());
+
+        // blobb should have 2 responses, 1 reblobb and 3 likes
+        assertEquals(2L, bInfo.get().getResponses());
+        assertEquals(1L, bInfo.get().getReblobbs());
+        assertEquals(3L, bInfo.get().getLikes());
+    }
 }

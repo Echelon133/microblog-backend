@@ -5,6 +5,7 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface BlobbRepository extends Neo4jRepository<Blobb, UUID> {
@@ -25,4 +26,11 @@ public interface BlobbRepository extends Neo4jRepository<Blobb, UUID> {
             "reblobbs.uuid AS reblobbs, respondsTo.uuid AS respondsTo " +
             "ORDER BY datetime(blobbs.creationDate) DESC SKIP $skip LIMIT $limit ")
     List<FeedBlobb> getFeedForUserWithUuid_PostedBetween(UUID uuid, Date first, Date second, Long skip, Long limit);
+
+    @Query( "MATCH (u:User)-[:POSTS]->(blobb:Blobb) WHERE blobb.uuid = $uuid " +
+            "OPTIONAL MATCH (blobb:Blobb)-[:RESPONDS]->(respondsTo:Blobb) " +
+            "OPTIONAL MATCH (blobb:Blobb)-[:REBLOBBS]->(reblobbs:Blobb) " +
+            "RETURN blobb.uuid AS uuid, blobb.content AS content, blobb.creationDate AS date, u AS author, " +
+            "reblobbs.uuid AS reblobbs, respondsTo.uuid AS respondsTo ")
+    Optional<FeedBlobb> getBlobbWithUuid(UUID uuid);
 }

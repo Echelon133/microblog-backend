@@ -459,4 +459,197 @@ public class BlobbRepositoryTests {
         assertEquals(1L, bInfo.get().getReblobbs());
         assertEquals(3L, bInfo.get().getLikes());
     }
+
+    @Test
+    public void getAllResponsesToBlobbWithUuid_IsEmptyWhenNoResponses() {
+        // create a user
+        User u = new User("u1", "", "", "");
+        User savedUser = userRepository.save(u);
+
+        // create a single post
+        Blobb b = new Blobb(savedUser, "content");
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // when
+        List<FeedBlobb> blobbs = blobbRepository.getAllResponsesToBlobbWithUuid(savedBlobb.getUuid(), 0L, 10L);
+
+        // then
+        assertEquals(0, blobbs.size());
+    }
+
+    @Test
+    public void getAllResponsesToBlobbWithUuid_SkipArgumentWorks() {
+        // create a user
+        User u = new User("u1", "", "", "");
+        User savedUser = userRepository.save(u);
+
+        // create a single post
+        Blobb b = new Blobb(savedUser, "content");
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // make 5 responses
+        for (int i = 0; i < 5; i++) {
+            Blobb b1 = new ResponseBlobb(savedUser, "response " + i, savedBlobb);
+            blobbRepository.save(b1);
+        }
+
+        // when
+        List<FeedBlobb> blobbs = blobbRepository.getAllResponsesToBlobbWithUuid(savedBlobb.getUuid(), 2L, 10L);
+
+        // then
+        assertEquals(3, blobbs.size());
+    }
+
+    @Test
+    public void getAllResponsesToBlobbWithUuid_LimitArgumentWorks() {
+        // create a user
+        User u = new User("u1", "", "", "");
+        User savedUser = userRepository.save(u);
+
+        // create a single post
+        Blobb b = new Blobb(savedUser, "content");
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // make 5 responses
+        for (int i = 0; i < 5; i++) {
+            Blobb b1 = new ResponseBlobb(savedUser, "response " + i, savedBlobb);
+            blobbRepository.save(b1);
+        }
+
+        // when
+        List<FeedBlobb> blobbs = blobbRepository.getAllResponsesToBlobbWithUuid(savedBlobb.getUuid(), 0L, 4L);
+
+        // then
+        assertEquals(4, blobbs.size());
+    }
+
+    @Test
+    public void getAllResponsesToBlobbWithUuid_ReturnsCorrectObjects() {
+        // create a user
+        User u = new User("u1", "", "", "");
+        User savedUser = userRepository.save(u);
+
+        // create a single post
+        Blobb b = new Blobb(savedUser, "content");
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // make 5 responses
+        for (int i = 0; i < 5; i++) {
+            Blobb b1 = new ResponseBlobb(savedUser, "response " + i, savedBlobb);
+            blobbRepository.save(b1);
+        }
+
+        // when
+        List<FeedBlobb> blobbs = blobbRepository.getAllResponsesToBlobbWithUuid(savedBlobb.getUuid(), 0L, 5L);
+
+        // then
+        assertEquals(5, blobbs.size());
+
+        // response number 0 is the oldest one, expect it first
+        for (int i = 0; i < blobbs.size(); i++) {
+            FeedBlobb fBlobb = blobbs.get(i);
+
+            assertTrue(fBlobb.getContent().contains("response " + i));
+            assertEquals("u1", fBlobb.getAuthor().getUsername());
+            assertEquals(savedBlobb.getUuid(), fBlobb.getRespondsTo());
+            assertNull(fBlobb.getReblobbs());
+        }
+    }
+
+    @Test
+    public void getAllReblobbsOfBlobbWithUuid_IsEmptyWhenNoResponses() {
+        // create a user
+        User u = new User("u1", "", "", "");
+        User savedUser = userRepository.save(u);
+
+        // create a single post
+        Blobb b = new Blobb(savedUser, "content");
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // when
+        List<FeedBlobb> blobbs = blobbRepository.getAllReblobbsOfBlobbWithUuid(savedBlobb.getUuid(), 0L, 10L);
+
+        // then
+        assertEquals(0, blobbs.size());
+    }
+
+    @Test
+    public void getAllReblobbsOfBlobbWithUuid_SkipArgumentWorks() {
+        // create a user
+        User u = new User("u1", "", "", "");
+        User savedUser = userRepository.save(u);
+
+        // create a single post
+        Blobb b = new Blobb(savedUser, "content");
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // make 5 reblobbs
+        for (int i = 0; i < 5; i++) {
+            Blobb b1 = new Reblobb(savedUser, "reblobb " + i, savedBlobb);
+            blobbRepository.save(b1);
+        }
+
+        // when
+        List<FeedBlobb> blobbs = blobbRepository.getAllReblobbsOfBlobbWithUuid(savedBlobb.getUuid(), 2L, 10L);
+
+        // then
+        assertEquals(3, blobbs.size());
+    }
+
+    @Test
+    public void getAllReblobbsOfBlobbWithUuid_LimitArgumentWorks() {
+        // create a user
+        User u = new User("u1", "", "", "");
+        User savedUser = userRepository.save(u);
+
+        // create a single post
+        Blobb b = new Blobb(savedUser, "content");
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // make 5 reblobbs
+        for (int i = 0; i < 5; i++) {
+            Blobb b1 = new Reblobb(savedUser, "reblobb " + i, savedBlobb);
+            blobbRepository.save(b1);
+        }
+
+        // when
+        List<FeedBlobb> blobbs = blobbRepository.getAllReblobbsOfBlobbWithUuid(savedBlobb.getUuid(), 0L, 4L);
+
+        // then
+        assertEquals(4, blobbs.size());
+    }
+
+    @Test
+    public void getAllReblobbsOfBlobbWithUuid_ReturnsCorrectObjects() {
+        // create a user
+        User u = new User("u1", "", "", "");
+        User savedUser = userRepository.save(u);
+
+        // create a single post
+        Blobb b = new Blobb(savedUser, "content");
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // make 5 reblobbs
+        for (int i = 0; i < 5; i++) {
+            Blobb b1 = new Reblobb(savedUser, "reblobb " + i, savedBlobb);
+            blobbRepository.save(b1);
+        }
+
+        // when
+        List<FeedBlobb> blobbs = blobbRepository.getAllReblobbsOfBlobbWithUuid(savedBlobb.getUuid(), 0L, 5L);
+
+        // then
+        assertEquals(5, blobbs.size());
+
+        // reblobb number 0 is the oldest one, expect it first
+        for (int i = 0; i < blobbs.size(); i++) {
+            FeedBlobb fBlobb = blobbs.get(i);
+
+            assertTrue(fBlobb.getContent().contains("reblobb " + i));
+            assertEquals("u1", fBlobb.getAuthor().getUsername());
+            assertEquals(savedBlobb.getUuid(), fBlobb.getReblobbs());
+            assertNull(fBlobb.getRespondsTo());
+        }
+    }
+
 }

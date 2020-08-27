@@ -57,4 +57,18 @@ public interface BlobbRepository extends Neo4jRepository<Blobb, UUID> {
             "WHERE u.uuid = $uuidOfUser AND b.uuid = $uuidOfBlobb " +
             "DELETE l")
     void unlikeBlobbWithUuid(UUID uuidOfUser, UUID uuidOfBlobb);
+
+    @Query( "MATCH (blobb:Blobb) WHERE blobb.uuid = $uuid " +
+            "MATCH (u:User)-[:POSTS]->(response:ResponseBlobb)-[:RESPONDS]->(blobb) " +
+            "RETURN response.uuid AS uuid, response.content AS content, response.creationDate AS date, u AS author, " +
+            "NULL AS reblobbs, blobb.uuid AS respondsTo " +
+            "ORDER BY date ASC SKIP $skip LIMIT $limit")
+    List<FeedBlobb> getAllResponsesToBlobbWithUuid(UUID uuid, Long skip, Long limit);
+
+    @Query( "MATCH (blobb:Blobb) WHERE blobb.uuid = $uuid " +
+            "MATCH (u:User)-[:POSTS]->(reblobb:Reblobb)-[:REBLOBBS]->(blobb) " +
+            "RETURN reblobb.uuid AS uuid, reblobb.content AS content, reblobb.creationDate AS date, u AS author, " +
+            "blobb.uuid AS reblobbs, NULL AS respondsTo " +
+            "ORDER BY date ASC SKIP $skip LIMIT $limit")
+    List<FeedBlobb> getAllReblobbsOfBlobbWithUuid(UUID uuid, Long skip, Long limit);
 }

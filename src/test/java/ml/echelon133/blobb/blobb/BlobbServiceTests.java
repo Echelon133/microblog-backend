@@ -278,4 +278,135 @@ public class BlobbServiceTests {
         // then
         assertTrue(result);
     }
+
+    @Test
+    public void likeBlobb_ThrowsWhenBlobbDoesntExist() {
+        User user = new User("test1", "mail@test.com", "", "");
+        UUID blobbUuid = UUID.randomUUID();
+
+        // given
+        given(blobbRepository.existsById(blobbUuid)).willReturn(false);
+
+        // when
+        String message = assertThrows(BlobbDoesntExistException.class, () -> {
+            blobbService.likeBlobb(user, blobbUuid);
+        }).getMessage();
+
+        assertEquals(String.format("Blobb with UUID %s doesn't exist", blobbUuid), message);
+    }
+
+    @Test
+    public void likeBlobb_WhenUserDoesntAlreadyLike() throws Exception {
+        UUID u1Uuid = UUID.randomUUID();
+        User user = new User("test1", "mail@test.com", "", "");
+        UUID blobbUuid = UUID.randomUUID();
+        user.setUuid(u1Uuid);
+
+        // given
+        given(blobbRepository.existsById(blobbUuid)).willReturn(true);
+        given(blobbRepository.checkIfUserWithUuidLikes(u1Uuid, blobbUuid))
+                .willReturn(Optional.empty());
+        given(blobbRepository.likeBlobbWithUuid(u1Uuid, blobbUuid))
+                .willReturn(Optional.of(1L));
+
+        // when
+        boolean result = blobbService.likeBlobb(user, blobbUuid);
+
+        // then
+        assertTrue(result);
+    }
+
+    @Test
+    public void likeBlobb_WhenUserAlreadyLikes() throws Exception {
+        UUID u1Uuid = UUID.randomUUID();
+        User user = new User("test1", "mail@test.com", "", "");
+        UUID blobbUuid = UUID.randomUUID();
+        user.setUuid(u1Uuid);
+
+        // given
+        given(blobbRepository.existsById(blobbUuid)).willReturn(true);
+        given(blobbRepository.checkIfUserWithUuidLikes(u1Uuid, blobbUuid))
+                .willReturn(Optional.of(1L));
+
+        // when
+        boolean result = blobbService.likeBlobb(user, blobbUuid);
+
+        // then
+        assertTrue(result);
+    }
+
+    @Test
+    public void likeBlobb_WhenLikeFails() throws Exception {
+        UUID u1Uuid = UUID.randomUUID();
+        User user = new User("test1", "mail@test.com", "", "");
+        UUID blobbUuid = UUID.randomUUID();
+        user.setUuid(u1Uuid);
+
+        // given
+        given(blobbRepository.existsById(blobbUuid)).willReturn(true);
+        given(blobbRepository.checkIfUserWithUuidLikes(u1Uuid, blobbUuid))
+                .willReturn(Optional.empty());
+        given(blobbRepository.likeBlobbWithUuid(u1Uuid, blobbUuid))
+                .willReturn(Optional.empty());
+
+        // when
+        boolean result = blobbService.likeBlobb(user, blobbUuid);
+
+        // then
+        assertFalse(result);
+    }
+
+    @Test
+    public void unlikeBlobb_ThrowsWhenBlobbDoesntExist() {
+        User user = new User("test1", "mail@test.com", "", "");
+        UUID blobbUuid = UUID.randomUUID();
+
+        // given
+        given(blobbRepository.existsById(blobbUuid)).willReturn(false);
+
+        // when
+        String message = assertThrows(BlobbDoesntExistException.class, () -> {
+            blobbService.unlikeBlobb(user, blobbUuid);
+        }).getMessage();
+
+        assertEquals(String.format("Blobb with UUID %s doesn't exist", blobbUuid), message);
+    }
+
+    @Test
+    public void unlikeBlobb_WhenUnlikeSucceeds() throws Exception {
+        UUID u1Uuid = UUID.randomUUID();
+        User user = new User("test1", "mail@test.com", "", "");
+        UUID blobbUuid = UUID.randomUUID();
+        user.setUuid(u1Uuid);
+
+        // given
+        given(blobbRepository.existsById(blobbUuid)).willReturn(true);
+        given(blobbRepository.checkIfUserWithUuidLikes(u1Uuid, blobbUuid))
+                .willReturn(Optional.empty());
+
+        // when
+        boolean result = blobbService.unlikeBlobb(user, blobbUuid);
+
+        // then
+        assertTrue(result);
+    }
+
+    @Test
+    public void unlikeBlobb_WhenUnlikeFails() throws Exception {
+        UUID u1Uuid = UUID.randomUUID();
+        User user = new User("test1", "mail@test.com", "", "");
+        UUID blobbUuid = UUID.randomUUID();
+        user.setUuid(u1Uuid);
+
+        // given
+        given(blobbRepository.existsById(blobbUuid)).willReturn(true);
+        given(blobbRepository.checkIfUserWithUuidLikes(u1Uuid, blobbUuid))
+                .willReturn(Optional.of(1L));
+
+        // when
+        boolean result = blobbService.unlikeBlobb(user, blobbUuid);
+
+        // then
+        assertFalse(result);
+    }
 }

@@ -69,12 +69,23 @@ public class BlobbService implements IBlobbService {
 
     @Override
     public boolean likeBlobb(User user, UUID blobbUuid) throws BlobbDoesntExistException {
-        return false;
+        throwIfBlobbDoesntExist(blobbUuid);
+        Optional<Long> like = blobbRepository.checkIfUserWithUuidLikes(user.getUuid(), blobbUuid);
+
+        // only like if there is no already existing 'likes' relationship
+        // between the user and the post
+        // otherwise this will create duplicate relationships
+        if (like.isEmpty()) {
+            like = blobbRepository.likeBlobbWithUuid(user.getUuid(), blobbUuid);
+        }
+        return like.isPresent();
     }
 
     @Override
     public boolean unlikeBlobb(User user, UUID blobbUuid) throws BlobbDoesntExistException {
-        return false;
+        throwIfBlobbDoesntExist(blobbUuid);
+        blobbRepository.unlikeBlobbWithUuid(user.getUuid(), blobbUuid);
+        return blobbRepository.checkIfUserWithUuidLikes(user.getUuid(), blobbUuid).isEmpty();
     }
 
     @Override

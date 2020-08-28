@@ -35,7 +35,11 @@ public class BlobbService implements IBlobbService {
 
     @Override
     public BlobbInfo getBlobbInfo(UUID uuid) throws BlobbDoesntExistException {
-        return null;
+        Optional<BlobbInfo> info = blobbRepository.getInfoAboutBlobbWithUuid(uuid);
+        if (info.isPresent()) {
+            return info.get();
+        }
+        throw new BlobbDoesntExistException(uuid);
     }
 
     @Override

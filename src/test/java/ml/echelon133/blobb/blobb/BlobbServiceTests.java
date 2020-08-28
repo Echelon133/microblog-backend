@@ -7,10 +7,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.Clock;
+import java.time.ZoneId;
+import java.util.*;
 
+import static java.time.temporal.ChronoUnit.HOURS;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -408,5 +409,66 @@ public class BlobbServiceTests {
 
         // then
         assertFalse(result);
+    }
+
+    @Test
+    public void getFeedForUser_ThrowsWhenSkipAndLimitArgumentsNegative() {
+        UUID uuid = UUID.randomUUID();
+        User u = new User();
+
+        // then
+        Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+            blobbService.getFeedForUser(u, IBlobbService.BlobbsSince.ONE_HOUR, -1L, 5L);
+        });
+
+        assertEquals("Invalid skip and/or limit values.", ex.getMessage());
+
+        ex = assertThrows(IllegalArgumentException.class, () -> {
+            blobbService.getFeedForUser(u, IBlobbService.BlobbsSince.ONE_HOUR, 0L, -1L);
+        });
+
+        assertEquals("Invalid skip and/or limit values.", ex.getMessage());
+    }
+
+    @Test
+    public void getFeedForUser_ReturnsCorrectlyFilteredResults() {
+        UUID uuid = UUID.randomUUID();
+        User u = new User();
+        u.setUuid(uuid);
+
+        Date dateNow = new Date();
+        Date dateOneHourAgo = Date.from(dateNow.toInstant().minus(1, HOURS));
+        Date dateSixHoursAgo = Date.from(dateNow.toInstant().minus(6, HOURS));
+        Date dateTwelveHoursAgo = Date.from(dateNow.toInstant().minus(12, HOURS));
+
+        // inject fixed clock into the service
+        blobbService.setClock(Clock.fixed(dateNow.toInstant(), ZoneId.systemDefault()));
+
+        // given
+        given(blobbRepository
+                .getFeedForUserWithUuid_PostedBetween(uuid, dateOneHourAgo, dateNow, 0L, 5L))
+                .willReturn(List.of(new FeedBlobb()));
+        given(blobbRepository
+                .getFeedForUserWithUuid_PostedBetween(uuid, dateSixHoursAgo, dateNow, 0L, 5L))
+                .willReturn(List.of(new FeedBlobb(), new FeedBlobb()));
+        given(blobbRepository
+                .getFeedForUserWithUuid_PostedBetween(uuid, dateTwelveHoursAgo, dateNow, 0L, 5L))
+                .willReturn(List.of(new FeedBlobb(), new FeedBlobb(), new FeedBlobb()));
+
+        // when
+        List<FeedBlobb> oneHourResults = blobbService
+                .getFeedForUser(u, IBlobbService.BlobbsSince.ONE_HOUR, 0L, 5L);
+
+        List<FeedBlobb> sixHoursResults = blobbService
+                .getFeedForUser(u, IBlobbService.BlobbsSince.SIX_HOURS, 0L, 5L);
+
+        List<FeedBlobb> twelveHoursResults = blobbService
+                .getFeedForUser(u, IBlobbService.BlobbsSince.TWELVE_HOURS, 0L, 5L);
+
+
+        // then
+        assertEquals(1, oneHourResults.size());
+        assertEquals(2, sixHoursResults.size());
+        assertEquals(3, twelveHoursResults.size());
     }
 }

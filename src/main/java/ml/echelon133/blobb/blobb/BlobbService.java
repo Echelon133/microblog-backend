@@ -44,7 +44,11 @@ public class BlobbService implements IBlobbService {
 
     @Override
     public List<FeedBlobb> getAllResponsesTo(UUID uuid, Long skip, Long limit) throws BlobbDoesntExistException, IllegalArgumentException {
-        return null;
+        throwIfBlobbDoesntExist(uuid);
+        if (skip < 0 || limit < 0) {
+            throw new IllegalArgumentException("Invalid skip and/or limit values.");
+        }
+        return blobbRepository.getAllResponsesToBlobbWithUuid(uuid, skip, limit);
     }
 
     @Override

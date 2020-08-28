@@ -4,14 +4,20 @@ import ml.echelon133.blobb.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static java.time.temporal.ChronoUnit.HOURS;
 
 @Service
 public class BlobbService implements IBlobbService {
 
     private BlobbRepository blobbRepository;
+    private Clock clock = Clock.systemDefaultZone();
 
     @Autowired
     public BlobbService(BlobbRepository blobbRepository) {
@@ -90,11 +96,24 @@ public class BlobbService implements IBlobbService {
 
     @Override
     public List<FeedBlobb> getFeedForUser(User user, BlobbsSince since, Long skip, Long limit) throws IllegalArgumentException {
-        return null;
+
+        if (limit < 0 || skip < 0) {
+            throw new IllegalArgumentException("Invalid skip and/or limit values.");
+        }
+
+        int hoursToSubtract = since.getNumValue();
+        Date now = Date.from(Instant.now(clock));
+        Date before =  Date.from(now.toInstant().minus(hoursToSubtract, HOURS));
+        return blobbRepository
+                .getFeedForUserWithUuid_PostedBetween(user.getUuid(), before, now, skip, limit);
     }
 
     @Override
     public Blobb processBlobbAndSave(Blobb blobb) {
         return null;
+    }
+
+    public void setClock(Clock clock) {
+        this.clock = clock;
     }
 }

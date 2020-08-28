@@ -1,5 +1,6 @@
 package ml.echelon133.blobb.blobb;
 
+import ml.echelon133.blobb.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,8 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -227,5 +229,53 @@ public class BlobbServiceTests {
 
         // then
         assertEquals(2, responses.size());
+    }
+
+    @Test
+    public void checkIfUserWithUuidLikes_ThrowsWhenBlobbDoesntExist() {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbRepository.existsById(uuid)).willReturn(false);
+
+        // then
+        String message = assertThrows(BlobbDoesntExistException.class, () -> {
+            blobbService.checkIfUserWithUuidLikes(any(User.class), uuid);
+        }).getMessage();
+
+        assertEquals(String.format("Blobb with UUID %s doesn't exist", uuid), message);
+    }
+
+    @Test
+    public void checkIfUserWithUuidLikes_ReturnsFalseWhenThereIsNoLike() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        User user = new User("test1", "mail@test.com", "", "");
+
+        // given
+        given(blobbRepository.existsById(uuid)).willReturn(true);
+        given(blobbRepository.checkIfUserWithUuidLikes(user.getUuid(), uuid))
+                .willReturn(Optional.empty());
+
+        // when
+        boolean result = blobbService.checkIfUserWithUuidLikes(user, uuid);
+
+        // then
+        assertFalse(result);
+    }
+
+    @Test
+    public void checkIfUserWithUuidLikes_ReturnsTrueWhenThereIsLike() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        User user = new User("test1", "mail@test.com", "", "");
+
+        // given
+        given(blobbRepository.existsById(uuid)).willReturn(true);
+        given(blobbRepository.checkIfUserWithUuidLikes(user.getUuid(), uuid))
+                .willReturn(Optional.of(1L));
+        // when
+        boolean result = blobbService.checkIfUserWithUuidLikes(user, uuid);
+
+        // then
+        assertTrue(result);
     }
 }

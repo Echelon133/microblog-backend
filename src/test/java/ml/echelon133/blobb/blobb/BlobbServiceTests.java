@@ -157,4 +157,75 @@ public class BlobbServiceTests {
         // then
         assertEquals(2, responses.size());
     }
+
+    @Test
+    public void getAllReblobbsOf_ThrowsWhenBlobbDoesntExist() {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbRepository.existsById(uuid)).willReturn(false);
+
+        // when
+        String message = assertThrows(BlobbDoesntExistException.class, () -> {
+            blobbService.getAllReblobbsOf(uuid, 0L, 5L);
+        }).getMessage();
+
+        // then
+        assertEquals(String.format("Blobb with UUID %s doesn't exist", uuid), message);
+    }
+
+    @Test
+    public void getAllReblobbsOf_ThrowsWhenSkipAndLimitArgumentsNegative() {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbRepository.existsById(uuid)).willReturn(true);
+
+        // then
+        Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+            blobbService.getAllReblobbsOf(uuid, -1L, 5L);
+        });
+
+        assertEquals("Invalid skip and/or limit values.", ex.getMessage());
+
+        ex = assertThrows(IllegalArgumentException.class, () -> {
+            blobbService.getAllReblobbsOf(uuid, 0L, -5L);
+        });
+
+        assertEquals("Invalid skip and/or limit values.", ex.getMessage());
+    }
+
+    @Test
+    public void getAllReblobbsOf_ReturnsEmptyListIfNobodyReblobbed() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbRepository.existsById(uuid)).willReturn(true);
+        given(blobbRepository.getAllReblobbsOfBlobbWithUuid(uuid, 0L, 5L))
+                .willReturn(List.of());
+
+        // when
+        List<FeedBlobb> responses = blobbService.getAllReblobbsOf(uuid, 0L, 5L);
+
+        // then
+        assertEquals(0, responses.size());
+    }
+
+    @Test
+    public void getAllReblobbsOf_ReturnsListOfReblobbs() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        List<FeedBlobb> mockList = List.of(new FeedBlobb(), new FeedBlobb());
+
+        // given
+        given(blobbRepository.existsById(uuid)).willReturn(true);
+        given(blobbRepository.getAllReblobbsOfBlobbWithUuid(uuid, 0L, 5L))
+                .willReturn(mockList);
+
+        // when
+        List<FeedBlobb> responses = blobbService.getAllReblobbsOf(uuid, 0L, 5L);
+
+        // then
+        assertEquals(2, responses.size());
+    }
 }

@@ -63,7 +63,8 @@ public class BlobbService implements IBlobbService {
 
     @Override
     public boolean checkIfUserWithUuidLikes(User user, UUID blobbUuid) throws BlobbDoesntExistException {
-        return false;
+        throwIfBlobbDoesntExist(blobbUuid);
+        return blobbRepository.checkIfUserWithUuidLikes(user.getUuid(), blobbUuid).isPresent();
     }
 
     @Override

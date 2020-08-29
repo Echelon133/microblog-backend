@@ -33,4 +33,21 @@ public class BlobbController {
                 blobbService.getBlobbInfo(UUID.fromString(uuid)),
                 HttpStatus.OK);
     }
+
+
+    @GetMapping("/{uuid}/responses")
+    public ResponseEntity<List<FeedBlobb>> getResponsesToBlobb(@PathVariable String uuid,
+                                                               @RequestParam(required = false) Long skip,
+                                                               @RequestParam(required = false) Long limit) throws Exception {
+        if (skip == null) {
+            skip = 0L;
+        }
+        if (limit == null) {
+            limit = 5L;
+        }
+
+        return new ResponseEntity<>(
+                blobbService.getAllResponsesTo(UUID.fromString(uuid), skip, limit),
+                HttpStatus.OK);
+    }
 }

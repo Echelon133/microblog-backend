@@ -17,6 +17,7 @@ import org.springframework.security.web.context.SecurityContextPersistenceFilter
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -43,6 +44,8 @@ public class BlobbControllerTests {
     private JacksonTester<FeedBlobb> jsonFeedBlobb;
 
     private JacksonTester<BlobbInfo> jsonBlobbInfo;
+
+    private JacksonTester<List<FeedBlobb>> jsonFeedBlobbList;
 
     @BeforeAll
     public static void beforeAll() {
@@ -185,5 +188,145 @@ public class BlobbControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString()).isEqualTo(json.getJson());
+    }
+
+    @Test
+    public void getResponsesToBlobb_HandlesInvalidUuid() throws Exception {
+        String invalidUuid = "asdf";
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/blobbs/" + invalidUuid + "/responses")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Invalid UUID string");
+    }
+
+    @Test
+    public void getResponsesToBlobb_DoesntExist() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbService.getAllResponsesTo(uuid, 0L, 5L))
+                .willThrow(new BlobbDoesntExistException(uuid));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/blobbs/" + uuid + "/responses")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(response.getContentAsString())
+                .contains(String.format("Blobb with UUID %s doesn't exist", uuid.toString()));
+    }
+
+    @Test
+    public void getResponsesToBlobb_NoSkipSetsSkipValueToDefault() throws Exception {
+        List<FeedBlobb> responses = List.of(new FeedBlobb(), new FeedBlobb());
+
+        UUID uuid = UUID.randomUUID();
+
+        // expected json
+        JsonContent<List<FeedBlobb>> json = jsonFeedBlobbList.write(responses);
+
+        // given
+        given(blobbService.getAllResponsesTo(uuid, 0L, 20L))
+                .willReturn(responses);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/blobbs/" + uuid + "/responses")
+                        .accept(APPLICATION_JSON)
+                        .param("limit", "20")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains(json.getJson());
+    }
+
+    @Test
+    public void getResponsesToBlobb_NoLimitSetsLimitValueToDefault() throws Exception {
+        List<FeedBlobb> responses = List.of(new FeedBlobb(), new FeedBlobb());
+
+        UUID uuid = UUID.randomUUID();
+
+        // expected json
+        JsonContent<List<FeedBlobb>> json = jsonFeedBlobbList.write(responses);
+
+        // given
+        given(blobbService.getAllResponsesTo(uuid, 10L, 5L))
+                .willReturn(responses);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/blobbs/" + uuid + "/responses")
+                        .accept(APPLICATION_JSON)
+                        .param("skip", "10")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains(json.getJson());
+    }
+
+    @Test
+    public void getResponsesToBlobb_DefaultSkipAndLimitIsCorrect() throws Exception {
+        List<FeedBlobb> responses = List.of(new FeedBlobb(), new FeedBlobb());
+
+        UUID uuid = UUID.randomUUID();
+
+        // expected json
+        JsonContent<List<FeedBlobb>> json = jsonFeedBlobbList.write(responses);
+
+        // given
+        given(blobbService.getAllResponsesTo(uuid, 0L, 5L))
+                .willReturn(responses);
+
+        // when
+        // don't give skip & limit parameters to see if they are set to 0 & 5
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/blobbs/" + uuid + "/responses")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains(json.getJson());
+    }
+
+    @Test
+    public void getResponsesToBlobb_ProvidedSkipAndLimitAreUsed() throws Exception {
+        List<FeedBlobb> responses = List.of(new FeedBlobb(), new FeedBlobb());
+
+        UUID uuid = UUID.randomUUID();
+
+        // expected json
+        JsonContent<List<FeedBlobb>> json = jsonFeedBlobbList.write(responses);
+
+        // given
+        given(blobbService.getAllResponsesTo(uuid, 10L, 20L))
+                .willReturn(responses);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/blobbs/" + uuid + "/responses")
+                        .param("skip", "10")
+                        .param("limit", "20")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains(json.getJson());
     }
 }

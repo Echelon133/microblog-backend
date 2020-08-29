@@ -8,9 +8,19 @@ import java.util.UUID;
 public interface IBlobbService {
 
     enum BlobbsSince {
-        ONE_HOUR,
-        SIX_HOURS,
-        TWELVE_HOURS
+        ONE_HOUR(1),
+        SIX_HOURS(6),
+        TWELVE_HOURS(12);
+
+        private int numValue;
+
+        BlobbsSince(int i) {
+            this.numValue = i;
+        }
+
+        int getNumValue() {
+            return numValue;
+        }
     }
 
     FeedBlobb getByUuid(UUID uuid) throws BlobbDoesntExistException;

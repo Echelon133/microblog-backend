@@ -50,4 +50,20 @@ public class BlobbController {
                 blobbService.getAllResponsesTo(UUID.fromString(uuid), skip, limit),
                 HttpStatus.OK);
     }
+
+    @GetMapping("/{uuid}/reblobbs")
+    public ResponseEntity<List<FeedBlobb>> getReblobbsOfBlobb(@PathVariable String uuid,
+                                                              @RequestParam(required = false) Long skip,
+                                                              @RequestParam(required = false) Long limit) throws Exception {
+        if (skip == null) {
+            skip = 0L;
+        }
+        if (limit == null) {
+            limit = 5L;
+        }
+
+        return new ResponseEntity<>(
+                blobbService.getAllReblobbsOf(UUID.fromString(uuid), skip, limit),
+                HttpStatus.OK);
+    }
 }

@@ -101,7 +101,7 @@ public class BlobbService implements IBlobbService {
             throw new IllegalArgumentException("Invalid skip and/or limit values.");
         }
 
-        int hoursToSubtract = since.getNumValue();
+        int hoursToSubtract = since.getHours();
         Date now = Date.from(Instant.now(clock));
         Date before =  Date.from(now.toInstant().minus(hoursToSubtract, HOURS));
         return blobbRepository

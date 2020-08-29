@@ -12,14 +12,14 @@ public interface IBlobbService {
         SIX_HOURS(6),
         TWELVE_HOURS(12);
 
-        private int numValue;
+        private int hours;
 
         BlobbsSince(int i) {
-            this.numValue = i;
+            this.hours = i;
         }
 
-        int getNumValue() {
-            return numValue;
+        int getHours() {
+            return hours;
         }
     }
 

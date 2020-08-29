@@ -42,6 +42,8 @@ public class BlobbControllerTests {
 
     private JacksonTester<FeedBlobb> jsonFeedBlobb;
 
+    private JacksonTester<BlobbInfo> jsonBlobbInfo;
+
     @BeforeAll
     public static void beforeAll() {
         testUser = new User("user1", "", "","");
@@ -116,6 +118,67 @@ public class BlobbControllerTests {
         // when
         MockHttpServletResponse response = mockMvc.perform(
                 get("/api/blobbs/" + uuid)
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(json.getJson());
+    }
+
+    @Test
+    public void getInfoAboutBlobbWithUuid_HandlesInvalidUuid() throws Exception {
+        String invalidUuid = "asdf";
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/blobbs/" + invalidUuid + "/info")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Invalid UUID string");
+    }
+
+    @Test
+    public void getInfoAboutBlobbWithUuid_DoesntExist() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbService.getBlobbInfo(uuid))
+                .willThrow(new BlobbDoesntExistException(uuid));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/blobbs/" + uuid + "/info")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(response.getContentAsString())
+                .contains(String.format("Blobb with UUID %s doesn't exist", uuid.toString()));
+    }
+
+    @Test
+    public void getInfoAboutBlobbWithUuid_ReturnsBlobbInfo() throws Exception {
+        UUID uuid = UUID.randomUUID();
+        BlobbInfo info = new BlobbInfo();
+        info.setUuid(uuid);
+        info.setLikes(10L);
+        info.setReblobbs(20L);
+        info.setResponses(5L);
+
+        // expected json
+        JsonContent<BlobbInfo> json = jsonBlobbInfo.write(info);
+
+        // given
+        given(blobbService.getBlobbInfo(uuid)).willReturn(info);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/blobbs/" + uuid + "/info")
                         .accept(APPLICATION_JSON)
         ).andReturn().getResponse();
 

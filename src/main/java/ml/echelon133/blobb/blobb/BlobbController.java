@@ -78,4 +78,22 @@ public class BlobbController {
         Map<String, Boolean> response = Map.of("liked", result);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @PostMapping("/{uuid}/like")
+    public ResponseEntity<Map<String, Boolean>> likeBlobb(@PathVariable String uuid) throws Exception {
+        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Boolean result = blobbService.likeBlobb(loggedUser, UUID.fromString(uuid));
+
+        Map<String, Boolean> response = Map.of("liked", result);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/{uuid}/unlike")
+    public ResponseEntity<Map<String, Boolean>> unlikeBlobb(@PathVariable String uuid) throws Exception {
+        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Boolean result = blobbService.unlikeBlobb(loggedUser, UUID.fromString(uuid));
+
+        Map<String, Boolean> response = Map.of("unliked", result);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

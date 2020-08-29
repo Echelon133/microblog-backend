@@ -1,11 +1,14 @@
 package ml.echelon133.blobb.blobb;
 
+import ml.echelon133.blobb.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -65,5 +68,14 @@ public class BlobbController {
         return new ResponseEntity<>(
                 blobbService.getAllReblobbsOf(UUID.fromString(uuid), skip, limit),
                 HttpStatus.OK);
+    }
+
+    @GetMapping("/{uuid}/like")
+    public ResponseEntity<Map<String, Boolean>> checkIfLikes(@PathVariable String uuid) throws Exception {
+        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Boolean result = blobbService.checkIfUserWithUuidLikes(loggedUser, UUID.fromString(uuid));
+
+        Map<String, Boolean> response = Map.of("liked", result);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

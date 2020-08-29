@@ -1,15 +1,17 @@
 package ml.echelon133.blobb.blobb;
 
+import ml.echelon133.blobb.tag.ITagService;
+import ml.echelon133.blobb.tag.Tag;
+import ml.echelon133.blobb.tag.TagDoesntExistException;
 import ml.echelon133.blobb.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.time.temporal.ChronoUnit.HOURS;
 
@@ -17,11 +19,15 @@ import static java.time.temporal.ChronoUnit.HOURS;
 public class BlobbService implements IBlobbService {
 
     private BlobbRepository blobbRepository;
+    private ITagService tagService;
     private Clock clock = Clock.systemDefaultZone();
+    private Pattern hashtagPattern = Pattern.compile("(#[a-zA-Z0-9]{2,20})");
 
     @Autowired
-    public BlobbService(BlobbRepository blobbRepository) {
+    public BlobbService(BlobbRepository blobbRepository,
+                        ITagService tagService) {
         this.blobbRepository = blobbRepository;
+        this.tagService = tagService;
     }
 
     private void throwIfBlobbDoesntExist(UUID uuid) throws BlobbDoesntExistException {
@@ -108,9 +114,39 @@ public class BlobbService implements IBlobbService {
                 .getFeedForUserWithUuid_PostedBetween(user.getUuid(), before, now, skip, limit);
     }
 
+    private List<Tag> findTagsInContent(Blobb blobb) {
+        // look for the hashtag pattern in the blobb content
+        Matcher m = hashtagPattern.matcher(blobb.getContent());
+
+        Set<String> uniqueTags = new HashSet<>();
+
+        // find all tags that were used and save only unique ones
+        while (m.find()) {
+            // every tag name should have all characters lower case
+            uniqueTags.add(m.group().toLowerCase());
+        }
+
+        List<Tag> allFoundTags = new ArrayList<>();
+        for (String tagName : uniqueTags) {
+            // for every tag name check if that tag already exists
+            // in the database
+            try {
+                Tag dbTag = tagService.findByName(tagName);
+                allFoundTags.add(dbTag);
+            } catch (TagDoesntExistException ex) {
+                // tag doesn't exist in the database
+                // create a new tag
+                allFoundTags.add(new Tag(tagName));
+            }
+        }
+        return allFoundTags;
+    }
+
     @Override
     public Blobb processBlobbAndSave(Blobb blobb) {
-        return null;
+        List<Tag> tags = findTagsInContent(blobb);
+        tags.forEach(blobb::addTag);
+        return blobbRepository.save(blobb);
     }
 
     public void setClock(Clock clock) {

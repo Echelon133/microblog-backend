@@ -1,5 +1,8 @@
 package ml.echelon133.blobb.blobb;
 
+import ml.echelon133.blobb.tag.Tag;
+import ml.echelon133.blobb.tag.TagDoesntExistException;
+import ml.echelon133.blobb.tag.TagService;
 import ml.echelon133.blobb.user.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.Clock;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.HOURS;
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,6 +26,9 @@ public class BlobbServiceTests {
 
     @Mock
     private BlobbRepository blobbRepository;
+
+    @Mock
+    private TagService tagService;
 
     @InjectMocks
     private BlobbService blobbService;
@@ -470,5 +477,98 @@ public class BlobbServiceTests {
         assertEquals(1, oneHourResults.size());
         assertEquals(2, sixHoursResults.size());
         assertEquals(3, twelveHoursResults.size());
+    }
+
+    @Test
+    public void processBlobbAndSave_FindsNewTagsInContent() throws Exception {
+        String expected1 = "#test";
+        String expected2 = "#anothertest";
+        String content = "This is " + expected1 + " and " + expected2;
+
+        Blobb blobb = new Blobb(new User(), content);
+
+        // given
+        given(tagService.findByName(expected1))
+                .willThrow(new TagDoesntExistException(expected1));
+        given(tagService.findByName(expected2))
+                .willThrow(new TagDoesntExistException(expected2));
+        given(blobbRepository.save(blobb)).willReturn(blobb);
+
+        // when
+        Blobb processed = blobbService.processBlobbAndSave(blobb);
+
+        // then
+        assertEquals(2, processed.getTags().size());
+
+        Set<String> tagNames = processed.getTags().stream().map(Tag::getName).collect(Collectors.toSet());
+
+        assertTrue(tagNames.contains(expected1));
+        assertTrue(tagNames.contains(expected2));
+    }
+
+    @Test
+    public void processBlobbAndSave_FindsExistingTagsInContent() throws Exception {
+        String expected1 = "#test";
+        String expected2 = "#anothertest";
+        Tag tag1 = new Tag(expected1);
+        Tag tag2 = new Tag(expected2);
+
+        String content = "This is " + expected1 + " and " + expected2;
+
+        Blobb blobb = new Blobb(new User(), content);
+
+        // given
+        given(tagService.findByName(expected1)).willReturn(tag1);
+        given(tagService.findByName(expected2)).willReturn(tag2);
+        given(blobbRepository.save(blobb)).willReturn(blobb);
+
+        // when
+        Blobb processed = blobbService.processBlobbAndSave(blobb);
+
+        // then
+        assertEquals(2, processed.getTags().size());
+
+        Set<String> tagNames = processed.getTags().stream().map(Tag::getName).collect(Collectors.toSet());
+
+        assertTrue(tagNames.contains(expected1));
+        assertTrue(tagNames.contains(expected2));
+
+        assertTrue(processed.getTags().contains(tag1));
+        assertTrue(processed.getTags().contains(tag2));
+    }
+
+    @Test
+    public void processBlobbAndSave_OnlyFindsValidTagsInContent() throws Exception {
+        String invalidTag1 = "#a"; // too short (min length is 2)
+        String expected1 = "#C1"; // just right minimum length
+        String expected2 = "#DDDDDDDDDDdddddddddd"; // just right maximum length
+        String expected3 = "#bbbbbbbbbbbbbbbbbbbb"; // just right maximum length
+
+        // add some trailing characters to expected3 to check if they are ignored
+        String content = expected1 + " and " + expected2 + ". Also "
+                + invalidTag1 + " and " + expected3 + "bbbb";
+
+        Blobb blobb = new Blobb(new User(), content);
+
+        // given
+        given(tagService.findByName(expected1.toLowerCase()))
+                .willThrow(new TagDoesntExistException(expected1));
+        given(tagService.findByName(expected2.toLowerCase()))
+                .willThrow(new TagDoesntExistException(expected2));
+        given(tagService.findByName(expected3.toLowerCase()))
+                .willThrow(new TagDoesntExistException(expected3));
+        given(blobbRepository.save(blobb)).willReturn(blobb);
+
+        // when
+        Blobb processed = blobbService.processBlobbAndSave(blobb);
+
+        // then
+        assertEquals(3, processed.getTags().size());
+
+        Set<String> tagNames = processed.getTags().stream().map(Tag::getName).collect(Collectors.toSet());
+
+        assertTrue(tagNames.contains(expected1.toLowerCase()));
+        assertTrue(tagNames.contains(expected2.toLowerCase()));
+        assertTrue(tagNames.contains(expected3.toLowerCase()));
     }
 }

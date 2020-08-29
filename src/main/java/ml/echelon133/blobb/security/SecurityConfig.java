@@ -37,6 +37,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/users**").authenticated()
                 .antMatchers("/api/tags**").authenticated()
+                .antMatchers("/api/blobbs**").authenticated()
                 .and()
                 .httpBasic()
                 .and()

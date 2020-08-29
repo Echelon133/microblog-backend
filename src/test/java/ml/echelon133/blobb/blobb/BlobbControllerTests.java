@@ -2,6 +2,7 @@ package ml.echelon133.blobb.blobb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ml.echelon133.blobb.user.User;
+import ml.echelon133.blobb.user.UserDoesntExistException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @ExtendWith(MockitoExtension.class)
 public class BlobbControllerTests {
@@ -548,5 +550,163 @@ public class BlobbControllerTests {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
                 .contains("{\"liked\":true}");
+    }
+
+    @Test
+    public void likeBlobb_HandlesInvalidUuid() throws Exception {
+        String invalidUuid = "asdf";
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/blobbs/" + invalidUuid + "/like")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Invalid UUID string");
+    }
+
+    @Test
+    public void likeBlobb_DoesntExist() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbService.likeBlobb(testUser, uuid))
+                .willThrow(new BlobbDoesntExistException(uuid));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/blobbs/" + uuid + "/like")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(response.getContentAsString())
+                .contains(String.format("Blobb with UUID %s doesn't exist", uuid.toString()));
+    }
+
+    @Test
+    public void likeBlobb_Failure() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbService.likeBlobb(testUser, uuid))
+                .willReturn(false);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/blobbs/" + uuid + "/like")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains("{\"liked\":false}");
+    }
+
+    @Test
+    public void likeBlobb_Success() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbService.likeBlobb(testUser, uuid))
+                .willReturn(true);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/blobbs/" + uuid + "/like")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains("{\"liked\":true}");
+    }
+
+    @Test
+    public void unlikeBlobb_HandlesInvalidUuid() throws Exception {
+        String invalidUuid = "asdf";
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/blobbs/" + invalidUuid + "/unlike")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Invalid UUID string");
+    }
+
+    @Test
+    public void unlikeBlobb_DoesntExist() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbService.unlikeBlobb(testUser, uuid))
+                .willThrow(new BlobbDoesntExistException(uuid));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/blobbs/" + uuid + "/unlike")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(response.getContentAsString())
+                .contains(String.format("Blobb with UUID %s doesn't exist", uuid.toString()));
+    }
+
+    @Test
+    public void unlikeBlobb_Failure() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbService.unlikeBlobb(testUser, uuid))
+                .willReturn(false);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/blobbs/" + uuid + "/unlike")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains("{\"unliked\":false}");
+    }
+
+    @Test
+    public void unlikeBlobb_Success() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbService.unlikeBlobb(testUser, uuid))
+                .willReturn(true);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/blobbs/" + uuid + "/unlike")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .contains("{\"unliked\":true}");
     }
 }

@@ -2,7 +2,6 @@ package ml.echelon133.blobb.blobb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ml.echelon133.blobb.user.User;
-import ml.echelon133.blobb.user.UserDoesntExistException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -571,4 +571,30 @@ public class BlobbServiceTests {
         assertTrue(tagNames.contains(expected2.toLowerCase()));
         assertTrue(tagNames.contains(expected3.toLowerCase()));
     }
+
+    @Test
+    public void processBlobbAndSave_DuplicateTagsCountOnlyOnce() throws Exception {
+        String expected1 = "#test";
+        String duplicate1 = "#test";
+        String duplicate2 = "#TEST";
+
+        String content = expected1 + " " + duplicate1 + " " + duplicate2;
+
+        Blobb blobb = new Blobb(new User(), content);
+
+        // given
+        given(tagService.findByName(expected1.toLowerCase()))
+                .willThrow(new TagDoesntExistException(expected1));
+        given(blobbRepository.save(blobb)).willReturn(blobb);
+
+        // when
+        Blobb processed = blobbService.processBlobbAndSave(blobb);
+
+        // then
+        assertEquals(1, processed.getTags().size());
+
+        Set<String> tagNames = processed.getTags().stream().map(Tag::getName).collect(Collectors.toSet());
+
+        assertTrue(tagNames.contains(expected1.toLowerCase()));
+    }
 }

@@ -69,4 +69,8 @@ public class Blobb {
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
     }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
 }

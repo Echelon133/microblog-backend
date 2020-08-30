@@ -597,4 +597,40 @@ public class BlobbServiceTests {
 
         assertTrue(tagNames.contains(expected1.toLowerCase()));
     }
+
+    @Test
+    public void postReblobb_ThrowsWhenBlobbDoesntExist() {
+        User author = new User("test1", "", "" ,"");
+        UUID postUuid = UUID.randomUUID();
+
+        String content = "Test";
+
+        // given
+        given(blobbRepository.findById(postUuid)).willReturn(Optional.empty());
+
+        // then
+        String message = assertThrows(BlobbDoesntExistException.class, () -> {
+            blobbService.postReblobb(author, content, postUuid);
+        }).getMessage();
+
+        assertEquals(String.format("Blobb with UUID %s doesn't exist", postUuid), message);
+    }
+
+    @Test
+    public void postResponse_ThrowsWhenBlobbDoesntExist() {
+        User author = new User("test1", "", "" ,"");
+        UUID postUuid = UUID.randomUUID();
+
+        String content = "Test";
+
+        // given
+        given(blobbRepository.findById(postUuid)).willReturn(Optional.empty());
+
+        // then
+        String message = assertThrows(BlobbDoesntExistException.class, () -> {
+            blobbService.postResponse(author, content, postUuid);
+        }).getMessage();
+
+        assertEquals(String.format("Blobb with UUID %s doesn't exist", postUuid), message);
+    }
 }

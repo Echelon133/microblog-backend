@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -95,5 +97,72 @@ public class BlobbController {
 
         Map<String, Boolean> response = Map.of("unliked", result);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping()
+    public ResponseEntity<Map<String, String>> postBlobb(@Valid @RequestBody BlobbDto blobbDto, BindingResult result) throws Exception {
+
+        if (result.hasErrors()) {
+            if (result.getFieldError() != null)
+                throw new InvalidBlobbContentException(result.getFieldError().getDefaultMessage());
+            else
+                throw new InvalidBlobbContentException();
+        }
+
+        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Blobb savedBlobb = blobbService.postBlobb(loggedUser, blobbDto.getContent());
+
+        return new ResponseEntity<>(
+                Map.of("blobbUUID", savedBlobb.getUuid().toString(),
+                       "content", savedBlobb.getContent(),
+                       "author", loggedUser.getUsername()),
+                HttpStatus.OK
+        );
+    }
+
+    @PostMapping("/{uuid}/respond")
+    public ResponseEntity<Map<String, String>> respondToBlobb(@PathVariable String uuid,
+                                                              @Valid @RequestBody ResponseDto responseDto,
+                                                              BindingResult result) throws Exception {
+
+        if (result.hasErrors()) {
+            if (result.getFieldError() != null)
+                throw new InvalidBlobbContentException(result.getFieldError().getDefaultMessage());
+            else
+                throw new InvalidBlobbContentException();
+        }
+
+        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Blobb savedResponse = blobbService.postResponse(loggedUser, responseDto.getContent(), UUID.fromString(uuid));
+
+        return new ResponseEntity<>(
+                Map.of("blobbUUID", savedResponse.getUuid().toString(),
+                       "content", savedResponse.getContent(),
+                       "author", loggedUser.getUsername()),
+                HttpStatus.OK
+        );
+    }
+
+    @PostMapping("/{uuid}/reblobb")
+    public ResponseEntity<Map<String, String>> reblobbOfBlobb(@PathVariable String uuid,
+                                                              @Valid @RequestBody ReblobbDto reblobbDto,
+                                                              BindingResult result) throws Exception {
+
+        if (result.hasErrors()) {
+            if (result.getFieldError() != null)
+                throw new InvalidBlobbContentException(result.getFieldError().getDefaultMessage());
+            else
+                throw new InvalidBlobbContentException();
+        }
+
+        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Blobb savedReblobb = blobbService.postReblobb(loggedUser, reblobbDto.getContent(), UUID.fromString(uuid));
+
+        return new ResponseEntity<>(
+                Map.of("blobbUUID", savedReblobb.getUuid().toString(),
+                       "content", savedReblobb.getContent(),
+                       "author", loggedUser.getUsername()),
+                HttpStatus.OK
+        );
     }
 }

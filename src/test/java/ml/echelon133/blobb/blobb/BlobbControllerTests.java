@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -48,6 +49,14 @@ public class BlobbControllerTests {
     private JacksonTester<BlobbInfo> jsonBlobbInfo;
 
     private JacksonTester<List<FeedBlobb>> jsonFeedBlobbList;
+
+    private JacksonTester<BlobbDto> jsonBlobbDto;
+
+    private JacksonTester<ResponseDto> jsonResponseDto;
+
+    private JacksonTester<ReblobbDto> jsonReblobbDto;
+
+    private JacksonTester<Map<String, String>> jsonBlobbResult;
 
     @BeforeAll
     public static void beforeAll() {
@@ -707,5 +716,289 @@ public class BlobbControllerTests {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
                 .contains("{\"unliked\":true}");
+    }
+
+    @Test
+    public void postBlobb_RejectsInvalidBlobbLength() throws Exception {
+        BlobbDto dto1 = new BlobbDto();
+        BlobbDto dto2 = new BlobbDto();
+        dto1.setContent(""); // length 0
+        dto2.setContent(
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ); // length 301
+
+        // json
+        JsonContent<BlobbDto> json1 = jsonBlobbDto.write(dto1);
+        JsonContent<BlobbDto> json2 = jsonBlobbDto.write(dto2);
+
+        // when
+        MockHttpServletResponse response1 = mockMvc.perform(
+                post("/api/blobbs")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json1.getJson())
+        ).andReturn().getResponse();
+
+        MockHttpServletResponse response2 = mockMvc.perform(
+                post("/api/blobbs")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json2.getJson())
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response1.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response1.getContentAsString())
+                .contains("Blobb length is invalid");
+
+        assertThat(response2.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response2.getContentAsString())
+                .contains("Blobb length is invalid");
+    }
+
+    @Test
+    public void postBlobb_AcceptsValidBlobbLength() throws Exception {
+        BlobbDto dto1 = new BlobbDto();
+        dto1.setContent("This is a test blobb");
+
+        Blobb b = new Blobb(testUser, dto1.getContent());
+        b.setUuid(UUID.randomUUID());
+
+        // json
+        JsonContent<BlobbDto> json = jsonBlobbDto.write(dto1);
+        JsonContent<Map<String, String>> expected = jsonBlobbResult.write(
+                Map.of("blobbUUID", b.getUuid().toString(),
+                       "content", b.getContent(),
+                       "author", testUser.getUsername())
+        );
+
+        // given
+        given(blobbService.postBlobb(testUser, dto1.getContent())).willReturn(b);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/blobbs")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json.getJson())
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expected.getJson());
+    }
+
+    @Test
+    public void respondToBlobb_RejectsInvalidBlobbLength() throws Exception {
+        UUID postUuid = UUID.randomUUID();
+        ResponseDto dto1 = new ResponseDto();
+        ResponseDto dto2 = new ResponseDto();
+        dto1.setContent(""); // length 0
+        dto2.setContent(
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ); // length 301
+
+        // json
+        JsonContent<ResponseDto> json1 = jsonResponseDto.write(dto1);
+        JsonContent<ResponseDto> json2 = jsonResponseDto.write(dto2);
+
+        // when
+        MockHttpServletResponse response1 = mockMvc.perform(
+                post("/api/blobbs/" + postUuid + "/respond")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json1.getJson())
+        ).andReturn().getResponse();
+
+        MockHttpServletResponse response2 = mockMvc.perform(
+                post("/api/blobbs/" + postUuid + "/respond")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json2.getJson())
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response1.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response1.getContentAsString())
+                .contains("Response length is invalid");
+
+        assertThat(response2.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response2.getContentAsString())
+                .contains("Response length is invalid");
+    }
+
+    @Test
+    public void respondToBlobb_AcceptsValidBlobbLength() throws Exception {
+        UUID postUuid = UUID.randomUUID();
+        ResponseDto dto1 = new ResponseDto();
+        dto1.setContent("This is a test response");
+
+        Blobb b = new ResponseBlobb(testUser, dto1.getContent(), new Blobb());
+        b.setUuid(UUID.randomUUID());
+
+        // json
+        JsonContent<ResponseDto> json = jsonResponseDto.write(dto1);
+        JsonContent<Map<String, String>> expected = jsonBlobbResult.write(
+                Map.of("blobbUUID", b.getUuid().toString(),
+                        "content", b.getContent(),
+                        "author", testUser.getUsername())
+        );
+
+        // given
+        given(blobbService.postResponse(testUser, dto1.getContent(), postUuid)).willReturn(b);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/blobbs/" + postUuid + "/respond")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json.getJson())
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(expected.getJson());
+    }
+
+    @Test
+    public void respondToBlobb_HandlesInvalidUuid() throws Exception {
+        String invalidUuid = "test";
+
+        ResponseDto dto1 = new ResponseDto();
+        dto1.setContent("This is a test response");
+
+        // json
+        JsonContent<ResponseDto> json = jsonResponseDto.write(dto1);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/blobbs/" + invalidUuid + "/respond")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json.getJson())
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Invalid UUID string");
+    }
+
+    @Test
+    public void reblobbOfBlobb_RejectsInvalidBlobbLength() throws Exception {
+        UUID postUuid = UUID.randomUUID();
+        ReblobbDto dto1 = new ReblobbDto();
+        dto1.setContent(
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ); // length 301
+
+        // json
+        JsonContent<ReblobbDto> json1 = jsonReblobbDto.write(dto1);
+
+        // when
+        MockHttpServletResponse response1 = mockMvc.perform(
+                post("/api/blobbs/" + postUuid + "/reblobb")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json1.getJson())
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response1.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response1.getContentAsString())
+                .contains("Reblobb length is invalid");
+    }
+
+    @Test
+    public void reblobbOfBlobb_AcceptsValidBlobbLength() throws Exception {
+        UUID postUuid = UUID.randomUUID();
+        ReblobbDto dto1 = new ReblobbDto();
+        ReblobbDto dto2 = new ReblobbDto();
+        dto1.setContent(""); // reblobb should accept empty content
+        dto2.setContent("Test reblobb content");
+
+        Blobb b1 = new Reblobb(testUser, dto1.getContent(), new Blobb());
+        b1.setUuid(UUID.randomUUID());
+        Blobb b2 = new Reblobb(testUser, dto2.getContent(), new Blobb());
+        b2.setUuid(UUID.randomUUID());
+
+        // json
+        JsonContent<ReblobbDto> json1 = jsonReblobbDto.write(dto1);
+        JsonContent<ReblobbDto> json2 = jsonReblobbDto.write(dto2);
+        JsonContent<Map<String, String>> expected1 = jsonBlobbResult.write(
+                Map.of("blobbUUID", b1.getUuid().toString(),
+                        "content", b1.getContent(),
+                        "author", testUser.getUsername())
+        );
+        JsonContent<Map<String, String>> expected2 = jsonBlobbResult.write(
+                Map.of("blobbUUID", b2.getUuid().toString(),
+                        "content", b2.getContent(),
+                        "author", testUser.getUsername())
+        );
+
+        // given
+        given(blobbService.postReblobb(testUser, dto1.getContent(), postUuid)).willReturn(b1);
+        given(blobbService.postReblobb(testUser, dto2.getContent(), postUuid)).willReturn(b2);
+
+        // when
+        MockHttpServletResponse response1 = mockMvc.perform(
+                post("/api/blobbs/" + postUuid + "/reblobb")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json1.getJson())
+        ).andReturn().getResponse();
+
+        MockHttpServletResponse response2 = mockMvc.perform(
+                post("/api/blobbs/" + postUuid + "/reblobb")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json2.getJson())
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response1.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response1.getContentAsString()).isEqualTo(expected1.getJson());
+
+        assertThat(response2.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response2.getContentAsString()).isEqualTo(expected2.getJson());
+    }
+
+    @Test
+    public void reblobbOfBlobb_HandlesInvalidUuid() throws Exception {
+        String invalidUuid = "test";
+
+        ReblobbDto dto1 = new ReblobbDto();
+        dto1.setContent("This is a test reblobb");
+
+        // json
+        JsonContent<ReblobbDto> json = jsonReblobbDto.write(dto1);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/blobbs/" + invalidUuid + "/reblobb")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json.getJson())
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Invalid UUID string");
     }
 }

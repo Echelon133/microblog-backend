@@ -4,7 +4,7 @@ import org.hibernate.validator.constraints.Length;
 
 public class ReblobbDto {
 
-    @Length(max = 300, message = "Blobb length is invalid")
+    @Length(max = 300, message = "Reblobb length is invalid")
     private String content;
 
     public ReblobbDto() {}

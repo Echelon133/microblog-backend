@@ -35,4 +35,15 @@ public class BlobbExceptionHandler {
                 HttpStatus.BAD_REQUEST
         );
     }
+
+    @ExceptionHandler(value = InvalidBlobbContentException.class)
+    protected ResponseEntity<AbstractExceptionHandler.ErrorMessage> handleInvalidBlobbContentException(InvalidBlobbContentException ex, WebRequest request) {
+        return new ResponseEntity<>(
+                new AbstractExceptionHandler.ErrorMessage(new Date(),
+                        request.getDescription(false),
+                        HttpStatus.BAD_REQUEST,
+                        ex.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
 }

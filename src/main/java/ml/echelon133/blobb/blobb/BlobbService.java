@@ -149,6 +149,34 @@ public class BlobbService implements IBlobbService {
         return blobbRepository.save(blobb);
     }
 
+    @Override
+    public Blobb postBlobb(User author, String content) {
+        Blobb b = new Blobb(author, content);
+        return processBlobbAndSave(b);
+    }
+
+    @Override
+    public Blobb postReblobb(User author, String content, UUID reblobbedPostUuid) throws BlobbDoesntExistException {
+        Optional<Blobb> reblobbedPost = blobbRepository.findById(reblobbedPostUuid);
+
+        if (reblobbedPost.isPresent()) {
+            Blobb reblobb = new Reblobb(author, content, reblobbedPost.get());
+            return processBlobbAndSave(reblobb);
+        }
+        throw new BlobbDoesntExistException(reblobbedPostUuid);
+    }
+
+    @Override
+    public Blobb postResponse(User author, String content, UUID parentBlobbUuid) throws BlobbDoesntExistException {
+        Optional<Blobb> parentPost = blobbRepository.findById(parentBlobbUuid);
+
+        if (parentPost.isPresent()) {
+            Blobb response = new ResponseBlobb(author, content, parentPost.get());
+            return processBlobbAndSave(response);
+        }
+        throw new BlobbDoesntExistException(parentBlobbUuid);
+    }
+
     public void setClock(Clock clock) {
         this.clock = clock;
     }

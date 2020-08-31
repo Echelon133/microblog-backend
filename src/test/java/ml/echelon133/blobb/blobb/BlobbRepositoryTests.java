@@ -131,6 +131,34 @@ public class BlobbRepositoryTests {
     }
 
     @Test
+    public void getFeedForUserWithUuid_DoesNotContainDeletedPosts() {
+        User user = userRepository.findByUsername("test1").orElse(new User());
+
+        // create a post
+        Blobb blobb = new Blobb(user, "200");
+        blobb.markAsDeleted(); // mark as deleted even before saving it
+        blobbRepository.save(blobb);
+
+        Date date15MinAgo = Date.from(Instant.now().minus(15, MINUTES));
+
+        // when
+        List<FeedBlobb> blobbs = blobbRepository
+                .getFeedForUserWithUuid_PostedBetween(user.getUuid(),
+                        date15MinAgo,
+                        new Date(), 0L, 20L);
+
+        // make a list of contents of retrieved posts
+        List<String> contents = blobbs.stream().map(FeedBlobb::getContent).collect(Collectors.toList());
+
+        // then
+        assertEquals(10, blobbs.size());
+        // expect posts with content 5, 6, 7, 8, 9, 15, 16, 17, 18, 19 (all made within last 15 minutes)
+        Arrays.asList(5, 6, 7, 8, 9, 15, 16, 17, 18, 19).forEach(i -> {
+            assertTrue(contents.contains(i.toString()));
+        });
+    }
+
+    @Test
     public void getFeedForUserWithUuid_SkipArgumentWorks() {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
@@ -191,6 +219,10 @@ public class BlobbRepositoryTests {
 
         // make a list of contents of retrieved posts
         List<String> contents = allBlobbs.stream().map(FeedBlobb::getContent).collect(Collectors.toList());
+
+        for (FeedBlobb b : allBlobbs) {
+            System.out.println(b.getContent() + " " + b.getDate());
+        }
 
         // then
         assertEquals(20, allBlobbs.size());
@@ -261,6 +293,21 @@ public class BlobbRepositoryTests {
 
         // when
         Optional<FeedBlobb> blobb = blobbRepository.getBlobbWithUuid(UUID.randomUUID());
+
+        // then
+        assertTrue(blobb.isEmpty());
+    }
+
+    @Test
+    public void getBlobbWithUuid_ReturnsEmptyObjectWhenObjectMarkedAsDeleted() {
+        User test1 = userRepository.findByUsername("test1").orElse(new User());
+
+        Blobb b = new Blobb(test1, "test blobb");
+        b.markAsDeleted();
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // when
+        Optional<FeedBlobb> blobb = blobbRepository.getBlobbWithUuid(savedBlobb.getUuid());
 
         // then
         assertTrue(blobb.isEmpty());
@@ -350,6 +397,21 @@ public class BlobbRepositoryTests {
     }
 
     @Test
+    public void likeBlobbWithUuid_IsEmptyWhenBlobbMarkedAsDeleted() {
+        User test1 = userRepository.findByUsername("test1").orElse(new User());
+
+        Blobb b = new Blobb(test1, "test blobb");
+        b.markAsDeleted();
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // when
+        Optional<Long> result = blobbRepository.likeBlobbWithUuid(test1.getUuid(), savedBlobb.getUuid());
+
+        // then
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
     public void likeBlobbWithUuid_Works() {
         // create two users
         User u1 = new User("u1", "", "", "");
@@ -418,6 +480,22 @@ public class BlobbRepositoryTests {
     }
 
     @Test
+    public void getInfoAboutBlobbWithUuid_IsEmptyWhenBlobbMarkedAsDeleted() {
+        User test1 = userRepository.findByUsername("test1").orElse(new User());
+
+        Blobb b = new Blobb(test1, "test blobb");
+        b.markAsDeleted();
+        Blobb savedBlobb = blobbRepository.save(b);
+
+        // when
+        Optional<BlobbInfo> bInfo = blobbRepository
+                .getInfoAboutBlobbWithUuid(savedBlobb.getUuid());
+
+        // then
+        assertTrue(bInfo.isEmpty());
+    }
+
+    @Test
     public void getInfoAboutBlobbWithUuid_HoldsCorrectCounterValues() {
         // create four users
         User u1 = new User("u1", "", "", "");
@@ -433,15 +511,21 @@ public class BlobbRepositoryTests {
         Blobb u1Blobb = new Blobb(savedU1, "test");
         Blobb savedU1Blobb = blobbRepository.save(u1Blobb);
 
-        // create two responses to that blobb
+        // create three responses to that blobb (and delete one)
         Blobb u2Response1 = new ResponseBlobb(savedU2, "test", savedU1Blobb);
         Blobb u2Response2 = new ResponseBlobb(savedU2, "test", savedU1Blobb);
+        Blobb u2Response3 = new ResponseBlobb(savedU2, "test", savedU1Blobb);
         blobbRepository.save(u2Response1);
         blobbRepository.save(u2Response2);
+        u2Response3.markAsDeleted(); // mark this response as deleted before saving
+        blobbRepository.save(u2Response3);
 
-        // create one reblobb
-        Blobb u2Reblobb = new Reblobb(savedU2, "test", savedU1Blobb);
-        blobbRepository.save(u2Reblobb);
+        // create two reblobbs (and delete one)
+        Blobb u2Reblobb1 = new Reblobb(savedU2, "test", savedU1Blobb);
+        Blobb u2Reblobb2 = new Reblobb(savedU2, "test", savedU1Blobb);
+        blobbRepository.save(u2Reblobb1);
+        u2Reblobb2.markAsDeleted(); // mark this reblobb as deleted before saving
+        blobbRepository.save(u2Reblobb2);
 
         // like the initial blobb as u2, u3, u4
         blobbRepository.likeBlobbWithUuid(savedU2.getUuid(), savedU1Blobb.getUuid());
@@ -455,6 +539,7 @@ public class BlobbRepositoryTests {
         assertTrue(bInfo.isPresent());
 
         // blobb should have 2 responses, 1 reblobb and 3 likes
+        // because one response and one reblobb have been deleted
         assertEquals(2L, bInfo.get().getResponses());
         assertEquals(1L, bInfo.get().getReblobbs());
         assertEquals(3L, bInfo.get().getLikes());
@@ -475,6 +560,28 @@ public class BlobbRepositoryTests {
 
         // then
         assertEquals(0, blobbs.size());
+    }
+
+    @Test
+    public void getAllResponsesToBlobbWithUuid_DoesNotListResponsesMarkedAsDeleted() {
+        // create a user
+        User u = new User("u1", "", "", "");
+        User savedUser = userRepository.save(u);
+
+        // create a parent post and two responses
+        Blobb b = new Blobb(savedUser, "content");
+        Blobb savedBlobb = blobbRepository.save(b);
+        Blobb r1 = new ResponseBlobb(u, "r1", b);
+        Blobb r2 = new ResponseBlobb(u, "r2", b);
+        r2.markAsDeleted(); // mark second response as deleted right away
+        blobbRepository.save(r1);
+        blobbRepository.save(r2);
+
+        // when
+        List<FeedBlobb> blobbs = blobbRepository.getAllResponsesToBlobbWithUuid(savedBlobb.getUuid(), 0L, 10L);
+
+        // then
+        assertEquals(1, blobbs.size());
     }
 
     @Test
@@ -571,6 +678,28 @@ public class BlobbRepositoryTests {
 
         // then
         assertEquals(0, blobbs.size());
+    }
+
+    @Test
+    public void getAllReblobbsOfBlobbWithUuid_DoesNotListReblobbsMarkedAsDeleted() {
+        // create a user
+        User u = new User("u1", "", "", "");
+        User savedUser = userRepository.save(u);
+
+        // create a parent post and two responses
+        Blobb b = new Blobb(savedUser, "content");
+        Blobb savedBlobb = blobbRepository.save(b);
+        Blobb r1 = new Reblobb(u, "r1", b);
+        Blobb r2 = new Reblobb(u, "r2", b);
+        r2.markAsDeleted(); // mark second reblobb as deleted right away
+        blobbRepository.save(r1);
+        blobbRepository.save(r2);
+
+        // when
+        List<FeedBlobb> blobbs = blobbRepository.getAllReblobbsOfBlobbWithUuid(savedBlobb.getUuid(), 0L, 10L);
+
+        // then
+        assertEquals(1, blobbs.size());
     }
 
     @Test

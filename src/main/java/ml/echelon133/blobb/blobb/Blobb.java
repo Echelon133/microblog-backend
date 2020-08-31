@@ -1,6 +1,5 @@
 package ml.echelon133.blobb.blobb;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import ml.echelon133.blobb.tag.Tag;
 import ml.echelon133.blobb.user.User;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -24,6 +23,7 @@ public class Blobb {
     private UUID uuid;
     private String content;
     private Date creationDate;
+    private boolean deleted;
 
     @Relationship(value = "POSTS", direction = Relationship.INCOMING)
     private User author;
@@ -72,5 +72,13 @@ public class Blobb {
 
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void markAsDeleted() {
+        this.deleted = true;
     }
 }

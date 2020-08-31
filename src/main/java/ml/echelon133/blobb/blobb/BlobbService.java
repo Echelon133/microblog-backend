@@ -184,7 +184,7 @@ public class BlobbService implements IBlobbService {
         if (blobbToDelete.isPresent()) {
             Blobb b = blobbToDelete.get();
             // make sure that the user has the right to delete that blobb
-            if (b.getAuthor().getUuid() != loggedUser.getUuid()) {
+            if (!b.getAuthor().getUuid().equals(loggedUser.getUuid())) {
                 throw new UserCannotDeleteBlobbException(loggedUser, blobbUuid);
             }
             b.markAsDeleted();

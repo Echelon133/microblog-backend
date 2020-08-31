@@ -35,4 +35,5 @@ public interface IBlobbService {
     Blobb postBlobb(User author, String content);
     Blobb postReblobb(User author, String content, UUID reblobbedPostUuid) throws BlobbDoesntExistException;
     Blobb postResponse(User author, String content, UUID parentBlobbUuid) throws BlobbDoesntExistException;
+    boolean markBlobbAsDeleted(User loggedUser, UUID blobbUuid) throws BlobbDoesntExistException, UserCannotDeleteBlobbException;
 }

@@ -159,7 +159,7 @@ public class BlobbService implements IBlobbService {
     public Blobb postReblobb(User author, String content, UUID reblobbedPostUuid) throws BlobbDoesntExistException {
         Optional<Blobb> reblobbedPost = blobbRepository.findById(reblobbedPostUuid);
 
-        if (reblobbedPost.isPresent()) {
+        if (reblobbedPost.isPresent() && !reblobbedPost.get().isDeleted()) {
             Blobb reblobb = new Reblobb(author, content, reblobbedPost.get());
             return processBlobbAndSave(reblobb);
         }
@@ -170,11 +170,27 @@ public class BlobbService implements IBlobbService {
     public Blobb postResponse(User author, String content, UUID parentBlobbUuid) throws BlobbDoesntExistException {
         Optional<Blobb> parentPost = blobbRepository.findById(parentBlobbUuid);
 
-        if (parentPost.isPresent()) {
+        if (parentPost.isPresent() && !parentPost.get().isDeleted()) {
             Blobb response = new ResponseBlobb(author, content, parentPost.get());
             return processBlobbAndSave(response);
         }
         throw new BlobbDoesntExistException(parentBlobbUuid);
+    }
+
+    @Override
+    public boolean markBlobbAsDeleted(User loggedUser, UUID blobbUuid) throws BlobbDoesntExistException, UserCannotDeleteBlobbException {
+        Optional<Blobb> blobbToDelete = blobbRepository.findById(blobbUuid);
+
+        if (blobbToDelete.isPresent()) {
+            Blobb b = blobbToDelete.get();
+            // make sure that the user has the right to delete that blobb
+            if (b.getAuthor().getUuid() != loggedUser.getUuid()) {
+                throw new UserCannotDeleteBlobbException(loggedUser, blobbUuid);
+            }
+            b.markAsDeleted();
+            return blobbRepository.save(b).isDeleted();
+        }
+        throw new BlobbDoesntExistException(blobbUuid);
     }
 
     public void setClock(Clock clock) {

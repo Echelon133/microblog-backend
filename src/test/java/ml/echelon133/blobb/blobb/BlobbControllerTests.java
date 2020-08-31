@@ -25,8 +25,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @ExtendWith(MockitoExtension.class)
 public class BlobbControllerTests {
@@ -1000,5 +999,86 @@ public class BlobbControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
         assertThat(response.getContentAsString()).contains("Invalid UUID string");
+    }
+
+    @Test
+    public void deleteBlobb_HandlesInvalidUuid() throws Exception {
+        String invalidUuid = "test";
+
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                delete("/api/blobbs/" + invalidUuid)
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Invalid UUID string");
+    }
+
+    @Test
+    public void deleteBlobb_CorrectResponseWhenNotAuthorized() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbService.markBlobbAsDeleted(testUser, uuid))
+                .willThrow(new UserCannotDeleteBlobbException(testUser, uuid));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                delete("/api/blobbs/" + uuid)
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.FORBIDDEN.value());
+        assertThat(response.getContentAsString())
+                .contains(String.format("User %s cannot delete blobb with %s uuid",
+                        testUser.getUsername(), uuid));
+    }
+
+    @Test
+    public void deleteBlobb_CorrectResponseWhenDeleted() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbService.markBlobbAsDeleted(testUser, uuid))
+                .willReturn(true);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                delete("/api/blobbs/" + uuid)
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .isEqualTo("{\"deleted\":true}");
+    }
+
+    @Test
+    public void deleteBlobb_CorrectResponseWhenNotDeleted() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(blobbService.markBlobbAsDeleted(testUser, uuid))
+                .willReturn(false);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                delete("/api/blobbs/" + uuid)
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString())
+                .isEqualTo("{\"deleted\":false}");
     }
 }

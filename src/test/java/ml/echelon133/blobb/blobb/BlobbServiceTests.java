@@ -617,6 +617,26 @@ public class BlobbServiceTests {
     }
 
     @Test
+    public void postReblobb_ThrowsWhenBlobbMarkedAsDeleted() {
+        User author = new User("test1", "", "" ,"");
+        UUID postUuid = UUID.randomUUID();
+
+        Blobb parentBlobb = new Blobb(author, "test");
+        parentBlobb.setUuid(postUuid);
+        parentBlobb.markAsDeleted();
+
+        // given
+        given(blobbRepository.findById(postUuid)).willReturn(Optional.of(parentBlobb));
+
+        // then
+        String message = assertThrows(BlobbDoesntExistException.class, () -> {
+            blobbService.postReblobb(author, "test", postUuid);
+        }).getMessage();
+
+        assertEquals(String.format("Blobb with UUID %s doesn't exist", postUuid), message);
+    }
+
+    @Test
     public void postResponse_ThrowsWhenBlobbDoesntExist() {
         User author = new User("test1", "", "" ,"");
         UUID postUuid = UUID.randomUUID();
@@ -632,5 +652,88 @@ public class BlobbServiceTests {
         }).getMessage();
 
         assertEquals(String.format("Blobb with UUID %s doesn't exist", postUuid), message);
+    }
+
+    @Test
+    public void postResponse_ThrowsWhenBlobbMarkedAsDeleted() {
+        User author = new User("test1", "", "" ,"");
+        UUID postUuid = UUID.randomUUID();
+
+        Blobb blobb = new Blobb(author, "test");
+        blobb.setUuid(postUuid);
+        blobb.markAsDeleted();
+
+        // given
+        given(blobbRepository.findById(postUuid)).willReturn(Optional.of(blobb));
+
+        // then
+        String message = assertThrows(BlobbDoesntExistException.class, () -> {
+            blobbService.postResponse(author, "test", postUuid);
+        }).getMessage();
+
+        assertEquals(String.format("Blobb with UUID %s doesn't exist", postUuid), message);
+    }
+
+    @Test
+    public void markBlobbAsDeleted_ThrowsWhenBlobbDoesntExist() {
+        User author = new User("test1", "", "" ,"");
+        UUID postUuid = UUID.randomUUID();
+
+        // given
+        given(blobbRepository.findById(postUuid)).willReturn(Optional.empty());
+
+        // then
+        String message = assertThrows(BlobbDoesntExistException.class, () -> {
+            blobbService.markBlobbAsDeleted(author, postUuid);
+        }).getMessage();
+
+        assertEquals(String.format("Blobb with UUID %s doesn't exist", postUuid), message);
+    }
+
+    @Test
+    public void markBlobbAsDeleted_ThrowsWhenUserNotAuthorized() {
+        // user that tries to delete
+        User u1 = new User("u1", "", "", "");
+        u1.setUuid(UUID.randomUUID());
+
+        // actual author (only this user can delete his own blobbs)
+        User author = new User("test1", "", "" ,"");
+        author.setUuid(UUID.randomUUID());
+
+        UUID postUuid = UUID.randomUUID();
+
+        Blobb blobb = new Blobb(author, "test");
+        blobb.setUuid(postUuid);
+
+        // given
+        given(blobbRepository.findById(postUuid)).willReturn(Optional.of(blobb));
+
+        // then
+        String message = assertThrows(UserCannotDeleteBlobbException.class, () -> {
+            blobbService.markBlobbAsDeleted(u1, postUuid);
+        }).getMessage();
+
+        assertEquals(String.format("User %s cannot delete blobb with %s uuid", u1.getUsername(), postUuid), message);
+    }
+
+    @Test
+    public void markBlobbAsDeleted_ReturnsTrueWhenMarkedCorrectly() throws Exception {
+        UUID postUuid = UUID.randomUUID();
+
+        User author = new User("u1", "", "", "");
+        author.setUuid(UUID.randomUUID());
+
+        Blobb blobb = new Blobb(author, "test");
+        blobb.setUuid(postUuid);
+
+        // given
+        given(blobbRepository.findById(postUuid)).willReturn(Optional.of(blobb));
+        given(blobbRepository.save(blobb)).willReturn(blobb);
+
+        // when
+        boolean response = blobbService.markBlobbAsDeleted(author, postUuid);
+
+        // then
+        assertTrue(response);
     }
 }

@@ -165,4 +165,15 @@ public class BlobbController {
                 HttpStatus.OK
         );
     }
+
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity<Map<String, Boolean>> deleteBlobb(@PathVariable String uuid) throws Exception {
+        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        boolean deleted = blobbService.markBlobbAsDeleted(loggedUser, UUID.fromString(uuid));
+
+        return new ResponseEntity<>(
+                Map.of("deleted", deleted),
+                HttpStatus.OK
+        );
+    }
 }

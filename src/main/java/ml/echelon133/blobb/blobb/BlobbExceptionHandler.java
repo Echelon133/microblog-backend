@@ -46,4 +46,15 @@ public class BlobbExceptionHandler {
                 HttpStatus.BAD_REQUEST
         );
     }
+
+    @ExceptionHandler(value = UserCannotDeleteBlobbException.class)
+    protected ResponseEntity<AbstractExceptionHandler.ErrorMessage> handleUserCannotDeleteBlobbException(UserCannotDeleteBlobbException ex, WebRequest request) {
+        return new ResponseEntity<>(
+                new AbstractExceptionHandler.ErrorMessage(new Date(),
+                        request.getDescription(false),
+                        HttpStatus.FORBIDDEN,
+                        ex.getMessage()),
+                HttpStatus.FORBIDDEN
+        );
+    }
 }

@@ -7,9 +7,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.HOURS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
@@ -83,5 +89,49 @@ public class TagServiceTests {
 
         // then
         assertEquals(tag, foundTag);
+    }
+
+    @Test
+    public void findMostPopular_ThrowsWhenLimitNegative() {
+
+        // when
+        String message = assertThrows(IllegalArgumentException.class, () -> {
+            tagService.findMostPopular(-1L, ITagService.PopularSince.ONE_HOUR);
+        }).getMessage();
+
+        // then
+        assertEquals("Limit cannot be negative", message);
+    }
+
+    @Test
+    public void findMostPopular_CorrectlyCalculatesPastDates() {
+        Date now = new Date();
+        Clock fixedClock = Clock.fixed(now.toInstant(), ZoneId.systemDefault());
+        Date hourAgo = Date.from(fixedClock.instant().minus(1, HOURS));
+        Date dayAgo = Date.from(fixedClock.instant().minus(1, DAYS));
+        Date weekAgo = Date.from(fixedClock.instant().minus(7, DAYS));
+
+        tagService.setClock(fixedClock);
+
+        // given
+        given(tagRepository.findMostPopularTags_Between(hourAgo, now, 10L))
+                .willReturn(List.of(new Tag()));
+        given(tagRepository.findMostPopularTags_Between(dayAgo, now, 10L))
+                .willReturn(List.of(new Tag(), new Tag()));
+        given(tagRepository.findMostPopularTags_Between(weekAgo, now, 10L))
+                .willReturn(List.of(new Tag(), new Tag(), new Tag()));
+
+        // when
+        List<Tag> popularHourAgo = tagService
+                .findMostPopular(10L, ITagService.PopularSince.ONE_HOUR);
+        List<Tag> popularDayAgo = tagService
+                .findMostPopular(10L, ITagService.PopularSince.DAY);
+        List<Tag> popularWeekAgo = tagService
+                .findMostPopular(10L, ITagService.PopularSince.WEEK);
+
+        // then
+        assertEquals(1L, popularHourAgo.size());
+        assertEquals(2L, popularDayAgo.size());
+        assertEquals(3L, popularWeekAgo.size());
     }
 }

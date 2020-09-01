@@ -723,6 +723,11 @@ public class BlobbServiceTests {
         User author = new User("u1", "", "", "");
         author.setUuid(UUID.randomUUID());
 
+        // to make sure that the blobb author's UUID and the loggedUser's UUID are compared by value and not
+        // by address, make loggedUser's UUID a new object with same UUID value as the author's
+        User loggedUser = new User("u1", "", "", "");
+        loggedUser.setUuid(UUID.fromString(author.getUuid().toString()));
+
         Blobb blobb = new Blobb(author, "test");
         blobb.setUuid(postUuid);
 
@@ -731,7 +736,7 @@ public class BlobbServiceTests {
         given(blobbRepository.save(blobb)).willReturn(blobb);
 
         // when
-        boolean response = blobbService.markBlobbAsDeleted(author, postUuid);
+        boolean response = blobbService.markBlobbAsDeleted(loggedUser, postUuid);
 
         // then
         assertTrue(response);

@@ -14,6 +14,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.List;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -34,6 +36,8 @@ public class TagControllerTests {
     private TagExceptionHandler tagExceptionHandler;
 
     private JacksonTester<Tag> jsonTag;
+
+    private JacksonTester<List<Tag>> jsonListTags;
 
     @BeforeEach
     public void beforeEach() {
@@ -101,5 +105,119 @@ public class TagControllerTests {
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    public void listPopularTags_NotProvidedParametersSetToDefault() throws Exception {
+        List<Tag> tags = List.of(new Tag("#test"), new Tag("#test1"));
+
+        // json
+        JsonContent<List<Tag>> json = jsonListTags.write(tags);
+
+        // given
+        // not provided 'limit' and 'since' are set to 5L and ONE_HOUR respectively
+        given(tagService.findMostPopular(5L, ITagService.PopularSince.ONE_HOUR))
+                .willReturn(tags);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/tags/popular")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(json.getJson());
+    }
+
+    @Test
+    public void listPopularTags_ProvidedLimitParameterIsUsed() throws Exception {
+        List<Tag> tags = List.of(new Tag("#test"), new Tag("#test1"));
+
+        // json
+        JsonContent<List<Tag>> json = jsonListTags.write(tags);
+
+        // given
+        given(tagService.findMostPopular(30L, ITagService.PopularSince.ONE_HOUR))
+                .willReturn(tags);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/tags/popular")
+                        .accept(APPLICATION_JSON)
+                        .param("limit", "30")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(json.getJson());
+    }
+
+    @Test
+    public void listPopularTags_ProvidedSinceParameterIsUsed() throws Exception {
+        List<Tag> oneHour = List.of(new Tag("#test"));
+        List<Tag> oneDay = List.of(new Tag("#test123"));
+        List<Tag> oneWeek = List.of(new Tag("#test3333"));
+
+        // json
+        JsonContent<List<Tag>> json1 = jsonListTags.write(oneHour);
+        JsonContent<List<Tag>> json2 = jsonListTags.write(oneDay);
+        JsonContent<List<Tag>> json3 = jsonListTags.write(oneWeek);
+
+        // given
+        given(tagService.findMostPopular(5L, ITagService.PopularSince.ONE_HOUR))
+                .willReturn(oneHour);
+        given(tagService.findMostPopular(5L, ITagService.PopularSince.DAY))
+                .willReturn(oneDay);
+        given(tagService.findMostPopular(5L, ITagService.PopularSince.WEEK))
+                .willReturn(oneWeek);
+
+        // when
+        MockHttpServletResponse response1 = mockMvc.perform(
+                get("/api/tags/popular")
+                        .accept(APPLICATION_JSON)
+                        .param("since", "hOUr")
+        ).andReturn().getResponse();
+
+        MockHttpServletResponse response2 = mockMvc.perform(
+                get("/api/tags/popular")
+                        .accept(APPLICATION_JSON)
+                        .param("since", "dAY")
+        ).andReturn().getResponse();
+
+        MockHttpServletResponse response3 = mockMvc.perform(
+                get("/api/tags/popular")
+                        .accept(APPLICATION_JSON)
+                        .param("since", "weeK")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response1.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response1.getContentAsString()).isEqualTo(json1.getJson());
+
+        assertThat(response2.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response2.getContentAsString()).isEqualTo(json2.getJson());
+
+        assertThat(response3.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response3.getContentAsString()).isEqualTo(json3.getJson());
+    }
+
+    @Test
+    public void listPopularTags_CorrectResponseWhenLimitNegative() throws Exception {
+        // given
+        given(tagService.findMostPopular(-1L, ITagService.PopularSince.ONE_HOUR))
+                .willThrow(new IllegalArgumentException("Limit cannot be negative"));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/tags/popular")
+                        .accept(APPLICATION_JSON)
+                        .param("limit", "-1")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString())
+                .contains("Limit cannot be negative");
     }
 }

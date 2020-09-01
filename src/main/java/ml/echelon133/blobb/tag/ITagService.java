@@ -12,4 +12,6 @@ public interface ITagService {
     Tag findByUuid(UUID uuid) throws TagDoesntExistException;
     Tag findByName(String name) throws TagDoesntExistException;
     List<Tag> findMostPopular(Long limit, PopularSince since) throws IllegalArgumentException;
+    List<RecentBlobb> findRecentBlobbsTagged(UUID tagUuid, Long skip, Long limit) throws TagDoesntExistException,
+            IllegalArgumentException;
 }

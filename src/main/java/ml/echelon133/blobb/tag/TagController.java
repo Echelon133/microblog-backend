@@ -3,12 +3,10 @@ package ml.echelon133.blobb.tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/tags")
@@ -54,5 +52,22 @@ public class TagController {
         return new ResponseEntity<>(
                 result, HttpStatus.OK
         );
+    }
+
+    @GetMapping("/{uuid}/recentBlobbs")
+    public ResponseEntity<List<RecentBlobb>> findRecentBlobbs(@PathVariable String uuid,
+                                                              @RequestParam(required = false) Long skip,
+                                                              @RequestParam(required = false) Long limit) throws Exception {
+
+        if (skip == null) {
+            skip = 0L;
+        }
+
+        if (limit == null) {
+            limit = 5L;
+        }
+
+        List<RecentBlobb> recent = tagService.findRecentBlobbsTagged(UUID.fromString(uuid), skip, limit);
+        return new ResponseEntity<>(recent, HttpStatus.OK);
     }
 }

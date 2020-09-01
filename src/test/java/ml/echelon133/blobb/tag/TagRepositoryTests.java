@@ -247,4 +247,130 @@ public class TagRepositoryTests {
             assertEquals(expectedOrder.get(i), tagNames.get(i));
         }
     }
+
+    @Test
+    public void findRecentBlobbsTagged_IsEmptyWhenNoPostsMade() {
+        Tag t = new Tag("#tag");
+        UUID tagUuid = tagRepository.save(t).getUuid();
+
+        // when
+        List<RecentBlobb> recent = tagRepository.findRecentBlobbsTagged(tagUuid, 0L, 10L);
+
+        // then
+        assertEquals(0, recent.size());
+    }
+
+    @Test
+    public void findRecentBlobbsTagged_ReturnsObjectsInCorrectOrder() {
+        Tag savedTag = tagRepository.save(new Tag("#test"));
+
+        Date now = new Date();
+        Date hourAgo = Date.from(Instant.now().minus(1, HOURS));
+        Date twoHoursAgo = Date.from(Instant.now().minus(2, HOURS));
+
+        // create blobbs
+        Blobb b1 = new Blobb(new User(), "content1");
+        b1.setCreationDate(now);
+        b1.addTag(savedTag);
+        Blobb b2 = new Blobb(new User(), "content2");
+        b2.setCreationDate(hourAgo);
+        b2.addTag(savedTag);
+        Blobb b3 = new Blobb(new User(), "content3");
+        b3.setCreationDate(twoHoursAgo);
+        b3.addTag(savedTag);
+
+        blobbRepository.save(b1);
+        blobbRepository.save(b2);
+        blobbRepository.save(b3);
+
+        // when
+        List<RecentBlobb> recent = tagRepository.findRecentBlobbsTagged(savedTag.getUuid(), 0L, 10L);
+
+        // then
+        List<String> recentContents = recent.stream().map(RecentBlobb::getContent).collect(Collectors.toList());
+
+        assertEquals(3, recent.size());
+
+        List<String> expectedOrder = List.of("content1", "content2", "content3");
+
+        for (int i = 0; i < recent.size(); i++) {
+            assertEquals(expectedOrder.get(i), recentContents.get(i));
+        }
+    }
+
+    @Test
+    public void findRecentBlobbsTagged_LimitsNumberOfResults() {
+        Tag savedTag = tagRepository.save(new Tag("#test"));
+
+        Date now = new Date();
+        Date hourAgo = Date.from(Instant.now().minus(1, HOURS));
+        Date twoHoursAgo = Date.from(Instant.now().minus(2, HOURS));
+
+        // create blobbs
+        Blobb b1 = new Blobb(new User(), "content1");
+        b1.setCreationDate(now);
+        b1.addTag(savedTag);
+        Blobb b2 = new Blobb(new User(), "content2");
+        b2.setCreationDate(hourAgo);
+        b2.addTag(savedTag);
+        Blobb b3 = new Blobb(new User(), "content3");
+        b3.setCreationDate(twoHoursAgo);
+        b3.addTag(savedTag);
+
+        blobbRepository.save(b1);
+        blobbRepository.save(b2);
+        blobbRepository.save(b3);
+
+        // when
+        List<RecentBlobb> recent = tagRepository.findRecentBlobbsTagged(savedTag.getUuid(), 0L, 1L);
+
+        // then
+        List<String> recentContents = recent.stream().map(RecentBlobb::getContent).collect(Collectors.toList());
+
+        assertEquals(1, recent.size());
+
+        List<String> expectedOrder = Collections.singletonList("content1");
+
+        for (int i = 0; i < recent.size(); i++) {
+            assertEquals(expectedOrder.get(i), recentContents.get(i));
+        }
+    }
+
+    @Test
+    public void findRecentBlobbsTagged_SkipsResults() {
+        Tag savedTag = tagRepository.save(new Tag("#test"));
+
+        Date now = new Date();
+        Date hourAgo = Date.from(Instant.now().minus(1, HOURS));
+        Date twoHoursAgo = Date.from(Instant.now().minus(2, HOURS));
+
+        // create blobbs
+        Blobb b1 = new Blobb(new User(), "content1");
+        b1.setCreationDate(now);
+        b1.addTag(savedTag);
+        Blobb b2 = new Blobb(new User(), "content2");
+        b2.setCreationDate(hourAgo);
+        b2.addTag(savedTag);
+        Blobb b3 = new Blobb(new User(), "content3");
+        b3.setCreationDate(twoHoursAgo);
+        b3.addTag(savedTag);
+
+        blobbRepository.save(b1);
+        blobbRepository.save(b2);
+        blobbRepository.save(b3);
+
+        // when
+        List<RecentBlobb> recent = tagRepository.findRecentBlobbsTagged(savedTag.getUuid(), 1L, 10L);
+
+        // then
+        List<String> recentContents = recent.stream().map(RecentBlobb::getContent).collect(Collectors.toList());
+
+        assertEquals(2, recent.size());
+
+        List<String> expectedOrder = List.of("content2", "content3");
+
+        for (int i = 0; i < recent.size(); i++) {
+            assertEquals(expectedOrder.get(i), recentContents.get(i));
+        }
+    }
 }

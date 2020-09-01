@@ -1,6 +1,5 @@
 package ml.echelon133.blobb.tag;
 
-import ml.echelon133.blobb.user.UserDoesntExistException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -133,5 +132,66 @@ public class TagServiceTests {
         assertEquals(1L, popularHourAgo.size());
         assertEquals(2L, popularDayAgo.size());
         assertEquals(3L, popularWeekAgo.size());
+    }
+
+    @Test
+    public void findRecentBlobbsTagged_ThrowsIfTagDoesntExist() {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(tagRepository.existsById(uuid)).willReturn(false);
+
+        // then
+        String message = assertThrows(TagDoesntExistException.class, () -> {
+            tagService.findRecentBlobbsTagged(uuid, 0L, 10L);
+        }).getMessage();
+
+        assertEquals(String.format("Tag with UUID %s doesn't exist", uuid), message);
+    }
+
+    @Test
+    public void findRecentBlobbsTagged_ThrowsIfSkipIsNegative() {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(tagRepository.existsById(uuid)).willReturn(true);
+
+        // then
+        String message = assertThrows(IllegalArgumentException.class, () -> {
+            tagService.findRecentBlobbsTagged(uuid, -1L, 10L);
+        }).getMessage();
+
+        assertEquals("Invalid skip and/or limit values.", message);
+    }
+
+    @Test
+    public void findRecentBlobbsTagged_ThrowsIfLimitIsNegative() {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(tagRepository.existsById(uuid)).willReturn(true);
+
+        // then
+        String message = assertThrows(IllegalArgumentException.class, () -> {
+            tagService.findRecentBlobbsTagged(uuid, 0L, -10L);
+        }).getMessage();
+
+        assertEquals("Invalid skip and/or limit values.", message);
+    }
+
+    @Test
+    public void findRecentBlobbsTagged_ReturnsObjects() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(tagRepository.existsById(uuid)).willReturn(true);
+        given(tagRepository.findRecentBlobbsTagged(uuid, 0L, 10L))
+                .willReturn(List.of(new RecentBlobb(), new RecentBlobb()));
+
+        // when
+        List<RecentBlobb> recent = tagService.findRecentBlobbsTagged(uuid, 0L, 10L);
+
+        // then
+        assertEquals(2, recent.size());
     }
 }

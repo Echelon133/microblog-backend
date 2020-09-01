@@ -63,6 +63,19 @@ public class TagService implements ITagService {
         return tagRepository.findMostPopularTags_Between(before, now, limit);
     }
 
+    @Override
+    public List<RecentBlobb> findRecentBlobbsTagged(UUID tagUuid, Long skip, Long limit) throws TagDoesntExistException {
+        if (!tagRepository.existsById(tagUuid)) {
+            throw new TagDoesntExistException(tagUuid);
+        }
+
+        if (limit < 0 || skip < 0) {
+            throw new IllegalArgumentException("Invalid skip and/or limit values.");
+        }
+
+        return tagRepository.findRecentBlobbsTagged(tagUuid, skip, limit);
+    }
+
     public void setClock(Clock clock) {
         this.clock = clock;
     }

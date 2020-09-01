@@ -27,14 +27,14 @@ public interface UserRepository extends Neo4jRepository<User, UUID> {
     void unfollowUserWithUuid(UUID uuidOfFollower, UUID uuidOfFollowed);
 
     @Query( "MATCH (u:User)-[:FOLLOWS]->(followed) " +
-            "WHERE u.uuid = $uuid " +
+            "WHERE u.uuid = $uuid AND followed.uuid <> $uuid " +
             "RETURN followed " +
             "SKIP $skip " +
             "LIMIT $limit")
     List<User> findAllFollowsOfUserWithUuid(UUID uuid, Long skip, Long limit);
 
     @Query( "MATCH (following)-[:FOLLOWS]->(u:User) " +
-            "WHERE u.uuid = $uuid " +
+            "WHERE u.uuid = $uuid AND following.uuid <> $uuid " +
             "RETURN following " +
             "SKIP $skip " +
             "LIMIT $limit")
@@ -42,8 +42,8 @@ public interface UserRepository extends Neo4jRepository<User, UUID> {
 
     @Query( "MATCH (user:User) " +
             "WHERE user.uuid = $uuid " +
-            "OPTIONAL MATCH (user)-[follows:FOLLOWS]->(:User) " +
-            "OPTIONAL MATCH (:User)-[followedBy:FOLLOWS]->(user) " +
+            "OPTIONAL MATCH (user)-[follows:FOLLOWS]->(o1:User) WHERE o1.uuid <> user.uuid " +
+            "OPTIONAL MATCH (o2:User)-[followedBy:FOLLOWS]->(user) WHERE o2.uuid <> user.uuid " +
             "RETURN user.uuid AS uuid, count(distinct(follows)) AS follows, count(distinct(followedBy)) AS followers")
     Optional<UserProfileInfo> getUserProfileInfo(UUID uuid);
 }

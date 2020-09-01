@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -38,6 +39,8 @@ public class TagControllerTests {
     private JacksonTester<Tag> jsonTag;
 
     private JacksonTester<List<Tag>> jsonListTags;
+
+    private JacksonTester<List<RecentBlobb>> jsonRecentBlobbs;
 
     @BeforeEach
     public void beforeEach() {
@@ -219,5 +222,137 @@ public class TagControllerTests {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
         assertThat(response.getContentAsString())
                 .contains("Limit cannot be negative");
+    }
+
+    @Test
+    public void findRecentBlobbs_HandlesInvalidUuid() throws Exception {
+        String invalidUuid = "asdf";
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/tags/" + invalidUuid + "/recentBlobbs")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Invalid UUID string");
+
+    }
+
+    @Test
+    public void findRecentBlobbs_NotProvidedParametersSetToDefault() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        List<RecentBlobb> recent = List.of(new RecentBlobb(), new RecentBlobb());
+
+        // json
+        JsonContent<List<RecentBlobb>> json = jsonRecentBlobbs.write(recent);
+
+        // given
+        given(tagService.findRecentBlobbsTagged(uuid, 0L, 5L))
+                .willReturn(recent);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/tags/" + uuid + "/recentBlobbs")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(json.getJson());
+    }
+
+    @Test
+    public void findRecentBlobbs_ProvidedSkipAndLimitAreUsed() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        List<RecentBlobb> recent = List.of(new RecentBlobb(), new RecentBlobb());
+
+        // json
+        JsonContent<List<RecentBlobb>> json = jsonRecentBlobbs.write(recent);
+
+        // given
+        given(tagService.findRecentBlobbsTagged(uuid, 10L, 20L))
+                .willReturn(recent);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/tags/" + uuid + "/recentBlobbs")
+                        .accept(APPLICATION_JSON)
+                        .param("skip", "10")
+                        .param("limit", "20")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(json.getJson());
+    }
+
+    @Test
+    public void findRecentBlobbs_CorrectResponseWhenTagDoesntExist() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(tagService.findRecentBlobbsTagged(uuid, 10L, 20L))
+                .willThrow(new TagDoesntExistException(uuid));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/tags/" + uuid + "/recentBlobbs")
+                        .accept(APPLICATION_JSON)
+                        .param("skip", "10")
+                        .param("limit", "20")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(response.getContentAsString())
+                .contains(String.format("Tag with UUID %s doesn't exist", uuid));
+    }
+
+    @Test
+    public void findRecentBlobbs_CorrectResponseWhenSkipNegative() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(tagService.findRecentBlobbsTagged(uuid, -1L, 20L))
+                .willThrow(new IllegalArgumentException("Invalid skip and/or limit values."));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/tags/" + uuid + "/recentBlobbs")
+                        .accept(APPLICATION_JSON)
+                        .param("skip", "-1")
+                        .param("limit", "20")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString())
+                .contains("Invalid skip and/or limit values.");
+    }
+
+    @Test
+    public void findRecentBlobbs_CorrectResponseWhenLimitNegative() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(tagService.findRecentBlobbsTagged(uuid, 10L, -20L))
+                .willThrow(new IllegalArgumentException("Invalid skip and/or limit values."));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/tags/" + uuid + "/recentBlobbs")
+                        .accept(APPLICATION_JSON)
+                        .param("skip", "10")
+                        .param("limit", "-20")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString())
+                .contains("Invalid skip and/or limit values.");
     }
 }

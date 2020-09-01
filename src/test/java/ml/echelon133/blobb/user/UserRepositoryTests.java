@@ -25,9 +25,12 @@ public class UserRepositoryTests {
         User u1 = new User("user1", "user1@mail.com", "user1", "");
         User u2 = new User("user2", "user2@mail.com", "user2", "");
         User u3 = new User("user3", "user3@mail.com", "user3", "");
-        userRepository.save(u1);
-        userRepository.save(u2);
-        userRepository.save(u3);
+        User savedU1 = userRepository.save(u1);
+        User savedU2 = userRepository.save(u2);
+        User savedU3 = userRepository.save(u3);
+        userRepository.followUserWithUuid(savedU1.getUuid(), savedU1.getUuid());
+        userRepository.followUserWithUuid(savedU2.getUuid(), savedU2.getUuid());
+        userRepository.followUserWithUuid(savedU3.getUuid(), savedU3.getUuid());
     }
 
     @Test

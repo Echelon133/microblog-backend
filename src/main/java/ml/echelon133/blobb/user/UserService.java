@@ -96,4 +96,13 @@ public class UserService implements IUserService {
         throwIfUserDoesntExist(followedUuid);
         return userRepository.checkIfUserWithUuidFollows(user.getUuid(), followedUuid).isPresent();
     }
+
+    @Override
+    public List<UserBlobb> findRecentBlobbsOfUser(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException {
+        throwIfUserDoesntExist(uuid);
+        if (skip < 0 || limit < 0) {
+            throw new IllegalArgumentException("Invalid skip and/or limit values.");
+        }
+        return userRepository.findRecentBlobbsOfUser(uuid, skip, limit);
+    }
 }

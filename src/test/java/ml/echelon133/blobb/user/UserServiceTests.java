@@ -488,4 +488,59 @@ public class UserServiceTests {
         // then
         assertEquals(user, receivedUser);
     }
+
+    @Test
+    public void findRecentBlobbsOfUser_ThrowsWhenUserDoesntExist() {
+        UUID uUuid = UUID.randomUUID();
+
+        // given
+        given(userRepository.existsById(uUuid)).willReturn(false);
+
+        // when
+        String message = assertThrows(UserDoesntExistException.class, () -> {
+            userService.findRecentBlobbsOfUser(uUuid, 0L, 5L);
+        }).getMessage();
+
+        // then
+        assertEquals(String.format("User with UUID %s doesn't exist", uUuid), message);
+    }
+
+    @Test
+    public void findRecentBlobbsOfUser_ThrowsWhenSkipAndLimitArgumentsNegative() {
+        UUID uUuid = UUID.randomUUID();
+
+        // given
+        given(userRepository.existsById(uUuid)).willReturn(true);
+
+        // then
+        Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+            userService.findRecentBlobbsOfUser(uUuid, -1L, 0L);
+        });
+
+        assertEquals("Invalid skip and/or limit values.", ex.getMessage());
+
+        ex = assertThrows(IllegalArgumentException.class, () -> {
+            userService.findRecentBlobbsOfUser(uUuid, 0L, -1L);
+        });
+
+        assertEquals("Invalid skip and/or limit values.", ex.getMessage());
+    }
+
+    @Test
+    public void findRecentBlobbsOfUser_ReturnsObjects() throws Exception {
+        UUID uUuid = UUID.randomUUID();
+
+        List<UserBlobb> recent = List.of(new UserBlobb(), new UserBlobb());
+
+        // given
+        given(userRepository.existsById(uUuid)).willReturn(true);
+        given(userRepository.findRecentBlobbsOfUser(uUuid, 0L, 5L))
+                .willReturn(recent);
+
+        // when
+        List<UserBlobb> retrieved = userService.findRecentBlobbsOfUser(uUuid, 0L, 5L);
+
+        // then
+        assertEquals(2, retrieved.size());
+    }
 }

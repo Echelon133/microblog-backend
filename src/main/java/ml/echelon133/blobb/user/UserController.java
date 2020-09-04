@@ -93,4 +93,20 @@ public class UserController {
                 userService.findAllFollowsOfUser(UUID.fromString(uuid), skip, limit),
                 HttpStatus.OK);
     }
+
+    @GetMapping("/{uuid}/recentBlobbs")
+    public ResponseEntity<List<UserBlobb>> getRecentBlobbs(@PathVariable String uuid,
+                                                           @RequestParam(required = false) Long skip,
+                                                           @RequestParam(required = false) Long limit) throws Exception {
+        if (skip == null) {
+            skip = 0L;
+        }
+        if (limit == null) {
+            limit = 10L;
+        }
+
+        return new ResponseEntity<>(
+                userService.findRecentBlobbsOfUser(UUID.fromString(uuid), skip, limit),
+                HttpStatus.OK);
+    }
 }

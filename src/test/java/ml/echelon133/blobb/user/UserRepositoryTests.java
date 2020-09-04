@@ -1,23 +1,29 @@
 package ml.echelon133.blobb.user;
 
+import ml.echelon133.blobb.blobb.Blobb;
+import ml.echelon133.blobb.blobb.BlobbRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTest;
 
-import java.util.List;
-import java.util.Optional;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import static java.time.temporal.ChronoUnit.HOURS;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataNeo4jTest
 public class UserRepositoryTests {
 
     private UserRepository userRepository;
+    private BlobbRepository blobbRepository;
 
     @Autowired
-    public UserRepositoryTests(UserRepository userRepository) {
+    public UserRepositoryTests(UserRepository userRepository, BlobbRepository blobbRepository) {
         this.userRepository = userRepository;
+        this.blobbRepository = blobbRepository;
     }
 
     @BeforeEach
@@ -224,5 +230,141 @@ public class UserRepositoryTests {
 
         assertTrue(u1FollowsU2.isPresent());
         assertTrue(u2FollowsU1.isPresent());
+    }
+
+    @Test
+    public void findRecentBlobbsOfUser_IsEmptyWhenNoPostsMade() {
+        User u1 = userRepository.findByUsername("user1").orElse(null);
+
+        // when
+        List<UserBlobb> recent = userRepository
+                .findRecentBlobbsOfUser(u1.getUuid(), 0L, 10L);
+
+        // then
+        assertEquals(0, recent.size());
+    }
+
+    @Test
+    public void findRecentBlobbsOfUser_ReturnsObjectsInCorrectOrder() {
+        User u1 = userRepository.findByUsername("user1").orElse(null);
+
+        Date now = new Date();
+        Date hourAgo = Date.from(Instant.now().minus(1, HOURS));
+        Date twoHoursAgo = Date.from(Instant.now().minus(2, HOURS));
+
+        // three u1 blobbs
+        Blobb b1 = new Blobb(u1, "content1");
+        b1.setCreationDate(now);
+        Blobb b2 = new Blobb(u1, "content2");
+        b2.setCreationDate(hourAgo);
+        Blobb b3 = new Blobb(u1, "content3");
+        b3.setCreationDate(twoHoursAgo);
+
+        blobbRepository.save(b1);
+        blobbRepository.save(b2);
+        blobbRepository.save(b3);
+
+        // when
+        List<UserBlobb> recent = userRepository
+                .findRecentBlobbsOfUser(u1.getUuid(), 0L, 10L);
+
+        // then
+        List<String> recentContents = recent.stream().map(UserBlobb::getContent).collect(Collectors.toList());
+
+        assertEquals(3, recent.size());
+
+        List<String> expectedOrder = List.of("content1", "content2", "content3");
+
+        for (int i = 0; i < recent.size(); i++) {
+            assertEquals(expectedOrder.get(i), recentContents.get(i));
+        }
+    }
+
+    @Test
+    public void findRecentBlobbsOfUser_LimitsNumberOfResults() {
+        User u1 = userRepository.findByUsername("user1").orElse(null);
+
+        Date now = new Date();
+        Date hourAgo = Date.from(Instant.now().minus(1, HOURS));
+        Date twoHoursAgo = Date.from(Instant.now().minus(2, HOURS));
+
+        // three u1 blobbs
+        Blobb b1 = new Blobb(u1, "content1");
+        b1.setCreationDate(now);
+        Blobb b2 = new Blobb(u1, "content2");
+        b2.setCreationDate(hourAgo);
+        Blobb b3 = new Blobb(u1, "content3");
+        b3.setCreationDate(twoHoursAgo);
+
+        blobbRepository.save(b1);
+        blobbRepository.save(b2);
+        blobbRepository.save(b3);
+
+        // when
+        List<UserBlobb> recent = userRepository
+                .findRecentBlobbsOfUser(u1.getUuid(), 0L, 1L);
+
+        // then
+        List<String> recentContents = recent.stream().map(UserBlobb::getContent).collect(Collectors.toList());
+
+        assertEquals(1, recent.size());
+
+        List<String> expectedOrder = Collections.singletonList("content1");
+
+        for (int i = 0; i < recent.size(); i++) {
+            assertEquals(expectedOrder.get(i), recentContents.get(i));
+        }
+    }
+
+    @Test
+    public void findRecentBlobbsOfUser_SkipsResults() {
+        User u1 = userRepository.findByUsername("user1").orElse(null);
+
+        Date now = new Date();
+        Date hourAgo = Date.from(Instant.now().minus(1, HOURS));
+        Date twoHoursAgo = Date.from(Instant.now().minus(2, HOURS));
+
+        // three u1 blobbs
+        Blobb b1 = new Blobb(u1, "content1");
+        b1.setCreationDate(now);
+        Blobb b2 = new Blobb(u1, "content2");
+        b2.setCreationDate(hourAgo);
+        Blobb b3 = new Blobb(u1, "content3");
+        b3.setCreationDate(twoHoursAgo);
+
+        blobbRepository.save(b1);
+        blobbRepository.save(b2);
+        blobbRepository.save(b3);
+
+        // when
+        List<UserBlobb> recent = userRepository
+                .findRecentBlobbsOfUser(u1.getUuid(), 1L, 5L);
+        // then
+        List<String> recentContents = recent.stream().map(UserBlobb::getContent).collect(Collectors.toList());
+
+        assertEquals(2, recent.size());
+
+        List<String> expectedOrder = List.of("content2", "content3");
+
+        for (int i = 0; i < recent.size(); i++) {
+            assertEquals(expectedOrder.get(i), recentContents.get(i));
+        }
+    }
+
+    @Test
+    public void findRecentBlobbsOfUser_DoesNotShowBlobbsOfOtherUsers() {
+        User u1 = userRepository.findByUsername("user1").orElse(null);
+        User u2 = userRepository.findByUsername("user2").orElse(null);
+
+        // create one blobb as u1
+        Blobb b1 = new Blobb(u1, "content1");
+        blobbRepository.save(b1);
+
+        // when
+        List<UserBlobb> recent = userRepository
+                .findRecentBlobbsOfUser(u2.getUuid(), 0L, 5L);
+
+        // then
+        assertEquals(0, recent.size());
     }
 }

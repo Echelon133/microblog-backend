@@ -46,4 +46,13 @@ public interface UserRepository extends Neo4jRepository<User, UUID> {
             "OPTIONAL MATCH (o2:User)-[followedBy:FOLLOWS]->(user) WHERE o2.uuid <> user.uuid " +
             "RETURN user.uuid AS uuid, count(distinct(follows)) AS follows, count(distinct(followedBy)) AS followers")
     Optional<UserProfileInfo> getUserProfileInfo(UUID uuid);
+
+    @Query( "MATCH (u:User)-[:POSTS]->(b:Blobb) " +
+            "WHERE u.uuid = $userUuid AND b.deleted <> true " +
+            "OPTIONAL MATCH (b:Blobb)-[:RESPONDS]->(respondsTo:Blobb) " +
+            "OPTIONAL MATCH (b:Blobb)-[:REBLOBBS]->(reblobbs:Blobb) " +
+            "RETURN b.uuid AS uuid, b.content AS content, b.creationDate AS date, u AS author, " +
+            "reblobbs.uuid AS reblobbs, respondsTo.uuid AS respondsTo " +
+            "ORDER BY datetime(b.creationDate) DESC SKIP $skip LIMIT $limit ")
+    List<UserBlobb> findRecentBlobbsOfUser(UUID userUuid, Long skip, Long limit);
 }

@@ -38,6 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/users**").authenticated()
                 .antMatchers("/api/tags**").authenticated()
                 .antMatchers("/api/blobbs**").authenticated()
+                .antMatchers("/api/feed**").authenticated()
                 .and()
                 .httpBasic()
                 .and()

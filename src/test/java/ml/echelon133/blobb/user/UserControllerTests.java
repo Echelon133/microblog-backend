@@ -48,6 +48,8 @@ public class UserControllerTests {
 
     private JacksonTester<List<User>> jsonUsers;
 
+    private JacksonTester<List<UserBlobb>> jsonUserBlobbs;
+
     @BeforeAll
     public static void beforeAll() {
         testUser = new User("user1", "", "","");
@@ -776,5 +778,137 @@ public class UserControllerTests {
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    public void getRecentBlobbs_HandlesInvalidUuid() throws Exception {
+        String invalidUuid = "asdf";
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + invalidUuid + "/recentBlobbs")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Invalid UUID string");
+
+    }
+
+    @Test
+    public void getRecentBlobbs_NotProvidedParametersSetToDefault() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        List<UserBlobb> recent = List.of(new UserBlobb(), new UserBlobb());
+
+        // json
+        JsonContent<List<UserBlobb>> json = jsonUserBlobbs.write(recent);
+
+        // given
+        given(userService.findRecentBlobbsOfUser(uuid, 0L, 10L))
+                .willReturn(recent);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + uuid + "/recentBlobbs")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(json.getJson());
+    }
+
+    @Test
+    public void getRecentBlobbs_ProvidedSkipAndLimitAreUsed() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        List<UserBlobb> recent = List.of(new UserBlobb(), new UserBlobb());
+
+        // json
+        JsonContent<List<UserBlobb>> json = jsonUserBlobbs.write(recent);
+
+        // given
+        given(userService.findRecentBlobbsOfUser(uuid, 10L, 20L))
+                .willReturn(recent);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + uuid + "/recentBlobbs")
+                        .accept(APPLICATION_JSON)
+                        .param("skip", "10")
+                        .param("limit", "20")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(json.getJson());
+    }
+
+    @Test
+    public void getRecentBlobbs_CorrectResponseWhenUserDoesntExist() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userService.findRecentBlobbsOfUser(uuid, 10L, 20L))
+                .willThrow(new UserDoesntExistException(uuid));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + uuid + "/recentBlobbs")
+                        .accept(APPLICATION_JSON)
+                        .param("skip", "10")
+                        .param("limit", "20")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(response.getContentAsString())
+                .contains(String.format("User with UUID %s doesn't exist", uuid));
+    }
+
+    @Test
+    public void getRecentBlobbs_CorrectResponseWhenSkipNegative() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userService.findRecentBlobbsOfUser(uuid, -1L, 20L))
+                .willThrow(new IllegalArgumentException("Invalid skip and/or limit values."));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + uuid + "/recentBlobbs")
+                        .accept(APPLICATION_JSON)
+                        .param("skip", "-1")
+                        .param("limit", "20")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString())
+                .contains("Invalid skip and/or limit values.");
+    }
+
+    @Test
+    public void getRecentBlobbs_CorrectResponseWhenLimitNegative() throws Exception {
+        UUID uuid = UUID.randomUUID();
+
+        // given
+        given(userService.findRecentBlobbsOfUser(uuid, 10L, -20L))
+                .willThrow(new IllegalArgumentException("Invalid skip and/or limit values."));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/" + uuid + "/recentBlobbs")
+                        .accept(APPLICATION_JSON)
+                        .param("skip", "10")
+                        .param("limit", "-20")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString())
+                .contains("Invalid skip and/or limit values.");
     }
 }

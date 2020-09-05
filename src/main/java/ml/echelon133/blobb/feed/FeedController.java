@@ -29,6 +29,7 @@ public class FeedController {
 
     @GetMapping
     public ResponseEntity<List<FeedBlobb>> getUserFeed(@RequestParam(required = false) String since,
+                                                       @RequestParam(required = false) String by,
                                                        @RequestParam(required = false) Long skip,
                                                        @RequestParam(required = false) Long limit) throws IllegalArgumentException {
 
@@ -58,7 +59,18 @@ public class FeedController {
             }
         }
 
-        List<FeedBlobb> feed = blobbService.getFeedForUser(loggedUser, blobbsSince, skip, limit);
+        List<FeedBlobb> feed;
+
+        if (by != null && by.equalsIgnoreCase("POPULARITY")) {
+            // if 'by' is provided and contains 'POPULARITY'
+            // get most popular posts
+            feed = blobbService.getFeedForUser_Popular(loggedUser, blobbsSince, skip, limit);
+        } else {
+            // if 'by' is not provided or has some different value
+            // get most recent posts
+            feed = blobbService.getFeedForUser(loggedUser, blobbsSince, skip, limit);
+        }
+
         return new ResponseEntity<>(feed, HttpStatus.OK);
     }
 }

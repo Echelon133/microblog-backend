@@ -207,4 +207,45 @@ public class FeedControllerTests {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
         assertThat(response.getContentAsString()).contains("Invalid skip and/or limit values.");
     }
+
+    @Test
+    public void getUserFeed_ProvidedByParameterIsUsed() throws Exception {
+        List<FeedBlobb> testBlobbs1 = List.of(new FeedBlobb());
+        List<FeedBlobb> testBlobbs2 = List.of(new FeedBlobb(), new FeedBlobb());
+
+        // json
+        JsonContent<List<FeedBlobb>> json1 = jsonFeedBlobbs.write(testBlobbs1);
+        JsonContent<List<FeedBlobb>> json2 = jsonFeedBlobbs.write(testBlobbs2);
+
+        // given
+        given(blobbService.getFeedForUser_Popular(testUser, IBlobbService.BlobbsSince.ONE_HOUR, 0L, 20L))
+                .willReturn(testBlobbs1);
+        given(blobbService.getFeedForUser_Popular(testUser, IBlobbService.BlobbsSince.SIX_HOURS, 5L, 12L))
+                .willReturn(testBlobbs2);
+
+        // when
+        MockHttpServletResponse response1 = mockMvc.perform(
+                get("/api/feed")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .param("by", "popularity")
+        ).andReturn().getResponse();
+
+        MockHttpServletResponse response2 = mockMvc.perform(
+                get("/api/feed")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .param("by", "PoPULarITY")
+                        .param("since", "six_HOURS")
+                        .param("limit", "12")
+                        .param("skip", "5")
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response1.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response1.getContentAsString()).isEqualTo(json1.getJson());
+
+        assertThat(response2.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response2.getContentAsString()).isEqualTo(json2.getJson());
+    }
 }

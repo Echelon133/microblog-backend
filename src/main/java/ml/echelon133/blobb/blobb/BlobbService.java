@@ -114,6 +114,21 @@ public class BlobbService implements IBlobbService {
                 .getFeedForUserWithUuid_PostedBetween(user.getUuid(), before, now, skip, limit);
     }
 
+    @Override
+    public List<FeedBlobb> getFeedForUser_Popular(User user, BlobbsSince since, Long skip, Long limit) throws IllegalArgumentException {
+
+        if (limit < 0 || skip < 0) {
+            throw new IllegalArgumentException("Invalid skip and/or limit values.");
+        }
+
+        int hoursToSubtract = since.getHours();
+        Date now = Date.from(Instant.now(clock));
+        Date before =  Date.from(now.toInstant().minus(hoursToSubtract, HOURS));
+        return blobbRepository
+                .getFeedForUserWithUuid_Popular_PostedBetween(user.getUuid(), before, now, skip, limit);
+
+    }
+
     private List<Tag> findTagsInContent(Blobb blobb) {
         // look for the hashtag pattern in the blobb content
         Matcher m = hashtagPattern.matcher(blobb.getContent());

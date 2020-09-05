@@ -781,4 +781,171 @@ public class BlobbRepositoryTests {
         }
     }
 
+    @Test
+    public void getFeedForUserWithUuid_Popular_IsEmptyWhenUserDoesntExist() {
+        Date date7DaysAgo = Date.from(Instant.now().minus(1, MINUTES));
+        List<FeedBlobb> blobbs = blobbRepository
+                .getFeedForUserWithUuid_Popular_PostedBetween(UUID.randomUUID(),
+                        date7DaysAgo,
+                        new Date(), 0L, 10L);
+
+        assertEquals(0, blobbs.size());
+    }
+
+    @Test
+    public void getFeedForUserWithUuid_Popular_DoesNotContainDeletedPosts() {
+        User user = userRepository.findByUsername("test1").orElse(new User());
+
+        // create a post
+        Blobb blobb = new Blobb(user, "200");
+        blobb.markAsDeleted(); // mark as deleted even before saving it
+        blobbRepository.save(blobb);
+
+        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
+
+        // when
+        List<FeedBlobb> blobbs = blobbRepository
+                .getFeedForUserWithUuid_Popular_PostedBetween(user.getUuid(),
+                        date40MinAgo,
+                        new Date(), 0L, 10L);
+
+        // make a list of contents of retrieved posts
+        List<String> contents = blobbs.stream().map(FeedBlobb::getContent).collect(Collectors.toList());
+
+        // then
+        assertEquals(10, blobbs.size());
+        // expect posts with content 19, 18, 17, 16, 15, 14, 13, 12, 11, 10
+        Arrays.asList(19, 18, 17, 16, 15, 14, 13, 12, 11, 10).forEach(i -> {
+            assertTrue(contents.contains(i.toString()));
+        });
+    }
+
+    @Test
+    public void getFeedForUserWithUuid_Popular_SkipArgumentWorks() {
+        User user = userRepository.findByUsername("test1").orElse(new User());
+
+        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
+
+        // when
+        List<FeedBlobb> blobbs = blobbRepository
+                .getFeedForUserWithUuid_Popular_PostedBetween(user.getUuid(),
+                        date40MinAgo,
+                        new Date(), 5L, 5L);
+
+        // make a list of contents of retrieved posts
+        List<String> contents = blobbs.stream().map(FeedBlobb::getContent).collect(Collectors.toList());
+
+        // then
+        assertEquals(5, blobbs.size());
+        // expect posts with content: 14, 13, 12, 11, 10
+        Arrays.asList(14, 13, 12, 11, 10).forEach(i -> {
+            assertTrue(contents.contains(i.toString()));
+        });
+    }
+
+    @Test
+    public void getFeedForUserWithUuid_Popular_LimitArgumentWorks() {
+        User user = userRepository.findByUsername("test1").orElse(new User());
+
+        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
+
+        // when
+        List<FeedBlobb> blobbs = blobbRepository
+                .getFeedForUserWithUuid_Popular_PostedBetween(user.getUuid(),
+                        date40MinAgo,
+                        new Date(), 0L, 5L);
+
+        // make a list of contents of retrieved posts
+        List<String> contents = blobbs.stream().map(FeedBlobb::getContent).collect(Collectors.toList());
+
+        // then
+        assertEquals(5, blobbs.size());
+        // expect posts with content: 15, 16, 17, 18, 19
+        Arrays.asList(15, 16, 17, 18, 19).forEach(i -> {
+            assertTrue(contents.contains(i.toString()));
+        });
+    }
+
+    @Test
+    public void getFeedForUserWithUuid_Popular_FeedWithAllPostsIsSorted() {
+        User user = userRepository.findByUsername("test1").orElse(new User());
+
+        // using this date shows all of the posts, since the oldest posts are from 30 min before
+        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
+
+        // when
+        List<FeedBlobb> allBlobbs = blobbRepository
+                .getFeedForUserWithUuid_Popular_PostedBetween(user.getUuid(),
+                        date40MinAgo,
+                        new Date(), 0L, 20L); // limit to 20, to show all posts
+
+        // make a list of contents of retrieved posts
+        List<String> contents = allBlobbs.stream().map(FeedBlobb::getContent).collect(Collectors.toList());
+
+        // then
+        assertEquals(20, allBlobbs.size());
+
+        /*
+         since we expect 20 posts sorted by likes and date (in that order)
+         we should expect them in order:
+            * first 19, 18, 17, 16, 15 (because each post has 4 likes)
+            * second 14, 13, 12, 11, 10 (because each post has 3 likes)
+            * third 9, 8, 7, 6, 5 (because each post has 2 likes)
+            * fourth 4, 3, 2, 1, 0 (because each post has 1 like)
+         */
+        List<Integer> correctOrder = Arrays.asList(19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0);
+        for (int i = 0; i < correctOrder.size(); i++) {
+            assertEquals(correctOrder.get(i).toString(), contents.get(i));
+        }
+    }
+
+    @Test
+    public void getFeedForUserWithUuid_Popular_PostsHaveCorrectAuthors() {
+        User test1 = userRepository.findByUsername("test1").orElse(new User());
+        User test2 = userRepository.findByUsername("test2").orElse(new User());
+        User test3 = userRepository.findByUsername("test3").orElse(new User());
+
+        // using this date shows all of the posts, since the oldest posts are from 30 min before
+        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
+
+        // when
+        List<FeedBlobb> allBlobbs = blobbRepository
+                .getFeedForUserWithUuid_Popular_PostedBetween(test1.getUuid(),
+                        date40MinAgo,
+                        new Date(), 0L, 20L); // limit to 20, to show all posts
+
+        // then
+        // expected posts of test1: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+        List<FeedBlobb> test1Posts = allBlobbs.stream().filter(b -> b.getAuthor().getUuid() == test1.getUuid())
+                .collect(Collectors.toList());
+
+        assertEquals(10, test1Posts.size());
+
+        List<String> test1Contents = test1Posts.stream().map(FeedBlobb::getContent).collect(Collectors.toList());
+        Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9).forEach(c -> {
+            assertTrue(test1Contents.contains(c.toString()));
+        });
+
+        // expected posts of test2: 10, 11, 12, 13, 14
+        List<FeedBlobb> test2Posts = allBlobbs.stream().filter(b -> b.getAuthor().getUuid() == test2.getUuid())
+                .collect(Collectors.toList());
+
+        assertEquals(5, test2Posts.size());
+
+        List<String> test2Contents = test2Posts.stream().map(FeedBlobb::getContent).collect(Collectors.toList());
+        Arrays.asList(10, 11, 12, 13, 14).forEach(c -> {
+            assertTrue(test2Contents.contains(c.toString()));
+        });
+
+        // expected posts of test3: 15, 16, 17, 18, 19
+        List<FeedBlobb> test3Posts = allBlobbs.stream().filter(b -> b.getAuthor().getUuid() == test3.getUuid())
+                .collect(Collectors.toList());
+
+        assertEquals(5, test3Posts.size());
+
+        List<String> test3Contents = test3Posts.stream().map(FeedBlobb::getContent).collect(Collectors.toList());
+        Arrays.asList(15, 16, 17, 18, 19).forEach(c -> {
+            assertTrue(test3Contents.contains(c.toString()));
+        });
+    }
 }

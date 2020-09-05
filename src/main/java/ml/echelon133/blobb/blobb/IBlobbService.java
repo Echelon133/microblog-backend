@@ -31,6 +31,7 @@ public interface IBlobbService {
     boolean likeBlobb(User user, UUID blobbUuid) throws BlobbDoesntExistException;
     boolean unlikeBlobb(User user, UUID blobbUuid) throws BlobbDoesntExistException;
     List<FeedBlobb> getFeedForUser(User user, BlobbsSince since, Long skip, Long limit) throws IllegalArgumentException;
+    List<FeedBlobb> getFeedForUser_Popular(User user, BlobbsSince since, Long skip, Long limit) throws IllegalArgumentException;
     Blobb processBlobbAndSave(Blobb blobb);
     Blobb postBlobb(User author, String content);
     Blobb postReblobb(User author, String content, UUID reblobbedPostUuid) throws BlobbDoesntExistException;

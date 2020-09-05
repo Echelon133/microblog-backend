@@ -741,4 +741,64 @@ public class BlobbServiceTests {
         // then
         assertTrue(response);
     }
+
+    @Test
+    public void getFeedForUser_Popular_ThrowsWhenSkipAndLimitArgumentsNegative() {
+        User u = new User();
+
+        // then
+        Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+            blobbService.getFeedForUser_Popular(u, IBlobbService.BlobbsSince.ONE_HOUR, -1L, 5L);
+        });
+
+        assertEquals("Invalid skip and/or limit values.", ex.getMessage());
+
+        ex = assertThrows(IllegalArgumentException.class, () -> {
+            blobbService.getFeedForUser_Popular(u, IBlobbService.BlobbsSince.ONE_HOUR, 0L, -1L);
+        });
+
+        assertEquals("Invalid skip and/or limit values.", ex.getMessage());
+    }
+
+    @Test
+    public void getFeedForUser_Popular_ReturnsCorrectlyFilteredResults() {
+        UUID uuid = UUID.randomUUID();
+        User u = new User();
+        u.setUuid(uuid);
+
+        Date dateNow = new Date();
+        Date dateOneHourAgo = Date.from(dateNow.toInstant().minus(1, HOURS));
+        Date dateSixHoursAgo = Date.from(dateNow.toInstant().minus(6, HOURS));
+        Date dateTwelveHoursAgo = Date.from(dateNow.toInstant().minus(12, HOURS));
+
+        // inject fixed clock into the service
+        blobbService.setClock(Clock.fixed(dateNow.toInstant(), ZoneId.systemDefault()));
+
+        // given
+        given(blobbRepository
+                .getFeedForUserWithUuid_Popular_PostedBetween(uuid, dateOneHourAgo, dateNow, 0L, 5L))
+                .willReturn(List.of(new FeedBlobb()));
+        given(blobbRepository
+                .getFeedForUserWithUuid_Popular_PostedBetween(uuid, dateSixHoursAgo, dateNow, 0L, 5L))
+                .willReturn(List.of(new FeedBlobb(), new FeedBlobb()));
+        given(blobbRepository
+                .getFeedForUserWithUuid_Popular_PostedBetween(uuid, dateTwelveHoursAgo, dateNow, 0L, 5L))
+                .willReturn(List.of(new FeedBlobb(), new FeedBlobb(), new FeedBlobb()));
+
+        // when
+        List<FeedBlobb> oneHourResults = blobbService
+                .getFeedForUser_Popular(u, IBlobbService.BlobbsSince.ONE_HOUR, 0L, 5L);
+
+        List<FeedBlobb> sixHoursResults = blobbService
+                .getFeedForUser_Popular(u, IBlobbService.BlobbsSince.SIX_HOURS, 0L, 5L);
+
+        List<FeedBlobb> twelveHoursResults = blobbService
+                .getFeedForUser_Popular(u, IBlobbService.BlobbsSince.TWELVE_HOURS, 0L, 5L);
+
+
+        // then
+        assertEquals(1, oneHourResults.size());
+        assertEquals(2, sixHoursResults.size());
+        assertEquals(3, twelveHoursResults.size());
+    }
 }

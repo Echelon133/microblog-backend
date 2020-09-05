@@ -27,6 +27,17 @@ public interface BlobbRepository extends Neo4jRepository<Blobb, UUID> {
             "ORDER BY datetime(blobbs.creationDate) DESC SKIP $skip LIMIT $limit ")
     List<FeedBlobb> getFeedForUserWithUuid_PostedBetween(UUID uuid, Date first, Date second, Long skip, Long limit);
 
+    @Query( "MATCH (u:User)-[:FOLLOWS]->(poster:User)-[:POSTS]->(blobbs:Blobb) " +
+            "WHERE u.uuid = $uuid AND blobbs.creationDate >= $first AND blobbs.creationDate <= $second AND blobbs.deleted <> true " +
+            "OPTIONAL MATCH (blobbs:Blobb)-[:RESPONDS]->(respondsTo:Blobb) " +
+            "OPTIONAL MATCH (blobbs:Blobb)-[:REBLOBBS]->(reblobbs:Blobb) " +
+            "OPTIONAL MATCH (:User)-[l:LIKES]->(blobbs) " +
+            "WITH blobbs, reblobbs, respondsTo, poster, count(l) as amountLikes " +
+            "RETURN blobbs.uuid AS uuid, blobbs.content AS content, blobbs.creationDate AS date, poster AS author, " +
+            "reblobbs.uuid AS reblobbs, respondsTo.uuid AS respondsTo " +
+            "ORDER BY amountLikes DESC, datetime(blobbs.creationDate) DESC SKIP $skip LIMIT $limit ")
+    List<FeedBlobb> getFeedForUserWithUuid_Popular_PostedBetween(UUID uuid, Date first, Date second, Long skip, Long limit);
+
     @Query( "MATCH (u:User)-[:POSTS]->(blobb:Blobb) WHERE blobb.uuid = $uuid AND blobb.deleted <> true " +
             "OPTIONAL MATCH (blobb:Blobb)-[:RESPONDS]->(respondsTo:Blobb) " +
             "OPTIONAL MATCH (blobb:Blobb)-[:REBLOBBS]->(reblobbs:Blobb) " +

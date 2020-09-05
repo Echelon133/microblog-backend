@@ -23,17 +23,6 @@ public class BlobbExceptionHandler extends AbstractExceptionHandler {
         );
     }
 
-    @ExceptionHandler(value = IllegalArgumentException.class)
-    protected ResponseEntity<ErrorMessage> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
-        return new ResponseEntity<>(
-                new ErrorMessage(new Date(),
-                        request.getDescription(false),
-                        HttpStatus.BAD_REQUEST,
-                        ex.getMessage()),
-                HttpStatus.BAD_REQUEST
-        );
-    }
-
     @ExceptionHandler(value = InvalidBlobbContentException.class)
     protected ResponseEntity<ErrorMessage> handleInvalidBlobbContentException(InvalidBlobbContentException ex, WebRequest request) {
         return new ResponseEntity<>(

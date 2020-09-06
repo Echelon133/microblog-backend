@@ -29,9 +29,25 @@ public class TagRepositoryTests {
         this.blobbRepository = blobbRepository;
     }
 
+    private User createTestUser() {
+        return new User("test", "", "", "");
+    }
+
+    private Tag createTag(String name) {
+        return new Tag(name);
+    }
+
+    private Blobb createBlobb(User author, String content, Tag... tags) {
+        Blobb b = new Blobb(author, content);
+        for (Tag t : tags) {
+            b.addTag(t);
+        }
+        return b;
+    }
+
     @Test
     public void savedTagGetsUuid() {
-        Tag tag = new Tag("test");
+        Tag tag = createTag("#test");
         assertNull(tag.getUuid());
 
         Tag savedTag = tagRepository.save(tag);
@@ -40,27 +56,25 @@ public class TagRepositoryTests {
 
     @Test
     public void findByName_FindsExistingTags() {
-        Tag tag = new Tag("test");
+        Tag tag = createTag("#test");
         Tag savedTag = tagRepository.save(tag);
 
-        Optional<Tag> foundTag = tagRepository.findByName("test");
+        Optional<Tag> foundTag = tagRepository.findByName("#test");
 
         assertEquals(savedTag, foundTag.orElse(null));
     }
 
     @Test
     public void findMostPopularTags_DoesNotCountDeletedBlobbs() {
-        User u1 = new User("u1", "", "", "");
+        User u1 = createTestUser();
 
         // create a single blobb tagged '#test' and mark it as deleted
-        Blobb b1 = new Blobb(u1, "test");
+        Blobb b1 = createBlobb(u1, "test", createTag("#test"));
         b1.markAsDeleted();
-        b1.addTag(new Tag("#test"));
         blobbRepository.save(b1);
 
         // create another blobb tagged '#asdf' and don't delete it
-        Blobb b2 = new Blobb(u1, "test");
-        b2.addTag(new Tag("#asdf"));
+        Blobb b2 = createBlobb(u1, "test", createTag("#asdf"));
         blobbRepository.save(b2);
 
         // when
@@ -75,38 +89,34 @@ public class TagRepositoryTests {
 
     @Test
     public void findMostPopularTags_CorrectlyCalculatesPopularity() {
-        User u1 = new User("u1", "", "", "");
+        User u1 = createTestUser();
 
-        Tag test1 = tagRepository.save(new Tag("#test1"));
-        Tag test2 = tagRepository.save(new Tag("#test2"));
-        Tag test3 = tagRepository.save(new Tag("#test3"));
-        Tag test4 = tagRepository.save(new Tag("#test4"));
+        Tag test1 = tagRepository.save(createTag("#test1"));
+        Tag test2 = tagRepository.save(createTag("#test2"));
+        Tag test3 = tagRepository.save(createTag("#test3"));
+        Tag test4 = tagRepository.save(createTag("#test4"));
 
         // make 100 blobbs tagged '#test1'
         for (int i = 0; i < 100; i++) {
-            Blobb b = new Blobb(u1, "content");
-            b.addTag(test1);
+            Blobb b = createBlobb(u1, "content", test1);
             blobbRepository.save(b);
         }
 
         // make 200 blobbs tagged '#test2'
         for (int i = 0; i < 200; i++) {
-            Blobb b = new Blobb(u1, "content");
-            b.addTag(test2);
+            Blobb b = createBlobb(u1, "content", test2);
             blobbRepository.save(b);
         }
 
         // make 300 blobbs tagged '#test3'
         for (int i = 0; i < 300; i++) {
-            Blobb b = new Blobb(u1, "content");
-            b.addTag(test3);
+            Blobb b = createBlobb(u1, "content", test3);
             blobbRepository.save(b);
         }
 
         // make 400 blobbs tagged '#test4'
         for (int i = 0; i < 400; i++) {
-            Blobb b = new Blobb(u1, "content");
-            b.addTag(test4);
+            Blobb b = createBlobb(u1, "content", test4);
             blobbRepository.save(b);
         }
 
@@ -132,41 +142,37 @@ public class TagRepositoryTests {
         Date weekAgo = Date.from(Instant.now().minus(7, DAYS));
         Date twoWeeksAgo = Date.from(Instant.now().minus(14, DAYS));
 
-        User u1 = new User("u1", "", "", "");
+        User u1 = createTestUser();
 
-        Tag test1 = tagRepository.save(new Tag("#test1"));
-        Tag test2 = tagRepository.save(new Tag("#test2"));
-        Tag test3 = tagRepository.save(new Tag("#test3"));
-        Tag test4 = tagRepository.save(new Tag("#test4"));
+        Tag test1 = tagRepository.save(createTag("#test1"));
+        Tag test2 = tagRepository.save(createTag("#test2"));
+        Tag test3 = tagRepository.save(createTag("#test3"));
+        Tag test4 = tagRepository.save(createTag("#test4"));
 
         // make 100 blobbs tagged '#test1' (created now)
         for (int i = 0; i < 100; i++) {
-            Blobb b = new Blobb(u1, "content");
-            b.addTag(test1);
+            Blobb b = createBlobb(u1, "content", test1);
             blobbRepository.save(b);
         }
 
         // make 200 blobbs tagged '#test2' (created two hours ago)
         for (int i = 0; i < 200; i++) {
-            Blobb b = new Blobb(u1, "content");
+            Blobb b = createBlobb(u1, "content", test2);
             b.setCreationDate(twoHoursAgo);
-            b.addTag(test2);
             blobbRepository.save(b);
         }
 
         // make 300 blobbs tagged '#test3' (created two hours ago)
         for (int i = 0; i < 300; i++) {
-            Blobb b = new Blobb(u1, "content");
+            Blobb b = createBlobb(u1, "content", test3);
             b.setCreationDate(twoHoursAgo);
-            b.addTag(test3);
             blobbRepository.save(b);
         }
 
         // make 400 blobbs tagged '#test4' (created a week ago)
         for (int i = 0; i < 400; i++) {
-            Blobb b = new Blobb(u1, "content");
+            Blobb b = createBlobb(u1, "content", test4);
             b.setCreationDate(weekAgo);
-            b.addTag(test4);
             blobbRepository.save(b);
         }
 
@@ -198,38 +204,34 @@ public class TagRepositoryTests {
 
     @Test
     public void findMostPopularTags_LimitsNumberOfResults() {
-        User u1 = new User("u1", "", "", "");
+        User u1 = createTestUser();
 
-        Tag test1 = tagRepository.save(new Tag("#test1"));
-        Tag test2 = tagRepository.save(new Tag("#test2"));
-        Tag test3 = tagRepository.save(new Tag("#test3"));
-        Tag test4 = tagRepository.save(new Tag("#test4"));
+        Tag test1 = tagRepository.save(createTag("#test1"));
+        Tag test2 = tagRepository.save(createTag("#test2"));
+        Tag test3 = tagRepository.save(createTag("#test3"));
+        Tag test4 = tagRepository.save(createTag("#test4"));
 
         // make 100 blobbs tagged '#test1'
         for (int i = 0; i < 100; i++) {
-            Blobb b = new Blobb(u1, "content");
-            b.addTag(test1);
+            Blobb b = createBlobb(u1, "content", test1);
             blobbRepository.save(b);
         }
 
         // make 200 blobbs tagged '#test2'
         for (int i = 0; i < 200; i++) {
-            Blobb b = new Blobb(u1, "content");
-            b.addTag(test2);
+            Blobb b = createBlobb(u1, "content", test2);
             blobbRepository.save(b);
         }
 
         // make 300 blobbs tagged '#test3'
         for (int i = 0; i < 300; i++) {
-            Blobb b = new Blobb(u1, "content");
-            b.addTag(test3);
+            Blobb b = createBlobb(u1, "content", test3);
             blobbRepository.save(b);
         }
 
         // make 400 blobbs tagged '#test4'
         for (int i = 0; i < 400; i++) {
-            Blobb b = new Blobb(u1, "content");
-            b.addTag(test4);
+            Blobb b = createBlobb(u1, "content", test4);
             blobbRepository.save(b);
         }
 
@@ -250,7 +252,7 @@ public class TagRepositoryTests {
 
     @Test
     public void findRecentBlobbsTagged_IsEmptyWhenNoPostsMade() {
-        Tag t = new Tag("#tag");
+        Tag t = createTag("#tag");
         UUID tagUuid = tagRepository.save(t).getUuid();
 
         // when
@@ -262,22 +264,21 @@ public class TagRepositoryTests {
 
     @Test
     public void findRecentBlobbsTagged_ReturnsObjectsInCorrectOrder() {
-        Tag savedTag = tagRepository.save(new Tag("#test"));
+        Tag savedTag = tagRepository.save(createTag("#test"));
 
         Date now = new Date();
         Date hourAgo = Date.from(Instant.now().minus(1, HOURS));
         Date twoHoursAgo = Date.from(Instant.now().minus(2, HOURS));
 
         // create blobbs
-        Blobb b1 = new Blobb(new User(), "content1");
+        Blobb b1 = createBlobb(createTestUser(), "content1", savedTag);
         b1.setCreationDate(now);
-        b1.addTag(savedTag);
-        Blobb b2 = new Blobb(new User(), "content2");
+
+        Blobb b2 = createBlobb(createTestUser(), "content2", savedTag);
         b2.setCreationDate(hourAgo);
-        b2.addTag(savedTag);
-        Blobb b3 = new Blobb(new User(), "content3");
+
+        Blobb b3 = createBlobb(createTestUser(), "content3", savedTag);
         b3.setCreationDate(twoHoursAgo);
-        b3.addTag(savedTag);
 
         blobbRepository.save(b1);
         blobbRepository.save(b2);
@@ -300,22 +301,21 @@ public class TagRepositoryTests {
 
     @Test
     public void findRecentBlobbsTagged_LimitsNumberOfResults() {
-        Tag savedTag = tagRepository.save(new Tag("#test"));
+        Tag savedTag = tagRepository.save(createTag("#test"));
 
         Date now = new Date();
         Date hourAgo = Date.from(Instant.now().minus(1, HOURS));
         Date twoHoursAgo = Date.from(Instant.now().minus(2, HOURS));
 
         // create blobbs
-        Blobb b1 = new Blobb(new User(), "content1");
+        Blobb b1 = createBlobb(createTestUser(), "content1", savedTag);
         b1.setCreationDate(now);
-        b1.addTag(savedTag);
-        Blobb b2 = new Blobb(new User(), "content2");
+
+        Blobb b2 = createBlobb(createTestUser(), "content2", savedTag);
         b2.setCreationDate(hourAgo);
-        b2.addTag(savedTag);
-        Blobb b3 = new Blobb(new User(), "content3");
+
+        Blobb b3 = createBlobb(createTestUser(), "content3", savedTag);
         b3.setCreationDate(twoHoursAgo);
-        b3.addTag(savedTag);
 
         blobbRepository.save(b1);
         blobbRepository.save(b2);
@@ -338,22 +338,21 @@ public class TagRepositoryTests {
 
     @Test
     public void findRecentBlobbsTagged_SkipsResults() {
-        Tag savedTag = tagRepository.save(new Tag("#test"));
+        Tag savedTag = tagRepository.save(createTag("#test"));
 
         Date now = new Date();
         Date hourAgo = Date.from(Instant.now().minus(1, HOURS));
         Date twoHoursAgo = Date.from(Instant.now().minus(2, HOURS));
 
         // create blobbs
-        Blobb b1 = new Blobb(new User(), "content1");
+        Blobb b1 = createBlobb(createTestUser(), "content1", savedTag);
         b1.setCreationDate(now);
-        b1.addTag(savedTag);
-        Blobb b2 = new Blobb(new User(), "content2");
+
+        Blobb b2 = createBlobb(createTestUser(), "content2", savedTag);
         b2.setCreationDate(hourAgo);
-        b2.addTag(savedTag);
-        Blobb b3 = new Blobb(new User(), "content3");
+
+        Blobb b3 = createBlobb(createTestUser(), "content3", savedTag);
         b3.setCreationDate(twoHoursAgo);
-        b3.addTag(savedTag);
 
         blobbRepository.save(b1);
         blobbRepository.save(b2);

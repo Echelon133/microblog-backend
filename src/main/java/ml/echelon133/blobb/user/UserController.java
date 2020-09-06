@@ -27,6 +27,12 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<User> getLoggedUser() {
+        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return new ResponseEntity<>(loggedUser, HttpStatus.OK);
+    }
+
     @GetMapping("/{uuid}")
     public ResponseEntity<User> getUser(@PathVariable String uuid) throws Exception {
         return new ResponseEntity<>(userService.findByUuid(UUID.fromString(uuid)), HttpStatus.OK);

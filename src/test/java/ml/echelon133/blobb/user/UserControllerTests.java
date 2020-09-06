@@ -74,6 +74,23 @@ public class UserControllerTests {
     }
 
     @Test
+    public void getLoggedUser_ReturnsCorrectPrincipal() throws Exception {
+        // json
+        JsonContent<User> json = jsonUser.write(testUser);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users/me")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(json.getJson());
+    }
+
+    @Test
     public void getUser_HandlesInvalidUuid() throws Exception {
         String invalidUuid = "asdf";
 

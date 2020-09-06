@@ -530,4 +530,25 @@ public class UserServiceTests {
         // then
         assertEquals(2, retrieved.size());
     }
+
+    @Test
+    public void updateUser_UpdatesUserDetails() throws Exception {
+        User testUser = getTestUser();
+
+        UserDetailsDto dto = new UserDetailsDto();
+        dto.setDisplayedUsername("My displayed username");
+        dto.setDescription("This is my description");
+        dto.setAviURL("");
+
+        // given
+        given(userRepository.save(testUser)).willReturn(testUser);
+
+        // when
+        User updated = userService.updateUser(testUser, dto);
+
+        // then
+        assertEquals(dto.getDisplayedUsername(), updated.getDisplayedUsername());
+        assertEquals(dto.getDescription(), updated.getDescription());
+        assertEquals(dto.getAviURL(), updated.getAviURL());
+    }
 }

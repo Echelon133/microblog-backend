@@ -4,8 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -25,6 +29,29 @@ public class UserController {
     public ResponseEntity<User> getUserByUsername(@RequestParam String username) throws Exception {
         User user = userService.findByUsername(username);
         return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<User> getLoggedUser() {
+        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return new ResponseEntity<>(loggedUser, HttpStatus.OK);
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<User> updateUserDetails(@Valid @RequestBody UserDetailsDto userDetailsDto,
+                                                  BindingResult result) throws Exception {
+        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (result.hasFieldErrors()) {
+            List<String> messages = new ArrayList<>();
+            for (FieldError fe : result.getFieldErrors()) {
+                messages.add(fe.getDefaultMessage());
+            }
+            throw new InvalidUserDetailsFieldException(messages);
+        }
+
+        User updatedUser = userService.updateUser(loggedUser, userDetailsDto);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}")

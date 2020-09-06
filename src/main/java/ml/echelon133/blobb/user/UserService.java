@@ -105,4 +105,12 @@ public class UserService implements IUserService {
         }
         return userRepository.findRecentBlobbsOfUser(uuid, skip, limit);
     }
+
+    @Override
+    public User updateUser(User user, UserDetailsDto userDetailsDto) {
+        user.setDisplayedUsername(userDetailsDto.getDisplayedUsername());
+        user.setDescription(userDetailsDto.getDescription());
+        user.setAviURL(userDetailsDto.getAviURL());
+        return userRepository.save(user);
+    }
 }

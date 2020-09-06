@@ -23,4 +23,16 @@ public class UserExceptionHandler extends AbstractExceptionHandler {
                 HttpStatus.NOT_FOUND
         );
     }
+
+    @ExceptionHandler(value = InvalidUserDetailsFieldException.class)
+    protected ResponseEntity<ErrorMessage> handleInvalidUserDetailsFieldException(InvalidUserDetailsFieldException ex,
+                                                                                  WebRequest request) {
+        return new ResponseEntity<>(
+                new ErrorMessage(new Date(),
+                        request.getDescription(false),
+                        HttpStatus.BAD_REQUEST,
+                        ex.getMessages()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
 }

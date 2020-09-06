@@ -13,4 +13,5 @@ public interface IUserService {
     List<User> findAllFollowersOfUser(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException;
     UserProfileInfo getUserProfileInfo(UUID uuid) throws UserDoesntExistException;
     List<UserBlobb> findRecentBlobbsOfUser(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException;
+    User updateUser(User user, UserDetailsDto userDetailsDto);
 }

@@ -22,15 +22,4 @@ public class TagExceptionHandler extends AbstractExceptionHandler {
                 HttpStatus.NOT_FOUND
         );
     }
-
-    @ExceptionHandler(value = IllegalArgumentException.class)
-    protected ResponseEntity<ErrorMessage> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
-        return new ResponseEntity<>(
-                new ErrorMessage(new Date(),
-                        request.getDescription(false),
-                        HttpStatus.BAD_REQUEST,
-                        ex.getMessage()),
-                HttpStatus.BAD_REQUEST
-        );
-    }
 }

@@ -1,6 +1,9 @@
 package ml.echelon133.blobb.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.Arrays;
@@ -44,5 +47,16 @@ public abstract class AbstractExceptionHandler extends ResponseEntityExceptionHa
         public String getStatus() {
             return status;
         }
+    }
+
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    protected ResponseEntity<ErrorMessage> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
+        return new ResponseEntity<>(
+                new ErrorMessage(new Date(),
+                        request.getDescription(false),
+                        HttpStatus.BAD_REQUEST,
+                        ex.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
     }
 }

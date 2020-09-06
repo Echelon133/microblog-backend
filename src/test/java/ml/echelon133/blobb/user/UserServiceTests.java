@@ -23,11 +23,15 @@ public class UserServiceTests {
     @InjectMocks
     private UserService userService;
 
+    private User getTestUser() {
+        User u = new User("test", "", "", "");
+        u.setUuid(UUID.randomUUID());
+        return u;
+    }
 
     @Test
     public void followUserWithUuid_ThrowsWhenUserDoesntExist() {
-        UUID u1Uuid = UUID.randomUUID();
-        User user = new User("test1", "mail@test.com", "", "");
+        User user = getTestUser();
         UUID u2Uuid = UUID.randomUUID();
 
         // given
@@ -35,7 +39,7 @@ public class UserServiceTests {
 
         // when
         String message = assertThrows(UserDoesntExistException.class, () -> {
-            userService.followUserWithUuid(any(), u2Uuid);
+            userService.followUserWithUuid(user, u2Uuid);
         }).getMessage();
 
         assertEquals(String.format("User with UUID %s doesn't exist", u2Uuid), message);
@@ -43,15 +47,13 @@ public class UserServiceTests {
 
     @Test
     public void followUserWithUuid_WhenUserDoesntAlreadyFollow() throws Exception {
-        UUID u1Uuid = UUID.randomUUID();
-        User user = new User("test1", "mail@test.com", "", "");
-        user.setUuid(u1Uuid);
+        User user = getTestUser();
         UUID u2Uuid = UUID.randomUUID();
 
         // given
         given(userRepository.existsById(u2Uuid)).willReturn(true);
-        given(userRepository.checkIfUserWithUuidFollows(u1Uuid, u2Uuid)).willReturn(Optional.empty());
-        given(userRepository.followUserWithUuid(u1Uuid, u2Uuid)).willReturn(Optional.of(1L));
+        given(userRepository.checkIfUserWithUuidFollows(user.getUuid(), u2Uuid)).willReturn(Optional.empty());
+        given(userRepository.followUserWithUuid(user.getUuid(), u2Uuid)).willReturn(Optional.of(1L));
 
         // when
         boolean result = userService.followUserWithUuid(user, u2Uuid);
@@ -62,14 +64,12 @@ public class UserServiceTests {
 
     @Test
     public void followUserWithUuid_WhenUserAlreadyFollows() throws Exception {
-        UUID u1Uuid = UUID.randomUUID();
-        User user = new User("test1", "mail@test.com", "", "");
-        user.setUuid(u1Uuid);
+        User user = getTestUser();
         UUID u2Uuid = UUID.randomUUID();
 
         // given
         given(userRepository.existsById(u2Uuid)).willReturn(true);
-        given(userRepository.checkIfUserWithUuidFollows(u1Uuid, u2Uuid)).willReturn(Optional.of(1L));
+        given(userRepository.checkIfUserWithUuidFollows(user.getUuid(), u2Uuid)).willReturn(Optional.of(1L));
 
         // when
         boolean result = userService.followUserWithUuid(user, u2Uuid);
@@ -80,15 +80,13 @@ public class UserServiceTests {
 
     @Test
     public void followUserWithUuid_WhenFollowingFails() throws Exception {
-        UUID u1Uuid = UUID.randomUUID();
-        User user = new User("test1", "mail@test.com", "", "");
-        user.setUuid(u1Uuid);
+        User user = getTestUser();
         UUID u2Uuid = UUID.randomUUID();
 
         // given
         given(userRepository.existsById(u2Uuid)).willReturn(true);
-        given(userRepository.checkIfUserWithUuidFollows(u1Uuid, u2Uuid)).willReturn(Optional.empty());
-        given(userRepository.followUserWithUuid(u1Uuid, u2Uuid)).willReturn(Optional.empty());
+        given(userRepository.checkIfUserWithUuidFollows(user.getUuid(), u2Uuid)).willReturn(Optional.empty());
+        given(userRepository.followUserWithUuid(user.getUuid(), u2Uuid)).willReturn(Optional.empty());
 
         // when
         boolean result = userService.followUserWithUuid(user, u2Uuid);
@@ -98,18 +96,16 @@ public class UserServiceTests {
     }
 
     @Test
-    public void followUserWithUuid_ThrowsWhenUserFollowsThemselves() throws Exception {
-        UUID u1Uuid = UUID.randomUUID();
-        User user = new User("test1", "mail@test.com", "", "");
-        user.setUuid(u1Uuid);
+    public void followUserWithUuid_ThrowsWhenUserFollowsThemselves() {
+        User user = getTestUser();
 
         // given
-        given(userRepository.existsById(u1Uuid)).willReturn(true);
-        given(userRepository.checkIfUserWithUuidFollows(u1Uuid, u1Uuid)).willReturn(Optional.empty());
+        given(userRepository.existsById(user.getUuid())).willReturn(true);
+        given(userRepository.checkIfUserWithUuidFollows(user.getUuid(), user.getUuid())).willReturn(Optional.empty());
 
         // then
         String message = assertThrows(IllegalArgumentException.class, () -> {
-            userService.followUserWithUuid(user, u1Uuid);
+            userService.followUserWithUuid(user, user.getUuid());
         }).getMessage();
 
         assertEquals("Users cannot follow themselves.", message);
@@ -117,9 +113,7 @@ public class UserServiceTests {
 
     @Test
     public void unfollowUserWithUuid_ThrowsWhenUserDoesntExist() {
-        UUID u1Uuid = UUID.randomUUID();
-        User user = new User("test1", "mail@test.com", "", "");
-        user.setUuid(u1Uuid);
+        User user = getTestUser();
         UUID u2Uuid = UUID.randomUUID();
 
         // given
@@ -136,14 +130,12 @@ public class UserServiceTests {
 
     @Test
     public void unfollowUserWithUuid_WhenUnfollowSucceeds() throws Exception {
-        UUID u1Uuid = UUID.randomUUID();
-        User user = new User("test1", "mail@test.com", "", "");
-        user.setUuid(u1Uuid);
+        User user = getTestUser();
         UUID u2Uuid = UUID.randomUUID();
 
         // given
         given(userRepository.existsById(u2Uuid)).willReturn(true);
-        given(userRepository.checkIfUserWithUuidFollows(u1Uuid, u2Uuid)).willReturn(Optional.empty());
+        given(userRepository.checkIfUserWithUuidFollows(user.getUuid(), u2Uuid)).willReturn(Optional.empty());
 
         // when
         boolean result = userService.unfollowUserWithUuid(user, u2Uuid);
@@ -154,14 +146,12 @@ public class UserServiceTests {
 
     @Test
     public void unfollowUserWithUuid_WhenUnfollowFails() throws Exception {
-        UUID u1Uuid = UUID.randomUUID();
-        User user = new User("test1", "mail@test.com", "", "");
-        user.setUuid(u1Uuid);
+        User user = getTestUser();
         UUID u2Uuid = UUID.randomUUID();
 
         // given
         given(userRepository.existsById(u2Uuid)).willReturn(true);
-        given(userRepository.checkIfUserWithUuidFollows(u1Uuid, u2Uuid)).willReturn(Optional.of(1L));
+        given(userRepository.checkIfUserWithUuidFollows(user.getUuid(), u2Uuid)).willReturn(Optional.of(1L));
 
         // when
         boolean result = userService.unfollowUserWithUuid(user, u2Uuid);
@@ -280,7 +270,7 @@ public class UserServiceTests {
     public void findAllFollowersOfUser_ReturnsListOfFollowers() throws Exception {
         UUID uUuid = UUID.randomUUID();
 
-        List<User> mockList = List.of(new User(), new User(), new User());
+        List<User> mockList = List.of(getTestUser(), getTestUser(), getTestUser());
 
         // given
         given(userRepository.existsById(uUuid)).willReturn(true);
@@ -395,20 +385,18 @@ public class UserServiceTests {
 
     @Test
     public void findByUuid_ReturnsObject() throws Exception {
-        UUID uuid = UUID.randomUUID();
-        User user = new User();
-        user.setUuid(uuid);
+        User user = getTestUser();
 
         // given
-        given(userRepository.existsById(uuid)).willReturn(true);
-        given(userRepository.findById(uuid)).willReturn(Optional.of(user));
+        given(userRepository.existsById(user.getUuid())).willReturn(true);
+        given(userRepository.findById(user.getUuid())).willReturn(Optional.of(user));
 
         // when
-        User foundUser = userService.findByUuid(uuid);
+        User foundUser = userService.findByUuid(user.getUuid());
 
         //then
         assertNotNull(foundUser);
-        assertEquals(uuid, foundUser.getUuid());
+        assertEquals(user.getUuid(), foundUser.getUuid());
     }
 
     @Test
@@ -429,7 +417,7 @@ public class UserServiceTests {
     @Test
     public void checkIfUserFollows_ReturnsFalseWhenThereIsNoFollow() throws Exception {
         UUID uuid = UUID.randomUUID();
-        User user = new User("test1", "mail@test.com", "", "");
+        User user = getTestUser();
 
         // given
         given(userRepository.existsById(uuid)).willReturn(true);
@@ -445,7 +433,7 @@ public class UserServiceTests {
     @Test
     public void checkIfUserFollows_ReturnsTrueWhenThereIsFollow() throws Exception {
         UUID uuid = UUID.randomUUID();
-        User user = new User("test1", "mail@test.com", "", "");
+        User user = getTestUser();
 
         // given
         given(userRepository.existsById(uuid)).willReturn(true);
@@ -475,15 +463,14 @@ public class UserServiceTests {
 
     @Test
     public void findByUsername_ReturnsExistingObject() throws Exception {
-        String username = "test321";
-        User user = new User(username, "", "", "");
+        User user = getTestUser();
 
         // given
-        given(userRepository.findByUsername(username))
+        given(userRepository.findByUsername(user.getUsername()))
                 .willReturn(Optional.of(user));
 
         // when
-        User receivedUser = userService.findByUsername(username);
+        User receivedUser = userService.findByUsername(user.getUsername());
 
         // then
         assertEquals(user, receivedUser);

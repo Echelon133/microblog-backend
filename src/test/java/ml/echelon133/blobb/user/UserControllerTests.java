@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -49,6 +50,8 @@ public class UserControllerTests {
     private JacksonTester<List<User>> jsonUsers;
 
     private JacksonTester<List<UserBlobb>> jsonUserBlobbs;
+
+    private JacksonTester<UserDetailsDto> jsonUserDetailsDto;
 
     @BeforeAll
     public static void beforeAll() {
@@ -88,6 +91,83 @@ public class UserControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString()).isEqualTo(json.getJson());
+    }
+
+    @Test
+    public void updateUserDetails_RejectsFieldsWithInvalidLength() throws Exception {
+        UserDetailsDto dto1 = new UserDetailsDto();
+        UserDetailsDto dto2 = new UserDetailsDto();
+
+        // invalid because both are not at least 1 character long
+        dto1.setDisplayedUsername("");
+        dto1.setDescription("");
+
+        // invalid because both are above max character in length
+        // length 71
+        dto2.setDisplayedUsername("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        // length 201
+        dto2.setDescription("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" +
+                            "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" +
+                            "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" +
+                            "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+
+        // json
+        JsonContent<UserDetailsDto> json1 = jsonUserDetailsDto.write(dto1);
+        JsonContent<UserDetailsDto> json2 = jsonUserDetailsDto.write(dto2);
+
+        // when
+        MockHttpServletResponse response1 = mockMvc.perform(
+                put("/api/users/me")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json1.getJson())
+        ).andReturn().getResponse();
+
+        MockHttpServletResponse response2 = mockMvc.perform(
+                put("/api/users/me")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json2.getJson())
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response1.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response1.getContentAsString()).contains("Username length is invalid");
+        assertThat(response1.getContentAsString()).contains("Description length is invalid");
+
+        assertThat(response2.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response2.getContentAsString()).contains("Username length is invalid");
+        assertThat(response2.getContentAsString()).contains("Description length is invalid");
+    }
+
+    @Test
+    public void updateUserDetails_AcceptsFieldsWithValidLength() throws Exception {
+        UserDetailsDto dto = new UserDetailsDto();
+
+        // set all fields to their minimum length
+        dto.setDisplayedUsername("d");
+        dto.setDescription("d");
+        dto.setAviURL("");
+
+        // json
+        JsonContent<UserDetailsDto> json = jsonUserDetailsDto.write(dto);
+
+        // given
+        given(userService.updateUser(any(), any())).willReturn(testUser);
+
+        // when
+        MockHttpServletResponse response1 = mockMvc.perform(
+                put("/api/users/me")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json.getJson())
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response1.getStatus()).isEqualTo(HttpStatus.OK.value());
     }
 
     @Test

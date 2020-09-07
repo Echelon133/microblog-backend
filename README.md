@@ -42,3 +42,49 @@ Simple twitter-like API.
 | /api/blobbs/{uuid}/respond               | POST       | Response Content | As the currently logged user, create a response with the content given in the request body, that responds to the blobb with uuid |
 | /api/blobbs/{uuid}/reblobb               | POST       | Reblobb Content  | As the currently logged user, create a reblobb with the content given in the request body, that references the blobb with uuid |
 | /api/feed?skip&limit&since&by            | GET        |                  | Get the feed of the currently logged user. Parameter 'since' can be set to *HOUR/SIX_HOURS/TWELVE_HOURS*. Parameter 'by' set to 'POPULARITY' returns most popular blobbs in a given frame. By default parameters 'skip' and 'limit' are set to 0 and 20 respectively. Calling this endpoint with no parameters returns at most 20 most recent blobbs that have been posted in the last hour |
+
+## Request bodies
+
+### User details
+
+* displayedUsername valid length is between 1 and 70 characters
+* description valid length is between 1 and 200 characters
+
+```JSON
+{
+  "displayedUsername": "",
+  "description": "",
+  "aviURL": ""
+}
+```
+
+#### Blobb Content
+
+* content valid length is between 1 and 300 characters
+
+```JSON
+{
+  "content": ""
+}
+```
+
+#### Reblobb Content
+
+* content valid length is between 0 and 300 characters
+
+```JSON
+{
+  "content": ""
+}
+```
+
+#### Response Content
+
+* content valid length is between 1 and 300 characters
+
+```JSON
+{
+  "content": ""
+}
+```
+

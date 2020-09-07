@@ -88,3 +88,89 @@ Simple twitter-like API.
 }
 ```
 
+## Examples
+
+#### GET CURRENTLY LOGGED USER
+![GET-CURRENT-USER](https://github.com/Echelon133/Blobb/blob/master/screens/1_GET_CURRENT_USER.png)
+
+#### CHANGE USER DETAILS
+![CHANGE-USER-DETAILS](https://github.com/Echelon133/Blobb/blob/master/screens/2_CHANGE_USER_DETAILS.png)
+
+#### CHECK IF USER FOLLOWS
+
+Check if *user1* follows *user3*.
+
+![IS-FOLLOWING](https://github.com/Echelon133/Blobb/blob/master/screens/3_IS_FOLLOWING.png)
+
+#### FOLLOW USER
+
+Follow *user3* as *user1*.
+
+![FOLLOW](https://github.com/Echelon133/Blobb/blob/master/screens/4_FOLLOW.png)
+
+#### USER PROFILE INFO
+
+![USER-PROFILE-INFO](https://github.com/Echelon133/Blobb/blob/master/screens/5_USER_PROFILE_INFO.png)
+
+#### GET FOLLOWS
+
+Get all follows of *user1*.
+
+![GET-FOLLOWS](https://github.com/Echelon133/Blobb/blob/master/screens/6_GET_FOLLOWS.png)
+
+#### GET FOLLOWERS
+
+Get all followers of *user1* (in this case, there is none).
+
+![GET-FOLLOWERS](https://github.com/Echelon133/Blobb/blob/master/screens/7_GET_FOLLOWERS.png)
+
+#### INVALID CONTENT
+
+![INVALID-BLOBB-CONTENT](https://github.com/Echelon133/Blobb/blob/master/screens/8_INVALID_BLOBB_CONTENT.png)
+
+#### POST BLOBBS
+
+Post three blobbs as *user1*.
+
+![BLOBB1](https://github.com/Echelon133/Blobb/blob/master/screens/9_POST_BLOBB.png)
+![BLOBB2](https://github.com/Echelon133/Blobb/blob/master/screens/10_POST_BLOBB1.png)
+![BLOBB3](https://github.com/Echelon133/Blobb/blob/master/screens/11_POST_BLOBB2.png)
+
+#### GET RECENT BLOBBS OF USER
+
+![GET-RECENT-BLOBBS](https://github.com/Echelon133/Blobb/blob/master/screens/12_GET_RECENT_USER_BLOBBS.png)
+
+#### GET MOST POPULAR TAGS
+
+Tag *#test* is first, because it has been used twice.
+
+![POPULAR-TAGS](https://github.com/Echelon133/Blobb/blob/master/screens/13_GET_POPULAR_TAGS.png)
+
+#### RESPONSE TO BLOBB
+
+Post a response to a blobb as *user3*.
+
+![RESPONSE](https://github.com/Echelon133/Blobb/blob/master/screens/14_RESPONSE_TO_BLOBB.png)
+
+#### GET RESPONSES
+
+List all responses to the blobb that *user3* responded to (there should be only one response).
+
+![GET-RESPONSES](https://github.com/Echelon133/Blobb/blob/master/screens/15_GET_RESPONSES_TO_BLOBB.png)
+
+#### LIKE ANOTHER BLOBB
+
+As *user1*, like a blobb posted by *user3*.
+
+![LIKE-BLOBB](https://github.com/Echelon133/Blobb/blob/master/screens/16_LIKE_ANOTHER_BLOBB.png)
+
+#### GET LIKED BLOBB INFO
+
+![GET-BLOBB-INFO](https://github.com/Echelon133/Blobb/blob/master/screens/17_GET_BLOBB_INFO.png)
+
+#### GET USER FEED
+
+*user1* follows *user3*, so this user's blobbs should show up on *user1*'s feed.
+
+![GET-FEED](https://github.com/Echelon133/Blobb/blob/master/screens/18_GET_USER_FEED.png)
+

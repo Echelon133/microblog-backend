@@ -30,3 +30,14 @@ Simple twitter-like API.
 | /api/tags?name                           | GET        |                  | Get the tag with exact name. The parameter 'name' is required |
 | /api/tags/popular?since&limit            | GET        |                  | Get a list of tags popular within a certain frame. The parameter 'since' can be set to values: *HOUR/DAY/WEEK*. If not provided, 'since' is set to *HOUR* and 'limit' is set to 5 |
 | /api/tags/{uuid}/recentBlobbs?skip&limit | GET        |                  | Get a list of most recent blobbs tagged with the tag with given uuid |                
+| /api/blobbs/{uuid}                       | GET        |                  | Get the blobb with uuid |
+| /api/blobbs/{uuid}/info                  | GET        |                  | Get blobb's response/like/reblobb counters |
+| /api/blobbs/{uuid}                       | DELETE     |                  | Mark the blobb with uuid as deleted |
+| /api/blobbs/{uuid}/responses?skip&limit  | GET        |                  | Get responses to the blobb with uuid. Parameters 'skip' and 'limit' are optional. By default they are 0 and 5 respectively |
+| /api/blobbs/{uuid}/reblobbs?skip&limit   | GET        |                  | Get reblobbs of the blobb with uuid. Parameters 'skip' and 'limit' are optional. By default they are 0 and 5 respectively |
+| /api/blobbs/{uuid}/like                  | GET        |                  | Get info whether the currently logged user likes the blobb with uuid |
+| /api/blobbs/{uuid}/like                  | POST       |                  | Make the currently logged user like the blobb with uuid |
+| /api/blobbs/{uuid}/unlike                | POST       |                  | Make the currently logged user unlike the blobb with uuid |
+| /api/blobbs                              | POST       | Blobb Content    | As the currently logged user, create a blobb with the content given in the request body |
+| /api/blobbs/{uuid}/respond               | POST       | Response Content | As the currently logged user, create a response with the content given in the request body, that responds to the blobb with uuid |
+| /api/blobbs/{uuid}/reblobb               | POST       | Reblobb Content  | As the currently logged user, create a reblobb with the content given in the request body, that references the blobb with uuid |

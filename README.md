@@ -17,7 +17,7 @@ Simple twitter-like API.
 | Endpoint                                 | Method     | Request body     | Description                                      |
 |------------------------                  |----------  |----------------- |-------------                                     |
 | /api/users/me                            | GET        |                  | Get info about the user that is currently logged in |
-| /api/users/me                            | PUT        | User details     | Update displyed username, description and profile picture of currently logged user |
+| /api/users/me                            | PUT        | [User details](https://github.com/Echelon133/Blobb/tree/docs#user-details)     | Update displyed username, description and profile picture of currently logged user |
 | /api/users/{uuid}                        | GET        |                  | Get info about the user with uuid |
 | /api/users/{uuid}/profile                | GET        |                  | Get counters that show how many follows/followers the user with uuid has |
 | /api/users/{uuid}/follow                 | GET        |                  | Get a response that shows whether currently logged user follows the user with uuid |
@@ -38,9 +38,9 @@ Simple twitter-like API.
 | /api/blobbs/{uuid}/like                  | GET        |                  | Get info whether the currently logged user likes the blobb with uuid |
 | /api/blobbs/{uuid}/like                  | POST       |                  | Make the currently logged user like the blobb with uuid |
 | /api/blobbs/{uuid}/unlike                | POST       |                  | Make the currently logged user unlike the blobb with uuid |
-| /api/blobbs                              | POST       | Blobb Content    | As the currently logged user, create a blobb with the content given in the request body |
-| /api/blobbs/{uuid}/respond               | POST       | Response Content | As the currently logged user, create a response with the content given in the request body, that responds to the blobb with uuid |
-| /api/blobbs/{uuid}/reblobb               | POST       | Reblobb Content  | As the currently logged user, create a reblobb with the content given in the request body, that references the blobb with uuid |
+| /api/blobbs                              | POST       | [Blobb Content](https://github.com/Echelon133/Blobb/tree/docs#blobb-content)    | As the currently logged user, create a blobb with the content given in the request body |
+| /api/blobbs/{uuid}/respond               | POST       | [Response Content](https://github.com/Echelon133/Blobb/tree/docs#response-content) | As the currently logged user, create a response with the content given in the request body, that responds to the blobb with uuid |
+| /api/blobbs/{uuid}/reblobb               | POST       | [Reblobb Content](https://github.com/Echelon133/Blobb/tree/docs#reblobb-content)  | As the currently logged user, create a reblobb with the content given in the request body, that references the blobb with uuid |
 | /api/feed?skip&limit&since&by            | GET        |                  | Get the feed of the currently logged user. Parameter 'since' can be set to *HOUR/SIX_HOURS/TWELVE_HOURS*. Parameter 'by' set to 'POPULARITY' returns most popular blobbs in a given frame. By default parameters 'skip' and 'limit' are set to 0 and 20 respectively. Calling this endpoint with no parameters returns at most 20 most recent blobbs that have been posted in the last hour |
 
 ## Request bodies

@@ -2,6 +2,7 @@ package ml.echelon133.blobb.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,7 +36,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .cors().disable()
                 .authorizeRequests()
-                .antMatchers("/api/**").hasRole("USER")
+                .antMatchers(HttpMethod.GET, "/api/users/me").hasRole("USER")
+                .antMatchers(HttpMethod.GET, "/api/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/**").hasRole("USER")
+                .antMatchers(HttpMethod.PUT, "/api/**").hasRole("USER")
+                .antMatchers(HttpMethod.DELETE, "/api/**").hasRole("USER")
                 .and()
                 .httpBasic()
                 .and()

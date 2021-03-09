@@ -21,7 +21,7 @@ public class PostService implements IPostService {
     private PostRepository postRepository;
     private ITagService tagService;
     private Clock clock = Clock.systemDefaultZone();
-    private Pattern hashtagPattern = Pattern.compile("(#[a-zA-Z0-9]{2,20})");
+    private Pattern hashtagPattern = Pattern.compile("#([a-zA-Z0-9]{2,20})");
 
     @Autowired
     public PostService(PostRepository postRepository,
@@ -138,7 +138,7 @@ public class PostService implements IPostService {
         // find all tags that were used and save only unique ones
         while (m.find()) {
             // every tag name should have all characters lower case
-            uniqueTags.add(m.group().toLowerCase());
+            uniqueTags.add(m.group(1).toLowerCase());
         }
 
         List<Tag> allFoundTags = new ArrayList<>();

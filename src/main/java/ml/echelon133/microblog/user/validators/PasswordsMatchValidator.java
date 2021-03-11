@@ -9,6 +9,7 @@ public class PasswordsMatchValidator implements ConstraintValidator<PasswordsMat
 
     @Override
     public boolean isValid(NewUserDto newUserDto, ConstraintValidatorContext constraintValidatorContext) {
+        if (newUserDto.getPassword() == null || newUserDto.getPassword2() == null) return false;
         boolean isValid = false;
         try {
             isValid = newUserDto.getPassword().equals(newUserDto.getPassword2());

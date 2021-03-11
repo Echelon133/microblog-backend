@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,9 @@ public class UserServiceTests {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private UserService userService;
 
@@ -27,6 +31,60 @@ public class UserServiceTests {
         User u = new User("test", "", "", "");
         u.setUuid(UUID.randomUUID());
         return u;
+    }
+
+    @Test
+    public void setupAndSaveUser_ThrowsWhenUsernameAlreadyTaken() {
+        User user = getTestUser();
+
+        // given
+        given(userRepository.existsUserByUsername(user.getUsername())).willReturn(true);
+
+        // when
+        String msg = assertThrows(UsernameAlreadyTakenException.class, () -> {
+            userService.setupAndSaveUser(user);
+        }).getMessage();
+
+        // then
+        assertEquals("Username already taken", msg);
+    }
+
+    @Test
+    public void setupAndSaveUser_EncodesUserPassword() throws Exception {
+        User user = getTestUser();
+        String expectedPassword = "encoded" + user.getPassword();
+
+        // given
+        given(userRepository.existsUserByUsername(user.getUsername())).willReturn(false);
+        given(passwordEncoder.encode(user.getPassword())).willReturn(expectedPassword);
+        given(userRepository.save(user)).willReturn(user);
+        given(userRepository.followUserWithUuid(user.getUuid(), user.getUuid())).willReturn(Optional.of(1L));
+
+        // when
+        User savedUser = userService.setupAndSaveUser(user);
+
+        // then
+        assertEquals(expectedPassword, savedUser.getPassword());
+    }
+
+    @Test
+    public void setupAndSaveUser_ThrowsWhenSetupFails() {
+        User user = getTestUser();
+
+        // given
+        given(userRepository.existsUserByUsername(user.getUsername())).willReturn(false);
+        given(passwordEncoder.encode(user.getPassword())).willReturn(user.getPassword());
+        given(userRepository.save(user)).willReturn(user);
+        given(userRepository.followUserWithUuid(user.getUuid(), user.getUuid()))
+                .willReturn(Optional.empty());
+
+        // when
+        String msg = assertThrows(UserCreationFailedException.class, () -> {
+            userService.setupAndSaveUser(user);
+        }).getMessage();
+
+        // then
+        assertEquals("User creation failed", msg);
     }
 
     @Test

@@ -35,4 +35,38 @@ public class UserExceptionHandler extends AbstractExceptionHandler {
                 HttpStatus.BAD_REQUEST
         );
     }
+
+    @ExceptionHandler(value = NewUserDataInvalidException.class)
+    protected ResponseEntity<ErrorMessage> handleNewUserDataInvalidException(NewUserDataInvalidException ex,
+                                                                                  WebRequest request) {
+        return new ResponseEntity<>(
+                new ErrorMessage(new Date(),
+                        request.getDescription(false),
+                        HttpStatus.BAD_REQUEST,
+                        ex.getMessages()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(value = UsernameAlreadyTakenException.class)
+    protected ResponseEntity<ErrorMessage> handleUsernameAlreadyTakenException(UsernameAlreadyTakenException ex, WebRequest request) {
+        return new ResponseEntity<>(
+                new ErrorMessage(new Date(),
+                        request.getDescription(false),
+                        HttpStatus.BAD_REQUEST,
+                        ex.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(value = UserCreationFailedException.class)
+    protected ResponseEntity<ErrorMessage> handleUserCreationFailedException(UserCreationFailedException ex, WebRequest request) {
+        return new ResponseEntity<>(
+                new ErrorMessage(new Date(),
+                        request.getDescription(false),
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        ex.getMessage()),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
 }

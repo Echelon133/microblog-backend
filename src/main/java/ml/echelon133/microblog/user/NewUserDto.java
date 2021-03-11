@@ -12,21 +12,16 @@ import org.hibernate.validator.constraints.Length;
 @PasswordsMatch
 public class NewUserDto {
 
-    @NotNull(message = "Username must not be null")
     @ValidUsername
     private String username;
 
-    @NotNull(message = "Email must not be null")
     @NotEmpty(message = "Email is required")
     @Email(message = "Email is not valid")
     private String email;
 
-    @NotNull(message = "Password must not be null")
     @Length(min = 8, max = 64, message = "Expected password length between 8 and 64 characters")
     @ValidPassword
     private String password;
-
-    @NotNull(message = "Password2 must not be null")
     private String password2;
 
     public String getUsername() {

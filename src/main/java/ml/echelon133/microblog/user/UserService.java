@@ -12,16 +12,42 @@ import java.util.UUID;
 public class UserService implements IUserService {
 
     private UserRepository userRepository;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     private void throwIfUserDoesntExist(UUID uuid) throws UserDoesntExistException{
         if (!userRepository.existsById(uuid)) {
             throw new UserDoesntExistException(uuid);
         }
+    }
+
+    @Override
+    public User setupAndSaveUser(User newUser) throws UsernameAlreadyTakenException, UserCreationFailedException {
+        if (userRepository.existsUserByUsername(newUser.getUsername())) {
+            throw new UsernameAlreadyTakenException("Username already taken");
+        }
+
+        String encodedPassword = passwordEncoder.encode(newUser.getPassword());
+        newUser.setPassword(encodedPassword);
+
+        User savedUser = userRepository.save(newUser);
+
+        // every user must follow themselves
+        // this simplifies searching for actions of users while creating
+        // their feeds
+        Optional<Long> followId = userRepository.followUserWithUuid(savedUser.getUuid(), savedUser.getUuid());
+        if (followId.isEmpty()) {
+            // if followUserWithUuid fails, delete the account
+            // because it hasn't been fully setup
+            userRepository.delete(savedUser);
+           throw new UserCreationFailedException("User creation failed");
+        }
+        return savedUser;
     }
 
     @Override

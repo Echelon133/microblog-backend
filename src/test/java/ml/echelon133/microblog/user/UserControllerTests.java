@@ -53,6 +53,8 @@ public class UserControllerTests {
 
     private JacksonTester<UserDetailsDto> jsonUserDetailsDto;
 
+    private JacksonTester<NewUserDto> jsonNewUserDto;
+
     @BeforeAll
     public static void beforeAll() {
         testUser = new User("user1", "", "","");
@@ -1007,5 +1009,374 @@ public class UserControllerTests {
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
         assertThat(response.getContentAsString())
                 .contains("Invalid skip and/or limit values.");
+    }
+
+    @Test
+    public void registerUser_CorrectResponseWhenPayloadNull() throws Exception {
+        String payload = "{}";
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/users/register")
+                        .accept(APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
+                        .content(payload)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Username is not valid");
+        assertThat(response.getContentAsString()).contains("Passwords do not match");
+        assertThat(response.getContentAsString()).contains("Email is required");
+        assertThat(response.getContentAsString()).contains("Password doesn't satisfy complexity requirements");
+    }
+
+    @Test
+    public void registerUser_CorrectResponseWhenUsernameLengthInvalid() throws Exception {
+        List<String> invalidUsernames = List.of(
+                "", // 0 characters
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",  // 31 characters
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAb",  // 31 characters
+                "0123456789012345678901234567890" // 31 characters
+        );
+
+        for (String invalidUsername : invalidUsernames) {
+            NewUserDto newUserDto = new NewUserDto();
+            newUserDto.setUsername(invalidUsername);
+
+            JsonContent<NewUserDto> json = jsonNewUserDto.write(newUserDto);
+
+            // when
+            MockHttpServletResponse response = mockMvc.perform(
+                    post("/api/users/register")
+                            .accept(APPLICATION_JSON)
+                            .contentType(APPLICATION_JSON)
+                            .content(json.getJson())
+            ).andReturn().getResponse();
+
+            // then
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            assertThat(response.getContentAsString()).contains("Username is not valid");
+        }
+    }
+
+    @Test
+    public void registerUser_CorrectResponseWhenUsernameContainsInvalidCharacters() throws Exception {
+        String invalidCharacters = " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+
+        for (int i = 0; i < invalidCharacters.length(); i++) {
+            NewUserDto newUserDto = new NewUserDto();
+            newUserDto.setUsername(String.valueOf(invalidCharacters.charAt(i)));
+
+            JsonContent<NewUserDto> json = jsonNewUserDto.write(newUserDto);
+
+            // when
+            MockHttpServletResponse response = mockMvc.perform(
+                    post("/api/users/register")
+                            .accept(APPLICATION_JSON)
+                            .contentType(APPLICATION_JSON)
+                            .content(json.getJson())
+            ).andReturn().getResponse();
+
+            // then
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            assertThat(response.getContentAsString()).contains("Username is not valid");
+        }
+    }
+
+    @Test
+    public void registerUser_CorrectResponseWhenUsernameValid() throws Exception {
+        List<String> validUsernames = List.of(
+                "a", // one lower char
+                "A", // one upper char
+                "0", // one number
+                "test", // random lower char password
+                "TEST", // random upper char password
+                "0123", // random number password
+                "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",  // 30 characters
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",  // 30 characters
+                "012345678901234567890123456789" // 30 characters
+        );
+
+        for (String validUsername : validUsernames) {
+            NewUserDto newUserDto = new NewUserDto();
+            newUserDto.setUsername(validUsername);
+
+            JsonContent<NewUserDto> json = jsonNewUserDto.write(newUserDto);
+
+            // when
+            MockHttpServletResponse response = mockMvc.perform(
+                    post("/api/users/register")
+                            .accept(APPLICATION_JSON)
+                            .contentType(APPLICATION_JSON)
+                            .content(json.getJson())
+            ).andReturn().getResponse();
+
+            // then
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            assertThat(response.getContentAsString()).doesNotContain("Username is not valid");
+        }
+    }
+
+    @Test
+    public void registerUser_CorrectResponseWhenEmailInvalid() throws Exception {
+        List<String> invalidEmails = List.of(
+                "a",  // no @
+                "a@",  // no domain
+                "a@.", // invalid domain
+                "a@.com" // invalid domain
+        );
+
+        for (String invalidEmail : invalidEmails) {
+            NewUserDto newUserDto = new NewUserDto();
+            newUserDto.setEmail(invalidEmail);
+
+            JsonContent<NewUserDto> json = jsonNewUserDto.write(newUserDto);
+
+            // when
+            MockHttpServletResponse response = mockMvc.perform(
+                    post("/api/users/register")
+                            .accept(APPLICATION_JSON)
+                            .contentType(APPLICATION_JSON)
+                            .content(json.getJson())
+            ).andReturn().getResponse();
+
+            // then
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            assertThat(response.getContentAsString()).contains("Email is not valid");
+        }
+    }
+
+    @Test
+    public void registerUser_CorrectResponseWhenPasswordLengthInvalid() throws Exception {
+        List<String> invalidPasswords = List.of(
+                "Aa;1aaa", // 7 characters
+                "Aa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaBBBBB" // 65 characters
+        );
+
+        for (String invalidPassword : invalidPasswords) {
+            NewUserDto newUserDto = new NewUserDto();
+            newUserDto.setPassword(invalidPassword);
+
+            JsonContent<NewUserDto> json = jsonNewUserDto.write(newUserDto);
+
+            // when
+            MockHttpServletResponse response = mockMvc.perform(
+                    post("/api/users/register")
+                            .accept(APPLICATION_JSON)
+                            .contentType(APPLICATION_JSON)
+                            .content(json.getJson())
+            ).andReturn().getResponse();
+
+            // then
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            assertThat(response.getContentAsString()).contains("Expected password length between 8 and 64 characters");
+        }
+    }
+
+    @Test
+    public void registerUser_CorrectResponseWhenPasswordLengthValid() throws Exception {
+        List<String> validPasswords = List.of(
+                "Aa;1aaaa", // 8 characters
+                "Aa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaBBBB" // 64 characters
+        );
+
+        for (String validPassword : validPasswords) {
+            NewUserDto newUserDto = new NewUserDto();
+            newUserDto.setPassword(validPassword);
+
+            JsonContent<NewUserDto> json = jsonNewUserDto.write(newUserDto);
+
+            // when
+            MockHttpServletResponse response = mockMvc.perform(
+                    post("/api/users/register")
+                            .accept(APPLICATION_JSON)
+                            .contentType(APPLICATION_JSON)
+                            .content(json.getJson())
+            ).andReturn().getResponse();
+
+            // then
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            assertThat(response.getContentAsString()).doesNotContain("Expected password length between 8 and 64 characters");
+        }
+    }
+
+    @Test
+    public void registerUser_CorrectResponseWhenPasswordComplexityValid() throws Exception {
+        List<String> validPasswords = List.of(
+                "Aa;1aaaa",
+                "Aa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaBBBB",
+                "Aa1 !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+        );
+
+        for (String validPassword : validPasswords) {
+            NewUserDto newUserDto = new NewUserDto();
+            newUserDto.setPassword(validPassword);
+
+            JsonContent<NewUserDto> json = jsonNewUserDto.write(newUserDto);
+
+            // when
+            MockHttpServletResponse response = mockMvc.perform(
+                    post("/api/users/register")
+                            .accept(APPLICATION_JSON)
+                            .contentType(APPLICATION_JSON)
+                            .content(json.getJson())
+            ).andReturn().getResponse();
+
+            // then
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            assertThat(response.getContentAsString()).doesNotContain("Password doesn't satisfy complexity requirements");
+        }
+    }
+
+    @Test
+    public void registerUser_CorrectResponseWhenPasswordsDoNotMatch() throws Exception {
+        List<String> validPasswords = List.of(
+                "Aa;1aaaa",
+                "Aa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaBBBB",
+                "Aa1 !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+        );
+
+        for (String validPassword : validPasswords) {
+            NewUserDto newUserDto = new NewUserDto();
+            newUserDto.setPassword(validPassword);
+            newUserDto.setPassword2("asdf"); // make passwords differ
+
+            JsonContent<NewUserDto> json = jsonNewUserDto.write(newUserDto);
+
+            // when
+            MockHttpServletResponse response = mockMvc.perform(
+                    post("/api/users/register")
+                            .accept(APPLICATION_JSON)
+                            .contentType(APPLICATION_JSON)
+                            .content(json.getJson())
+            ).andReturn().getResponse();
+
+            // then
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            assertThat(response.getContentAsString()).contains("Passwords do not match");
+        }
+    }
+
+    @Test
+    public void registerUser_CorrectResponseWhenPasswordsMatch() throws Exception {
+        List<String> validPasswords = List.of(
+                "Aa;1aaaa",
+                "Aa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaAa;1aaaaaaBBBB",
+                "Aa1 !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+        );
+
+        for (String validPassword : validPasswords) {
+            NewUserDto newUserDto = new NewUserDto();
+            newUserDto.setPassword(validPassword);
+            newUserDto.setPassword2(validPassword);
+
+            JsonContent<NewUserDto> json = jsonNewUserDto.write(newUserDto);
+
+            // when
+            MockHttpServletResponse response = mockMvc.perform(
+                    post("/api/users/register")
+                            .accept(APPLICATION_JSON)
+                            .contentType(APPLICATION_JSON)
+                            .content(json.getJson())
+            ).andReturn().getResponse();
+
+            // then
+            assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            assertThat(response.getContentAsString()).doesNotContain("Passwords do not match");
+        }
+    }
+
+    @Test
+    public void registerUser_CorrectResponseWhenDataValid() throws Exception {
+        User user = new User();
+        user.setUuid(UUID.randomUUID());
+
+        NewUserDto newUserDto = new NewUserDto();
+        newUserDto.setUsername("test");
+        newUserDto.setEmail("test@test.com");
+        newUserDto.setPassword("Aa1;aaaa");
+        newUserDto.setPassword2("Aa1;aaaa");
+
+        JsonContent<NewUserDto> json = jsonNewUserDto.write(newUserDto);
+
+        // given
+        given(userService.setupAndSaveUser(any())).willReturn(user);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/users/register")
+                        .accept(APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
+                        .content(json.getJson())
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(
+                String.format("{\"uuid\":\"%s\"}", user.getUuid())
+        );
+    }
+
+    @Test
+    public void registerUser_CorrectResponseWhenUsernameAlreadyTaken() throws Exception {
+        User user = new User();
+        user.setUuid(UUID.randomUUID());
+
+        NewUserDto newUserDto = new NewUserDto();
+        newUserDto.setUsername("test");
+        newUserDto.setEmail("test@test.com");
+        newUserDto.setPassword("Aa1;aaaa");
+        newUserDto.setPassword2("Aa1;aaaa");
+
+        JsonContent<NewUserDto> json = jsonNewUserDto.write(newUserDto);
+
+        // given
+        given(userService.setupAndSaveUser(any())).willThrow(
+                new UsernameAlreadyTakenException("Username already taken")
+        );
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/users/register")
+                        .accept(APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
+                        .content(json.getJson())
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Username already taken");
+    }
+
+    @Test
+    public void registerUser_CorrectResponseWhenUserCreationFails() throws Exception {
+        User user = new User();
+        user.setUuid(UUID.randomUUID());
+
+        NewUserDto newUserDto = new NewUserDto();
+        newUserDto.setUsername("test");
+        newUserDto.setEmail("test@test.com");
+        newUserDto.setPassword("Aa1;aaaa");
+        newUserDto.setPassword2("Aa1;aaaa");
+
+        JsonContent<NewUserDto> json = jsonNewUserDto.write(newUserDto);
+
+        // given
+        given(userService.setupAndSaveUser(any())).willThrow(
+                new UserCreationFailedException("User creation failed")
+        );
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/users/register")
+                        .accept(APPLICATION_JSON)
+                        .contentType(APPLICATION_JSON)
+                        .content(json.getJson())
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        assertThat(response.getContentAsString()).contains("User creation failed");
     }
 }

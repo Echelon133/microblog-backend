@@ -1,6 +1,7 @@
 package ml.echelon133.microblog.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -52,6 +54,28 @@ public class UserController {
 
         User updatedUser = userService.updateUser(loggedUser, userDetailsDto);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, UUID>> registerUser(@Valid @RequestBody NewUserDto newUserDto, BindingResult result)
+            throws NewUserDataInvalidException, UsernameAlreadyTakenException, UserCreationFailedException {
+
+        if (result.hasErrors()) {
+            List<String> errorMessages = result.getAllErrors()
+                    .stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.toList());
+            throw new NewUserDataInvalidException(errorMessages);
+        }
+
+        User user = new User(
+                newUserDto.getUsername(),
+                newUserDto.getEmail(),
+                newUserDto.getPassword(),
+                ""
+        );
+        User savedUser = userService.setupAndSaveUser(user);
+        return new ResponseEntity<>(Map.of("uuid", savedUser.getUuid()), HttpStatus.OK);
     }
 
     @GetMapping("/{uuid}")

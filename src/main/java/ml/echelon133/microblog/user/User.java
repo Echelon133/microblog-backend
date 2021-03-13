@@ -25,18 +25,18 @@ public class User implements UserDetails {
     private String displayedUsername;
     private String email;
     private String description;
-    private String passwordBCrypt;
+    private String password;
     private String aviURL;
     private Date creationDate;
 
 
     public User() {}
-    public User(String username, String email, String passwordBCrypt, String aviURL) {
+    public User(String username, String email, String password, String aviURL) {
         this();
         this.username = username;
         this.displayedUsername = username;
         this.email = email;
-        this.passwordBCrypt = passwordBCrypt;
+        this.password = password;
         this.aviURL = aviURL;
         this.description = "";
         this.creationDate = new Date();
@@ -56,7 +56,7 @@ public class User implements UserDetails {
     @JsonIgnore
     @Override
     public String getPassword() {
-        return passwordBCrypt;
+        return password;
     }
 
     public String getDescription() {
@@ -82,6 +82,10 @@ public class User implements UserDetails {
 
     public Date getCreationDate() {
         return creationDate;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setDisplayedUsername(String displayedUsername) {

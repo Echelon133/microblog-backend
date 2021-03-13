@@ -13,5 +13,6 @@ public interface IUserService {
     List<User> findAllFollowersOfUser(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException;
     UserProfileInfo getUserProfileInfo(UUID uuid) throws UserDoesntExistException;
     List<UserPost> findRecentPostsOfUser(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException;
+    User setupAndSaveUser(User newUser) throws UsernameAlreadyTakenException, UserCreationFailedException;
     User updateUser(User user, UserDetailsDto userDetailsDto);
 }

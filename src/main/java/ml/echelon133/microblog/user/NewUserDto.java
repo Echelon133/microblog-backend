@@ -2,7 +2,6 @@ package ml.echelon133.microblog.user;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 import ml.echelon133.microblog.user.validators.PasswordsMatch;
 import ml.echelon133.microblog.user.validators.ValidPassword;

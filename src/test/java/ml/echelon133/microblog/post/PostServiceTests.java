@@ -488,9 +488,9 @@ public class PostServiceTests {
 
     @Test
     public void processPostAndSave_FindsNewTagsInContent() throws Exception {
-        String expected1 = "#test";
-        String expected2 = "#anothertest";
-        String content = "This is " + expected1 + " and " + expected2;
+        String expected1 = "test";
+        String expected2 = "anothertest";
+        String content = String.format("This is #%s and #%s", expected1, expected2);
 
         Post post = new Post(new User(), content);
 
@@ -515,12 +515,12 @@ public class PostServiceTests {
 
     @Test
     public void processPostAndSave_FindsExistingTagsInContent() throws Exception {
-        String expected1 = "#test";
-        String expected2 = "#anothertest";
+        String expected1 = "test";
+        String expected2 = "anothertest";
         Tag tag1 = new Tag(expected1);
         Tag tag2 = new Tag(expected2);
 
-        String content = "This is " + expected1 + " and " + expected2;
+        String content = String.format("This is #%s and #%s", expected1, expected2);
 
         Post post = new Post(new User(), content);
 
@@ -546,14 +546,13 @@ public class PostServiceTests {
 
     @Test
     public void processPostAndSave_OnlyFindsValidTagsInContent() throws Exception {
-        String invalidTag1 = "#a"; // too short (min length is 2)
-        String expected1 = "#C1"; // just right minimum length
-        String expected2 = "#DDDDDDDDDDdddddddddd"; // just right maximum length
-        String expected3 = "#bbbbbbbbbbbbbbbbbbbb"; // just right maximum length
+        String invalidTag1 = "a"; // too short (min length is 2)
+        String expected1 = "C1"; // just right minimum length
+        String expected2 = "DDDDDDDDDDdddddddddd"; // just right maximum length
+        String expected3 = "bbbbbbbbbbbbbbbbbbbb"; // just right maximum length
 
         // add some trailing characters to expected3 to check if they are ignored
-        String content = expected1 + " and " + expected2 + ". Also "
-                + invalidTag1 + " and " + expected3 + "bbbb";
+        String content = String.format("#%s and #%s. Also #%s and #%sbbbb", expected1, expected2, invalidTag1, expected3);
 
         Post post = new Post(new User(), content);
 
@@ -581,11 +580,11 @@ public class PostServiceTests {
 
     @Test
     public void processPostAndSave_DuplicateTagsCountOnlyOnce() throws Exception {
-        String expected1 = "#test";
-        String duplicate1 = "#test";
-        String duplicate2 = "#TEST";
+        String expected1 = "test";
+        String duplicate1 = "test";
+        String duplicate2 = "TEST";
 
-        String content = expected1 + " " + duplicate1 + " " + duplicate2;
+        String content = String.format("#%s #%s #%s", expected1, duplicate1, duplicate2);
 
         Post post = new Post(new User(), content);
 

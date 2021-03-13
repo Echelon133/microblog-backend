@@ -10,7 +10,8 @@ public interface IPostService {
     enum PostsSince {
         ONE_HOUR(1),
         SIX_HOURS(6),
-        TWELVE_HOURS(12);
+        TWELVE_HOURS(12),
+        DAY(24);
 
         private int hours;
 

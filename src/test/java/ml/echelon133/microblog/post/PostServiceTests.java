@@ -447,6 +447,7 @@ public class PostServiceTests {
         Date dateOneHourAgo = Date.from(dateNow.toInstant().minus(1, HOURS));
         Date dateSixHoursAgo = Date.from(dateNow.toInstant().minus(6, HOURS));
         Date dateTwelveHoursAgo = Date.from(dateNow.toInstant().minus(12, HOURS));
+        Date dayAgo = Date.from(dateNow.toInstant().minus(24, HOURS));
 
         // inject fixed clock into the service
         postService.setClock(Clock.fixed(dateNow.toInstant(), ZoneId.systemDefault()));
@@ -461,6 +462,9 @@ public class PostServiceTests {
         given(postRepository
                 .getFeedForUserWithUuid_PostedBetween(uuid, dateTwelveHoursAgo, dateNow, 0L, 5L))
                 .willReturn(List.of(new FeedPost(), new FeedPost(), new FeedPost()));
+        given(postRepository
+                .getFeedForUserWithUuid_PostedBetween(uuid, dayAgo, dateNow, 0L, 5L))
+                .willReturn(List.of(new FeedPost(), new FeedPost(), new FeedPost(), new FeedPost()));
 
         // when
         List<FeedPost> oneHourResults = postService
@@ -472,11 +476,14 @@ public class PostServiceTests {
         List<FeedPost> twelveHoursResults = postService
                 .getFeedForUser(u, IPostService.PostsSince.TWELVE_HOURS, 0L, 5L);
 
+        List<FeedPost> dayResults = postService
+                .getFeedForUser(u, IPostService.PostsSince.DAY, 0L, 5L);
 
         // then
         assertEquals(1, oneHourResults.size());
         assertEquals(2, sixHoursResults.size());
         assertEquals(3, twelveHoursResults.size());
+        assertEquals(4, dayResults.size());
     }
 
     @Test
@@ -770,6 +777,7 @@ public class PostServiceTests {
         Date dateOneHourAgo = Date.from(dateNow.toInstant().minus(1, HOURS));
         Date dateSixHoursAgo = Date.from(dateNow.toInstant().minus(6, HOURS));
         Date dateTwelveHoursAgo = Date.from(dateNow.toInstant().minus(12, HOURS));
+        Date dayAgo = Date.from(dateNow.toInstant().minus(24, HOURS));
 
         // inject fixed clock into the service
         postService.setClock(Clock.fixed(dateNow.toInstant(), ZoneId.systemDefault()));
@@ -784,6 +792,9 @@ public class PostServiceTests {
         given(postRepository
                 .getFeedForUserWithUuid_Popular_PostedBetween(uuid, dateTwelveHoursAgo, dateNow, 0L, 5L))
                 .willReturn(List.of(new FeedPost(), new FeedPost(), new FeedPost()));
+        given(postRepository
+                .getFeedForUserWithUuid_Popular_PostedBetween(uuid, dayAgo, dateNow, 0L, 5L))
+                .willReturn(List.of(new FeedPost(), new FeedPost(), new FeedPost(), new FeedPost()));
 
         // when
         List<FeedPost> oneHourResults = postService
@@ -795,10 +806,14 @@ public class PostServiceTests {
         List<FeedPost> twelveHoursResults = postService
                 .getFeedForUser_Popular(u, IPostService.PostsSince.TWELVE_HOURS, 0L, 5L);
 
+        List<FeedPost> dayResults = postService
+                .getFeedForUser_Popular(u, IPostService.PostsSince.DAY, 0L, 5L);
+
 
         // then
         assertEquals(1, oneHourResults.size());
         assertEquals(2, sixHoursResults.size());
         assertEquals(3, twelveHoursResults.size());
+        assertEquals(4, dayResults.size());
     }
 }

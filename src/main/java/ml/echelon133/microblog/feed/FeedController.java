@@ -52,6 +52,9 @@ public class FeedController {
                 case "TWELVE_HOURS":
                     postsSince = TWELVE_HOURS;
                     break;
+                case "DAY":
+                    postsSince = DAY;
+                    break;
                 case "HOUR":
                 default:
                     // postsSince holds ONE_HOUR already

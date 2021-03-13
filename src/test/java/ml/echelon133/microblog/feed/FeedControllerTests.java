@@ -123,11 +123,13 @@ public class FeedControllerTests {
         List<FeedPost> hour = List.of(new FeedPost());
         List<FeedPost> sixHours = List.of(new FeedPost(), new FeedPost());
         List<FeedPost> twelveHours = List.of(new FeedPost(), new FeedPost(), new FeedPost());
+        List<FeedPost> day = List.of(new FeedPost(), new FeedPost(), new FeedPost(), new FeedPost());
 
         // json
         JsonContent<List<FeedPost>> json1 = jsonFeedPosts.write(hour);
         JsonContent<List<FeedPost>> json2 = jsonFeedPosts.write(sixHours);
         JsonContent<List<FeedPost>> json3 = jsonFeedPosts.write(twelveHours);
+        JsonContent<List<FeedPost>> json4 = jsonFeedPosts.write(day);
 
         // given
         given(postService.getFeedForUser(testUser, IPostService.PostsSince.ONE_HOUR, 0L, 20L))
@@ -136,6 +138,8 @@ public class FeedControllerTests {
                 .willReturn(sixHours);
         given(postService.getFeedForUser(testUser, IPostService.PostsSince.TWELVE_HOURS, 0L, 20L))
                 .willReturn(twelveHours);
+        given(postService.getFeedForUser(testUser, IPostService.PostsSince.DAY, 0L, 20L))
+                .willReturn(day);
 
         // when
         MockHttpServletResponse response1 = mockMvc.perform(
@@ -159,6 +163,13 @@ public class FeedControllerTests {
                         .param("since", "tweLVE_houRS")
         ).andReturn().getResponse();
 
+        MockHttpServletResponse response4 = mockMvc.perform(
+                get("/api/feed")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .param("since", "Day")
+        ).andReturn().getResponse();
+
         // then
         assertThat(response1.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response1.getContentAsString()).isEqualTo(json1.getJson());
@@ -168,6 +179,9 @@ public class FeedControllerTests {
 
         assertThat(response3.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response3.getContentAsString()).isEqualTo(json3.getJson());
+
+        assertThat(response4.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response4.getContentAsString()).isEqualTo(json4.getJson());
     }
 
     @Test

@@ -33,6 +33,7 @@ public interface IPostService {
     boolean unlikePost(User user, UUID postUuid) throws PostDoesntExistException;
     List<FeedPost> getFeedForUser(User user, PostsSince since, Long skip, Long limit) throws IllegalArgumentException;
     List<FeedPost> getFeedForUser_Popular(User user, PostsSince since, Long skip, Long limit) throws IllegalArgumentException;
+    List<FeedPost> getFeedForAnonymousUser(PostsSince since, Long skip, Long limit) throws IllegalArgumentException;
     Post processPostAndSave(Post post);
     Post postPost(User author, String content);
     Post postQuote(User author, String content, UUID quoteUuid) throws PostDoesntExistException;

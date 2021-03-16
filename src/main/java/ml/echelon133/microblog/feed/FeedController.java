@@ -6,6 +6,7 @@ import ml.echelon133.microblog.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,13 +28,16 @@ public class FeedController {
         this.postService = postService;
     }
 
+    private boolean isUserAnonymous() {
+        return SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream().anyMatch(r -> r.getAuthority().equals("ROLE_ANONYMOUS"));
+    }
+
     @GetMapping
     public ResponseEntity<List<FeedPost>> getUserFeed(@RequestParam(required = false) String since,
                                                       @RequestParam(required = false) String by,
                                                       @RequestParam(required = false) Long skip,
                                                       @RequestParam(required = false) Long limit) throws IllegalArgumentException {
-
-        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         if (skip == null) {
             skip = 0L;
@@ -64,14 +68,19 @@ public class FeedController {
 
         List<FeedPost> feed;
 
-        if (by != null && by.equalsIgnoreCase("POPULARITY")) {
-            // if 'by' is provided and contains 'POPULARITY'
-            // get most popular posts
-            feed = postService.getFeedForUser_Popular(loggedUser, postsSince, skip, limit);
+        if (isUserAnonymous()) {
+            feed = postService.getFeedForAnonymousUser(postsSince, skip, limit);
         } else {
-            // if 'by' is not provided or has some different value
-            // get most recent posts
-            feed = postService.getFeedForUser(loggedUser, postsSince, skip, limit);
+            User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (by != null && by.equalsIgnoreCase("POPULARITY")) {
+                // if 'by' is provided and contains 'POPULARITY'
+                // get most popular posts
+                feed = postService.getFeedForUser_Popular(loggedUser, postsSince, skip, limit);
+            } else {
+                // if 'by' is not provided or has some different value
+                // get most recent posts
+                feed = postService.getFeedForUser(loggedUser, postsSince, skip, limit);
+            }
         }
 
         return new ResponseEntity<>(feed, HttpStatus.OK);

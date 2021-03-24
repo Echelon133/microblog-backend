@@ -1,0 +1,54 @@
+package ml.echelon133.microblog.auth;
+
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+public class CustomAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
+
+    private final String AUTH_HEADER_NAME = "Authorization";
+
+    public CustomAuthenticationFilter() {
+        super(new AntPathRequestMatcher("/**"));
+    }
+
+    private boolean continueChainBeforeSuccessfulAuthentication = false;
+
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
+        String header = request.getHeader(AUTH_HEADER_NAME);
+
+        if (header != null && header.startsWith("Bearer")) {
+            String accessToken = header.substring(7); // skip to the actual token
+            TemporaryToken tempToken = new TemporaryToken(accessToken);
+            return getAuthenticationManager().authenticate(tempToken);
+        } else if (header == null) {
+            // currently there is only a single auth filter
+            // no bearer token = the user must be anonymous
+            return new AnonymousToken();
+        }
+        throw new BadCredentialsException("Invalid token");
+    }
+
+    @Override
+    public void setContinueChainBeforeSuccessfulAuthentication(boolean continueChainBeforeSuccessfulAuthentication) {
+        this.continueChainBeforeSuccessfulAuthentication = continueChainBeforeSuccessfulAuthentication;
+    }
+
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        SecurityContextHolder.getContext().setAuthentication(authResult);
+        if (this.continueChainBeforeSuccessfulAuthentication) {
+            chain.doFilter(request, response);
+        }
+    }
+}

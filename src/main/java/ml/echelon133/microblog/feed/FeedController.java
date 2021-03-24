@@ -1,11 +1,13 @@
 package ml.echelon133.microblog.feed;
 
+import ml.echelon133.microblog.auth.AnonymousToken;
 import ml.echelon133.microblog.post.FeedPost;
 import ml.echelon133.microblog.post.IPostService;
 import ml.echelon133.microblog.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,11 +28,6 @@ public class FeedController {
     @Autowired
     public FeedController(IPostService postService) {
         this.postService = postService;
-    }
-
-    private boolean isUserAnonymous() {
-        return SecurityContextHolder.getContext().getAuthentication()
-                .getAuthorities().stream().anyMatch(r -> r.getAuthority().equals("ROLE_ANONYMOUS"));
     }
 
     @GetMapping
@@ -68,10 +65,12 @@ public class FeedController {
 
         List<FeedPost> feed;
 
-        if (isUserAnonymous()) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth instanceof AnonymousToken) {
             feed = postService.getFeedForAnonymousUser(postsSince, skip, limit);
         } else {
-            User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User loggedUser = (User) auth.getPrincipal();
             if (by != null && by.equalsIgnoreCase("POPULARITY")) {
                 // if 'by' is provided and contains 'POPULARITY'
                 // get most popular posts

@@ -815,4 +815,68 @@ public class PostServiceTests {
         assertEquals(3, twelveHoursResults.size());
         assertEquals(4, dayResults.size());
     }
+
+    @Test
+    public void getFeedForAnonymousUser_ThrowsWhenSkipAndLimitArgumentsNegative() {
+
+        // then
+        Exception ex = assertThrows(IllegalArgumentException.class, () -> {
+            postService.getFeedForAnonymousUser(IPostService.PostsSince.ONE_HOUR, -1L, 5L);
+        });
+
+        assertEquals("Invalid skip and/or limit values.", ex.getMessage());
+
+        ex = assertThrows(IllegalArgumentException.class, () -> {
+            postService.getFeedForAnonymousUser(IPostService.PostsSince.ONE_HOUR, 0L, -1L);
+        });
+
+        assertEquals("Invalid skip and/or limit values.", ex.getMessage());
+    }
+
+    @Test
+    public void getFeedForAnonymousUser_ReturnsCorrectlyFilteredResults() {
+
+        Date dateNow = new Date();
+        Date dateOneHourAgo = Date.from(dateNow.toInstant().minus(1, HOURS));
+        Date dateSixHoursAgo = Date.from(dateNow.toInstant().minus(6, HOURS));
+        Date dateTwelveHoursAgo = Date.from(dateNow.toInstant().minus(12, HOURS));
+        Date dayAgo = Date.from(dateNow.toInstant().minus(24, HOURS));
+
+        // inject fixed clock into the service
+        postService.setClock(Clock.fixed(dateNow.toInstant(), ZoneId.systemDefault()));
+
+        // given
+        given(postRepository
+                .getFeedForAnonymousUser_Popular_PostedBetween(dateOneHourAgo, dateNow, 0L, 5L))
+                .willReturn(List.of(new FeedPost()));
+        given(postRepository
+                .getFeedForAnonymousUser_Popular_PostedBetween(dateSixHoursAgo, dateNow, 0L, 5L))
+                .willReturn(List.of(new FeedPost(), new FeedPost()));
+        given(postRepository
+                .getFeedForAnonymousUser_Popular_PostedBetween(dateTwelveHoursAgo, dateNow, 0L, 5L))
+                .willReturn(List.of(new FeedPost(), new FeedPost(), new FeedPost()));
+        given(postRepository
+                .getFeedForAnonymousUser_Popular_PostedBetween(dayAgo, dateNow, 0L, 5L))
+                .willReturn(List.of(new FeedPost(), new FeedPost(), new FeedPost(), new FeedPost()));
+
+        // when
+        List<FeedPost> oneHourResults = postService
+                .getFeedForAnonymousUser(IPostService.PostsSince.ONE_HOUR, 0L, 5L);
+
+        List<FeedPost> sixHoursResults = postService
+                .getFeedForAnonymousUser(IPostService.PostsSince.SIX_HOURS, 0L, 5L);
+
+        List<FeedPost> twelveHoursResults = postService
+                .getFeedForAnonymousUser(IPostService.PostsSince.TWELVE_HOURS, 0L, 5L);
+
+        List<FeedPost> dayResults = postService
+                .getFeedForAnonymousUser(IPostService.PostsSince.DAY, 0L, 5L);
+
+
+        // then
+        assertEquals(1, oneHourResults.size());
+        assertEquals(2, sixHoursResults.size());
+        assertEquals(3, twelveHoursResults.size());
+        assertEquals(4, dayResults.size());
+    }
 }

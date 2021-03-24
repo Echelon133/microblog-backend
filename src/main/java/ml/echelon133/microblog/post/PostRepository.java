@@ -38,6 +38,17 @@ public interface PostRepository extends Neo4jRepository<Post, UUID> {
             "ORDER BY amountLikes DESC, datetime(posts.creationDate) DESC SKIP $skip LIMIT $limit ")
     List<FeedPost> getFeedForUserWithUuid_Popular_PostedBetween(UUID uuid, Date first, Date second, Long skip, Long limit);
 
+    @Query( "MATCH (poster:User)-[:POSTS]->(posts:Post) " +
+            "WHERE posts.creationDate >= $first AND posts.creationDate <= $second AND posts.deleted <> true " +
+            "OPTIONAL MATCH (posts:Post)-[:RESPONDS]->(respondsTo:Post) " +
+            "OPTIONAL MATCH (posts:Post)-[:QUOTES]->(quotes:Post) " +
+            "OPTIONAL MATCH (:User)-[l:LIKES]->(posts) " +
+            "WITH posts, quotes, respondsTo, poster, count(l) as amountLikes " +
+            "RETURN posts.uuid AS uuid, posts.content AS content, posts.creationDate AS date, poster AS author, " +
+            "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo " +
+            "ORDER BY amountLikes DESC, datetime(posts.creationDate) DESC SKIP $skip LIMIT $limit ")
+    List<FeedPost> getFeedForAnonymousUser_Popular_PostedBetween(Date first, Date second, Long skip, Long limit);
+
     @Query( "MATCH (u:User)-[:POSTS]->(post:Post) WHERE post.uuid = $uuid AND post.deleted <> true " +
             "OPTIONAL MATCH (post:Post)-[:RESPONDS]->(respondsTo:Post) " +
             "OPTIONAL MATCH (post:Post)-[:QUOTES]->(quotes:Post) " +

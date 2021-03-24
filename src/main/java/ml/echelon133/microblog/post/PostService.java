@@ -126,7 +126,20 @@ public class PostService implements IPostService {
         Date before =  Date.from(now.toInstant().minus(hoursToSubtract, HOURS));
         return postRepository
                 .getFeedForUserWithUuid_Popular_PostedBetween(user.getUuid(), before, now, skip, limit);
+    }
 
+    @Override
+    public List<FeedPost> getFeedForAnonymousUser(PostsSince since, Long skip, Long limit) throws IllegalArgumentException {
+
+        if (limit < 0 || skip < 0) {
+            throw new IllegalArgumentException("Invalid skip and/or limit values.");
+        }
+
+        int hoursToSubtract = since.getHours();
+        Date now = Date.from(Instant.now(clock));
+        Date before =  Date.from(now.toInstant().minus(hoursToSubtract, HOURS));
+        return postRepository
+                .getFeedForAnonymousUser_Popular_PostedBetween(before, now, skip, limit);
     }
 
     private List<Tag> findTagsInContent(Post post) {

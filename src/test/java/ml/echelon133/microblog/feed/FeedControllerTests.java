@@ -136,9 +136,9 @@ public class FeedControllerTests {
                 .willReturn(hour);
         given(postService.getFeedForUser(testUser, IPostService.PostsSince.SIX_HOURS, 0L, 20L))
                 .willReturn(sixHours);
-        given(postService.getFeedForUser(testUser, IPostService.PostsSince.TWELVE_HOURS, 0L, 20L))
+        given(postService.getFeedForAnonymousUser(IPostService.PostsSince.TWELVE_HOURS, 0L, 20L))
                 .willReturn(twelveHours);
-        given(postService.getFeedForUser(testUser, IPostService.PostsSince.DAY, 0L, 20L))
+        given(postService.getFeedForAnonymousUser(IPostService.PostsSince.DAY, 0L, 20L))
                 .willReturn(day);
 
         // when
@@ -159,14 +159,12 @@ public class FeedControllerTests {
         MockHttpServletResponse response3 = mockMvc.perform(
                 get("/api/feed")
                         .accept(APPLICATION_JSON)
-                        .with(user(testUser))
                         .param("since", "tweLVE_houRS")
         ).andReturn().getResponse();
 
         MockHttpServletResponse response4 = mockMvc.perform(
                 get("/api/feed")
                         .accept(APPLICATION_JSON)
-                        .with(user(testUser))
                         .param("since", "Day")
         ).andReturn().getResponse();
 

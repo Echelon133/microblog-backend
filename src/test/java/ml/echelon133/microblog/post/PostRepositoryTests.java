@@ -65,6 +65,7 @@ public class PostRepositoryTests {
         User test3 = createTestUser("test3");
         User test4 = createTestUser("test4");
         User test5 = createTestUser("test5");
+        User test6 = createTestUser("test6");
 
         // "test1" also follows "test2" and "test3"
         userRepository.followUserWithUuid(test1.getUuid(), test2.getUuid());
@@ -102,8 +103,18 @@ public class PostRepositoryTests {
             postRepository.likePostWithUuid(test5.getUuid(), post.getUuid());
         }
 
+        // create 10 posts as "test4"
+        for (int i = 20; i < 25; i++) {
+            Post post = createTestPost(test4, "" + i, 0L);
+            postRepository.likePostWithUuid(test1.getUuid(), post.getUuid());
+            postRepository.likePostWithUuid(test2.getUuid(), post.getUuid());
+            postRepository.likePostWithUuid(test3.getUuid(), post.getUuid());
+            postRepository.likePostWithUuid(test5.getUuid(), post.getUuid());
+            postRepository.likePostWithUuid(test6.getUuid(), post.getUuid());
+        }
+
         /*
-            Test database has 20 posts
+            Test database has 30 posts
             User "test1":
                 * posts 0, 1, 2, 3, 4 made 30 min before
                 * posts 5, 6, 7, 8, 9 made 10 min before
@@ -111,10 +122,13 @@ public class PostRepositoryTests {
                 * posts 10, 11, 12, 13, 14 made 30 min before
             User "test3":
                 * posts 15, 16, 17, 18, 19 made 1 min before
+            User "test4":
+                * posts 20, 21, 22, 23, 24
             Posts 0, 1, 2, 3, 4 have 1 like each
             Posts 5, 6, 7, 8, 9 have 2 likes each
             Posts 10, 11, 12, 13, 14 have 3 likes each
             Posts 15, 16, 17, 18, 19 have 4 likes each
+            Posts 20, 21, 22, 23, 24 have 5 likes each
          */
     }
 
@@ -938,6 +952,173 @@ public class PostRepositoryTests {
         List<String> test3Contents = test3Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
         Arrays.asList(15, 16, 17, 18, 19).forEach(c -> {
             assertTrue(test3Contents.contains(c.toString()));
+        });
+    }
+
+    @Test
+    public void getFeedForAnonymousUser_Popular_PostedBetween_DoesNotContainDeletedPosts() {
+        User user = userRepository.findByUsername("test1").orElse(new User());
+
+        // create a post
+        Post post = createTestPost(user, "200", 0L);
+        post.markAsDeleted(); // mark as deleted even before saving it
+        postRepository.save(post);
+
+        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
+
+        // when
+        List<FeedPost> posts = postRepository
+                .getFeedForAnonymousUser_Popular_PostedBetween(
+                        date40MinAgo,
+                        new Date(), 0L, 10L);
+
+        // make a list of contents of retrieved posts
+        List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+
+        // then
+        assertEquals(10, posts.size());
+        // expect posts with content 24, 23, 22, 21, 20, 19, 18, 17, 16, 15
+        Arrays.asList(24, 23, 22, 21, 20, 19, 18, 17, 16, 15).forEach(i -> {
+            assertTrue(contents.contains(i.toString()));
+        });
+    }
+
+    @Test
+    public void getFeedForAnonymousUser_Popular_PostedBetween_SkipArgumentWorks() {
+        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
+
+        // when
+        List<FeedPost> posts = postRepository
+                .getFeedForAnonymousUser_Popular_PostedBetween(
+                        date40MinAgo,
+                        new Date(), 5L, 5L);
+
+        // make a list of contents of retrieved posts
+        List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+
+        // then
+        assertEquals(5, posts.size());
+        // expect posts with content: 19, 18, 17, 16, 15
+        Arrays.asList(19, 18, 17, 16, 15).forEach(i -> {
+            assertTrue(contents.contains(i.toString()));
+        });
+    }
+
+    @Test
+    public void getFeedForAnonymousUser_Popular_PostedBetween_LimitArgumentWorks() {
+        User user = userRepository.findByUsername("test1").orElse(new User());
+
+        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
+
+        // when
+        List<FeedPost> posts = postRepository
+                .getFeedForAnonymousUser_Popular_PostedBetween(
+                        date40MinAgo,
+                        new Date(), 0L, 5L);
+
+        // make a list of contents of retrieved posts
+        List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+
+        // then
+        assertEquals(5, posts.size());
+        // expect posts with content: 24, 23, 22, 21, 20
+        Arrays.asList(24, 23, 22, 21, 20).forEach(i -> {
+            assertTrue(contents.contains(i.toString()));
+        });
+    }
+
+    @Test
+    public void getFeedForAnonymousUser_Popular_PostedBetween_FeedWithAllPostsIsSorted() {
+        // using this date shows all of the posts, since the oldest posts are from 30 min before
+        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
+
+        // when
+        List<FeedPost> allPosts = postRepository
+                .getFeedForAnonymousUser_Popular_PostedBetween(
+                        date40MinAgo,
+                        new Date(), 0L, 25L); // limit to 25
+
+        // make a list of contents of retrieved posts
+        List<String> contents = allPosts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+
+        // then
+        assertEquals(25, allPosts.size());
+
+        /*
+         since we expect 25 posts sorted by likes and date (in that order)
+         we should expect them in order:
+            * first 24, 23, 22, 21, 20 (because each post has 5 likes)
+            * second 19, 18, 17, 16, 15 (because each post has 4 likes)
+            * third 14, 13, 12, 11, 10 (because each post has 3 likes)
+            * fourth 9, 8, 7, 6, 5 (because each post has 2 likes)
+            * fifth 4, 3, 2, 1, 0 (because each post has 1 like)
+         */
+        List<Integer> correctOrder = Arrays.asList(24, 23, 22, 21, 20, 19, 18, 17, 16, 15,
+                14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0);
+        for (int i = 0; i < correctOrder.size(); i++) {
+            assertEquals(correctOrder.get(i).toString(), contents.get(i));
+        }
+    }
+
+    @Test
+    public void getFeedForAnonymousUser_Popular_PostedBetween_PostsHaveCorrectAuthors() {
+        User test1 = userRepository.findByUsername("test1").orElse(new User());
+        User test2 = userRepository.findByUsername("test2").orElse(new User());
+        User test3 = userRepository.findByUsername("test3").orElse(new User());
+        User test4 = userRepository.findByUsername("test4").orElse(new User());
+
+        // using this date shows all of the posts, since the oldest posts are from 30 min before
+        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
+
+        // when
+        List<FeedPost> allPosts = postRepository
+                .getFeedForAnonymousUser_Popular_PostedBetween(
+                        date40MinAgo,
+                        new Date(), 0L, 25L); // limit to 25, to show all posts
+
+        // then
+        // expected posts of test1: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+        List<FeedPost> test1Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test1.getUuid())
+                .collect(Collectors.toList());
+
+        assertEquals(10, test1Posts.size());
+
+        List<String> test1Contents = test1Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9).forEach(c -> {
+            assertTrue(test1Contents.contains(c.toString()));
+        });
+
+        // expected posts of test2: 10, 11, 12, 13, 14
+        List<FeedPost> test2Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test2.getUuid())
+                .collect(Collectors.toList());
+
+        assertEquals(5, test2Posts.size());
+
+        List<String> test2Contents = test2Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        Arrays.asList(10, 11, 12, 13, 14).forEach(c -> {
+            assertTrue(test2Contents.contains(c.toString()));
+        });
+
+        // expected posts of test3: 15, 16, 17, 18, 19
+        List<FeedPost> test3Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test3.getUuid())
+                .collect(Collectors.toList());
+
+        assertEquals(5, test3Posts.size());
+
+        List<String> test3Contents = test3Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        Arrays.asList(15, 16, 17, 18, 19).forEach(c -> {
+            assertTrue(test3Contents.contains(c.toString()));
+        });
+
+        // expected posts of test4: 20, 21, 22, 23, 24
+        List<FeedPost> test4Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test4.getUuid())
+                .collect(Collectors.toList());
+
+        assertEquals(5, test4Posts.size());
+
+        List<String> test4Contents = test4Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        Arrays.asList(20, 21, 22, 23, 24).forEach(c -> {
+            assertTrue(test4Contents.contains(c.toString()));
         });
     }
 }

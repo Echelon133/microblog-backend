@@ -5,7 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -17,26 +17,35 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
 
     private final String AUTH_HEADER_NAME = "Authorization";
 
-    public CustomAuthenticationFilter() {
-        super(new AntPathRequestMatcher("/**"));
+    public CustomAuthenticationFilter(RequestMatcher requestMatcher) {
+        super(requestMatcher);
     }
 
     private boolean continueChainBeforeSuccessfulAuthentication = false;
 
     @Override
+    protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()) {
+            String header = request.getHeader(AUTH_HEADER_NAME);
+            try {
+                Boolean requestMatches = super.requiresAuthentication(request, response);
+                Boolean headerCorrect = header.startsWith("Bearer");
+                if (headerCorrect && requestMatches) {
+                    return true;
+                }
+            } catch (NullPointerException ignore) {}
+        }
+        return false;
+    }
+
+    @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
         String header = request.getHeader(AUTH_HEADER_NAME);
-
-        if (header != null && header.startsWith("Bearer")) {
-            String accessToken = header.substring(7); // skip to the actual token
-            TemporaryToken tempToken = new TemporaryToken(accessToken);
-            return getAuthenticationManager().authenticate(tempToken);
-        } else if (header == null) {
-            // currently there is only a single auth filter
-            // no bearer token = the user must be anonymous
-            return new AnonymousToken();
-        }
-        throw new BadCredentialsException("Invalid token");
+        String accessToken = header.substring(7); // skip to the actual token
+        TemporaryToken tempToken = new TemporaryToken(accessToken);
+        return getAuthenticationManager().authenticate(tempToken);
     }
 
     @Override

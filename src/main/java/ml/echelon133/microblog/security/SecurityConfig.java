@@ -14,6 +14,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @EnableWebSecurity
 @Configuration
@@ -30,6 +33,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
+    public RequestMatcher customRequestMatcher() {
+        return new AntPathRequestMatcher("**");
+    }
+
+    @Bean
     public CustomAuthenticationProvider customAuthProvider() {
         return new CustomAuthenticationProvider(userDetailsService, tokenService);
     }
@@ -41,7 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public CustomAuthenticationFilter customAuthFilter() {
-        CustomAuthenticationFilter filter = new CustomAuthenticationFilter();
+        CustomAuthenticationFilter filter = new CustomAuthenticationFilter(customRequestMatcher());
         filter.setAuthenticationManager(customAuthManager());
         filter.setContinueChainBeforeSuccessfulAuthentication(true);
         return filter;
@@ -53,14 +61,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .cors().and()
                 .httpBasic().disable()
-                .authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/api/users/me").hasRole("USER")
-                .antMatchers(HttpMethod.GET, "/api/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/users/register").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/**").hasRole("USER")
-                .antMatchers(HttpMethod.PUT, "/api/**").hasRole("USER")
-                .antMatchers(HttpMethod.DELETE, "/api/**").hasRole("USER")
-                .and()
+                .requestMatcher(customRequestMatcher()).addFilterBefore(customAuthFilter(), BasicAuthenticationFilter.class)
+                    .authorizeRequests()
+                        .antMatchers(HttpMethod.GET, "/api/users/me").hasRole("USER")
+                        .antMatchers(HttpMethod.GET, "/api/**").permitAll()
+                        .antMatchers(HttpMethod.POST, "/api/users/register").permitAll()
+                        .anyRequest().hasRole("USER")
+                    .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 }

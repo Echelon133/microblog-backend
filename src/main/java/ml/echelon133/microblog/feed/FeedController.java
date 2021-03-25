@@ -1,6 +1,5 @@
 package ml.echelon133.microblog.feed;
 
-import ml.echelon133.microblog.auth.AnonymousToken;
 import ml.echelon133.microblog.post.FeedPost;
 import ml.echelon133.microblog.post.IPostService;
 import ml.echelon133.microblog.user.User;
@@ -67,7 +66,7 @@ public class FeedController {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (auth instanceof AnonymousToken) {
+        if (auth instanceof AnonymousAuthenticationToken) {
             feed = postService.getFeedForAnonymousUser(postsSince, skip, limit);
         } else {
             User loggedUser = (User) auth.getPrincipal();

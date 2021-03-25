@@ -5,7 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -17,11 +17,28 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
 
     private final String AUTH_HEADER_NAME = "Authorization";
 
-    public CustomAuthenticationFilter() {
-        super(new AntPathRequestMatcher("/**"));
+    public CustomAuthenticationFilter(RequestMatcher requestMatcher) {
+        super(requestMatcher);
     }
 
     private boolean continueChainBeforeSuccessfulAuthentication = false;
+
+    @Override
+    protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()) {
+            String header = request.getHeader(AUTH_HEADER_NAME);
+            try {
+                Boolean requestMatches = super.requiresAuthentication(request, response);
+                Boolean headerCorrect = header.startsWith("Bearer");
+                if (headerCorrect && requestMatches) {
+                    return true;
+                }
+            } catch (NullPointerException ignore) {}
+        }
+        return false;
+    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {

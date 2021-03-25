@@ -32,22 +32,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         this.tokenService = tokenService;
     }
 
-    @Bean
     public RequestMatcher customRequestMatcher() {
         return new AntPathRequestMatcher("**");
     }
 
-    @Bean
     public CustomAuthenticationProvider customAuthProvider() {
         return new CustomAuthenticationProvider(userDetailsService, tokenService);
     }
 
-    @Bean
     public CustomAuthenticationManager customAuthManager() {
         return new CustomAuthenticationManager(customAuthProvider());
     }
 
-    @Bean
     public CustomAuthenticationFilter customAuthFilter() {
         CustomAuthenticationFilter filter = new CustomAuthenticationFilter(customRequestMatcher());
         filter.setAuthenticationManager(customAuthManager());

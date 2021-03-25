@@ -43,17 +43,9 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
         String header = request.getHeader(AUTH_HEADER_NAME);
-
-        if (header != null && header.startsWith("Bearer")) {
-            String accessToken = header.substring(7); // skip to the actual token
-            TemporaryToken tempToken = new TemporaryToken(accessToken);
-            return getAuthenticationManager().authenticate(tempToken);
-        } else if (header == null) {
-            // currently there is only a single auth filter
-            // no bearer token = the user must be anonymous
-            return new AnonymousToken();
-        }
-        throw new BadCredentialsException("Invalid token");
+        String accessToken = header.substring(7); // skip to the actual token
+        TemporaryToken tempToken = new TemporaryToken(accessToken);
+        return getAuthenticationManager().authenticate(tempToken);
     }
 
     @Override

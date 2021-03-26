@@ -12,7 +12,7 @@ public interface TagRepository extends Neo4jRepository<Tag, UUID> {
     Optional<Tag> findByName(String name);
 
     @Query( "MATCH (t:Tag)-[r:TAGS]->(p:Post) " +
-            "WHERE p.creationDate >= $first AND p.creationDate <= $second AND p.deleted <> true " +
+            "WHERE p.creationDate >= $first AND p.creationDate < $second AND p.deleted <> true " +
             "WITH t, count(r) as tagCounter RETURN t ORDER BY tagCounter DESC LIMIT $howManyTagsToGet")
     List<Tag> findMostPopularTags_Between(Date first, Date second, Long howManyTagsToGet);
 

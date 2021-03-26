@@ -66,7 +66,7 @@ public class FeedController {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (auth instanceof AnonymousAuthenticationToken) {
+        if (auth == null || auth instanceof AnonymousAuthenticationToken) {
             feed = postService.getFeedForAnonymousUser(postsSince, skip, limit);
         } else {
             User loggedUser = (User) auth.getPrincipal();

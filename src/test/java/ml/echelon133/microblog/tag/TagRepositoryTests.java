@@ -3,6 +3,7 @@ package ml.echelon133.microblog.tag;
 import ml.echelon133.microblog.post.Post;
 import ml.echelon133.microblog.post.PostRepository;
 import ml.echelon133.microblog.user.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.neo4j.DataNeo4jTest;
@@ -43,6 +44,12 @@ public class TagRepositoryTests {
             b.addTag(t);
         }
         return b;
+    }
+
+    @BeforeEach
+    private void beforeEach() {
+        postRepository.deleteAll();
+        tagRepository.deleteAll();
     }
 
     @Test

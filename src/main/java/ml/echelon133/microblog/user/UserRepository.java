@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public interface UserRepository extends Neo4jRepository<User, UUID> {
     Optional<User> findByUsername(String username);
+    List<User> findAllByUsernameContains(String search);
     boolean existsUserByUsername(String username);
 
     @Query( "MATCH (u1:User), (u2:User) " +

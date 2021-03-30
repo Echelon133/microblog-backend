@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public interface IUserService {
     User findByUsername(String username) throws UserDoesntExistException;
+    List<User> findAllByUsernameContains(String search);
     User findByUuid(UUID uuid) throws UserDoesntExistException;
     boolean checkIfUserFollows(User user, UUID followedUuid) throws UserDoesntExistException;
     boolean followUserWithUuid(User user, UUID followUuid) throws UserDoesntExistException, IllegalArgumentException;

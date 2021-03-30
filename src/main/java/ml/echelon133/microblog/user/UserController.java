@@ -28,9 +28,19 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<User> getUserByUsername(@RequestParam String username) throws Exception {
-        User user = userService.findByUsername(username);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+    public ResponseEntity<List<User>> getUserByUsername(@RequestParam(required = false) String username,
+                                                        @RequestParam(required = false) String search) throws Exception {
+        List<User> users;
+        if (username != null && search != null) {
+            throw new IllegalArgumentException("Parameters username and search mustn't be combined");
+        } else if (username != null) {
+            users = List.of(userService.findByUsername(username));
+        } else if (search != null) {
+            users = userService.findAllByUsernameContains(search);
+        } else {
+            throw new IllegalArgumentException("Parameters username or search must be specified");
+        }
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @GetMapping("/me")

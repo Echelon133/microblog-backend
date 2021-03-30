@@ -140,4 +140,9 @@ public class UserService implements IUserService {
         user.setAviURL(userDetailsDto.getAviURL());
         return userRepository.save(user);
     }
+
+    @Override
+    public List<User> findAllByUsernameContains(String search) {
+        return userRepository.findAllByUsernameContains(search);
+    }
 }

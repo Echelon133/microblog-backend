@@ -847,9 +847,10 @@ public class UserControllerTests {
     public void getUserByUsername_ReturnsUser() throws Exception {
         String username = "test1";
         User user = new User(username, "", "", "");
+        List<User> users = List.of(user);
 
         // expected json
-        JsonContent<User> json = jsonUser.write(user);
+        JsonContent<List<User>> json = jsonUsers.write(users);
 
         // given
         given(userService.findByUsername(username))
@@ -868,7 +869,69 @@ public class UserControllerTests {
     }
 
     @Test
-    public void getUserByUsername_NoRequiredParameter() throws Exception {
+    public void getUserByUsername_SearchReturnsEmptyResult() throws Exception {
+        String invalidUsername = "test321";
+
+        // given
+        given(userService.findAllByUsernameContains(invalidUsername))
+                .willReturn(List.of());
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users")
+                        .param("search", invalidUsername)
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo("[]");
+    }
+
+    @Test
+    public void getUserByUsername_SearchReturnsUsers() throws Exception {
+        String username = "test1";
+        List<User> users = List.of(
+                new User(username + "23", "", "", ""),
+                new User(username, "", "", "")
+        );
+
+        // expected json
+        JsonContent<List<User>> json = jsonUsers.write(users);
+
+        // given
+        given(userService.findAllByUsernameContains(username))
+                .willReturn(users);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users")
+                        .param("search", username)
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getContentAsString()).isEqualTo(json.getJson());
+    }
+
+    @Test
+    public void getUserByUsername_ParametersMutuallyExclusive() throws Exception {
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/users")
+                        .param("search", "test")
+                        .param("username", "test")
+                        .accept(APPLICATION_JSON)
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Parameters username and search mustn't be combined");
+    }
+
+    @Test
+    public void getUserByUsername_NoRequiredParameters() throws Exception {
         // when
         MockHttpServletResponse response = mockMvc.perform(
                 get("/api/users")
@@ -877,6 +940,7 @@ public class UserControllerTests {
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString()).contains("Parameters username or search must be specified");
     }
 
     @Test

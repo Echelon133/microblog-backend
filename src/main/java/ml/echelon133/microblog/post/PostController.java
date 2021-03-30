@@ -113,9 +113,7 @@ public class PostController {
         Post savedPost = postService.postPost(loggedUser, postDto.getContent());
 
         return new ResponseEntity<>(
-                Map.of("postUUID", savedPost.getUuid().toString(),
-                       "content", savedPost.getContent(),
-                       "author", loggedUser.getUsername()),
+                Map.of("uuid", savedPost.getUuid().toString()),
                 HttpStatus.OK
         );
     }
@@ -136,9 +134,7 @@ public class PostController {
         Post savedResponse = postService.postResponse(loggedUser, responseDto.getContent(), UUID.fromString(uuid));
 
         return new ResponseEntity<>(
-                Map.of("postUUID", savedResponse.getUuid().toString(),
-                       "content", savedResponse.getContent(),
-                       "author", loggedUser.getUsername()),
+                Map.of("uuid", savedResponse.getUuid().toString()),
                 HttpStatus.OK
         );
     }
@@ -159,9 +155,7 @@ public class PostController {
         Post savedQuote = postService.postQuote(loggedUser, quotePostDto.getContent(), UUID.fromString(uuid));
 
         return new ResponseEntity<>(
-                Map.of("postUUID", savedQuote.getUuid().toString(),
-                       "content", savedQuote.getContent(),
-                       "author", loggedUser.getUsername()),
+                Map.of("uuid", savedQuote.getUuid().toString()),
                 HttpStatus.OK
         );
     }

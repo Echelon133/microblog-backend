@@ -770,9 +770,7 @@ public class PostControllerTests {
         // json
         JsonContent<PostDto> json = jsonPostDto.write(dto1);
         JsonContent<Map<String, String>> expected = jsonPostResult.write(
-                Map.of("postUUID", b.getUuid().toString(),
-                       "content", b.getContent(),
-                       "author", testUser.getUsername())
+                Map.of("uuid", b.getUuid().toString())
         );
 
         // given
@@ -847,9 +845,7 @@ public class PostControllerTests {
         // json
         JsonContent<ResponseDto> json = jsonResponseDto.write(dto1);
         JsonContent<Map<String, String>> expected = jsonPostResult.write(
-                Map.of("postUUID", b.getUuid().toString(),
-                        "content", b.getContent(),
-                        "author", testUser.getUsername())
+                Map.of("uuid", b.getUuid().toString())
         );
 
         // given
@@ -938,14 +934,10 @@ public class PostControllerTests {
         JsonContent<QuotePostDto> json1 = jsonQuotesDto.write(dto1);
         JsonContent<QuotePostDto> json2 = jsonQuotesDto.write(dto2);
         JsonContent<Map<String, String>> expected1 = jsonPostResult.write(
-                Map.of("postUUID", b1.getUuid().toString(),
-                        "content", b1.getContent(),
-                        "author", testUser.getUsername())
+                Map.of("uuid", b1.getUuid().toString())
         );
         JsonContent<Map<String, String>> expected2 = jsonPostResult.write(
-                Map.of("postUUID", b2.getUuid().toString(),
-                        "content", b2.getContent(),
-                        "author", testUser.getUsername())
+                Map.of("uuid", b2.getUuid().toString())
         );
 
         // given

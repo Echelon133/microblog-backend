@@ -44,15 +44,17 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<User> getLoggedUser() {
-        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return new ResponseEntity<>(loggedUser, HttpStatus.OK);
+    public ResponseEntity<User> getLoggedUser() throws Exception {
+        UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User foundUser = userService.findByUsername(loggedUser.getUsername());
+        return new ResponseEntity<>(foundUser, HttpStatus.OK);
     }
 
     @PutMapping("/me")
     public ResponseEntity<User> updateUserDetails(@Valid @RequestBody UserDetailsDto userDetailsDto,
                                                   BindingResult result) throws Exception {
-        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User foundUser = userService.findByUsername(loggedUser.getUsername());
 
         if (result.hasFieldErrors()) {
             List<String> messages = new ArrayList<>();
@@ -62,7 +64,7 @@ public class UserController {
             throw new InvalidUserDetailsFieldException(messages);
         }
 
-        User updatedUser = userService.updateUser(loggedUser, userDetailsDto);
+        User updatedUser = userService.updateUser(foundUser, userDetailsDto);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
@@ -100,7 +102,7 @@ public class UserController {
 
     @GetMapping("/{uuid}/follow")
     public ResponseEntity<Map<String, Boolean>> checkIfFollowed(@PathVariable String uuid) throws Exception {
-        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Boolean result = userService.checkIfUserFollows(loggedUser, UUID.fromString(uuid));
 
         Map<String, Boolean> response = Map.of("followed", result);
@@ -109,7 +111,7 @@ public class UserController {
 
     @PostMapping("/{uuid}/follow")
     public ResponseEntity<Map<String, Boolean>> followUser(@PathVariable String uuid) throws Exception {
-        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Boolean result = userService.followUserWithUuid(loggedUser, UUID.fromString(uuid));
 
         Map<String, Boolean> response = Map.of("followed", result);

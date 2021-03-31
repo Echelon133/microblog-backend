@@ -2,7 +2,7 @@ package ml.echelon133.microblog.feed;
 
 import ml.echelon133.microblog.post.FeedPost;
 import ml.echelon133.microblog.post.IPostService;
-import ml.echelon133.microblog.user.User;
+import ml.echelon133.microblog.user.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,7 +69,7 @@ public class FeedController {
         if (auth == null || auth instanceof AnonymousAuthenticationToken) {
             feed = postService.getFeedForAnonymousUser(postsSince, skip, limit);
         } else {
-            User loggedUser = (User) auth.getPrincipal();
+            UserPrincipal loggedUser = (UserPrincipal) auth.getPrincipal();
             if (by != null && by.equalsIgnoreCase("POPULARITY")) {
                 // if 'by' is provided and contains 'POPULARITY'
                 // get most popular posts

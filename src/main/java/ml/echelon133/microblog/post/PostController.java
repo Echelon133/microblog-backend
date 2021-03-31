@@ -1,6 +1,8 @@
 package ml.echelon133.microblog.post;
 
+import ml.echelon133.microblog.user.IUserService;
 import ml.echelon133.microblog.user.User;
+import ml.echelon133.microblog.user.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +21,12 @@ import java.util.UUID;
 public class PostController {
 
     private IPostService postService;
+    private IUserService userService;
 
     @Autowired
-    public PostController(IPostService postService) {
+    public PostController(IPostService postService, IUserService userService) {
         this.postService = postService;
+        this.userService = userService;
     }
 
     @GetMapping("/{uuid}")
@@ -74,7 +78,7 @@ public class PostController {
 
     @GetMapping("/{uuid}/like")
     public ResponseEntity<Map<String, Boolean>> checkIfLikes(@PathVariable String uuid) throws Exception {
-        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Boolean result = postService.checkIfUserWithUuidLikes(loggedUser, UUID.fromString(uuid));
 
         Map<String, Boolean> response = Map.of("liked", result);
@@ -83,7 +87,7 @@ public class PostController {
 
     @PostMapping("/{uuid}/like")
     public ResponseEntity<Map<String, Boolean>> likePost(@PathVariable String uuid) throws Exception {
-        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Boolean result = postService.likePost(loggedUser, UUID.fromString(uuid));
 
         Map<String, Boolean> response = Map.of("liked", result);
@@ -92,7 +96,7 @@ public class PostController {
 
     @PostMapping("/{uuid}/unlike")
     public ResponseEntity<Map<String, Boolean>> unlikePost(@PathVariable String uuid) throws Exception {
-        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Boolean result = postService.unlikePost(loggedUser, UUID.fromString(uuid));
 
         Map<String, Boolean> response = Map.of("unliked", result);
@@ -109,8 +113,9 @@ public class PostController {
                 throw new InvalidPostContentException();
         }
 
-        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Post savedPost = postService.postPost(loggedUser, postDto.getContent());
+        UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userService.findByUsername(loggedUser.getUsername());
+        Post savedPost = postService.postPost(user, postDto.getContent());
 
         return new ResponseEntity<>(
                 Map.of("uuid", savedPost.getUuid().toString()),
@@ -130,8 +135,9 @@ public class PostController {
                 throw new InvalidPostContentException();
         }
 
-        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Post savedResponse = postService.postResponse(loggedUser, responseDto.getContent(), UUID.fromString(uuid));
+        UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userService.findByUsername(loggedUser.getUsername());
+        Post savedResponse = postService.postResponse(user, responseDto.getContent(), UUID.fromString(uuid));
 
         return new ResponseEntity<>(
                 Map.of("uuid", savedResponse.getUuid().toString()),
@@ -151,8 +157,9 @@ public class PostController {
                 throw new InvalidPostContentException();
         }
 
-        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Post savedQuote = postService.postQuote(loggedUser, quotePostDto.getContent(), UUID.fromString(uuid));
+        UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userService.findByUsername(loggedUser.getUsername());
+        Post savedQuote = postService.postQuote(user, quotePostDto.getContent(), UUID.fromString(uuid));
 
         return new ResponseEntity<>(
                 Map.of("uuid", savedQuote.getUuid().toString()),
@@ -162,8 +169,9 @@ public class PostController {
 
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Map<String, Boolean>> deletePost(@PathVariable String uuid) throws Exception {
-        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        boolean deleted = postService.markPostAsDeleted(loggedUser, UUID.fromString(uuid));
+        UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userService.findByUsername(loggedUser.getUsername());
+        boolean deleted = postService.markPostAsDeleted(user, UUID.fromString(uuid));
 
         return new ResponseEntity<>(
                 Map.of("deleted", deleted),

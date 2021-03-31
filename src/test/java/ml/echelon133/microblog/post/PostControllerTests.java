@@ -2,6 +2,7 @@ package ml.echelon133.microblog.post;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ml.echelon133.microblog.user.User;
+import ml.echelon133.microblog.user.UserService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,9 @@ public class PostControllerTests {
 
     @Mock
     private PostService postService;
+
+    @Mock
+    private UserService userService;
 
     @InjectMocks
     private PostController postController;
@@ -775,6 +779,8 @@ public class PostControllerTests {
 
         // given
         given(postService.postPost(testUser, dto1.getContent())).willReturn(b);
+        given(userService.findByUsername(testUser.getUsername()))
+                .willReturn(testUser);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
@@ -850,6 +856,8 @@ public class PostControllerTests {
 
         // given
         given(postService.postResponse(testUser, dto1.getContent(), postUuid)).willReturn(b);
+        given(userService.findByUsername(testUser.getUsername()))
+                .willReturn(testUser);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
@@ -874,6 +882,10 @@ public class PostControllerTests {
 
         // json
         JsonContent<ResponseDto> json = jsonResponseDto.write(dto1);
+
+        // given
+        given(userService.findByUsername(testUser.getUsername()))
+                .willReturn(testUser);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
@@ -943,6 +955,8 @@ public class PostControllerTests {
         // given
         given(postService.postQuote(testUser, dto1.getContent(), postUuid)).willReturn(b1);
         given(postService.postQuote(testUser, dto2.getContent(), postUuid)).willReturn(b2);
+        given(userService.findByUsername(testUser.getUsername()))
+                .willReturn(testUser);
 
         // when
         MockHttpServletResponse response1 = mockMvc.perform(
@@ -979,6 +993,10 @@ public class PostControllerTests {
         // json
         JsonContent<QuotePostDto> json = jsonQuotesDto.write(dto1);
 
+        // given
+        given(userService.findByUsername(testUser.getUsername()))
+                .willReturn(testUser);
+
         // when
         MockHttpServletResponse response = mockMvc.perform(
                 post("/api/posts/" + invalidUuid + "/quote")
@@ -997,6 +1015,9 @@ public class PostControllerTests {
     public void deletePost_HandlesInvalidUuid() throws Exception {
         String invalidUuid = "test";
 
+        // given
+        given(userService.findByUsername(testUser.getUsername()))
+                .willReturn(testUser);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
@@ -1017,6 +1038,8 @@ public class PostControllerTests {
         // given
         given(postService.markPostAsDeleted(testUser, uuid))
                 .willThrow(new UserCannotDeletePostException(testUser, uuid));
+        given(userService.findByUsername(testUser.getUsername()))
+                .willReturn(testUser);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
@@ -1039,6 +1062,8 @@ public class PostControllerTests {
         // given
         given(postService.markPostAsDeleted(testUser, uuid))
                 .willReturn(true);
+        given(userService.findByUsername(testUser.getUsername()))
+                .willReturn(testUser);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
@@ -1060,6 +1085,8 @@ public class PostControllerTests {
         // given
         given(postService.markPostAsDeleted(testUser, uuid))
                 .willReturn(false);
+        given(userService.findByUsername(testUser.getUsername()))
+                .willReturn(testUser);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(

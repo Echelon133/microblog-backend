@@ -4,6 +4,7 @@ import ml.echelon133.microblog.tag.ITagService;
 import ml.echelon133.microblog.tag.Tag;
 import ml.echelon133.microblog.tag.TagDoesntExistException;
 import ml.echelon133.microblog.user.User;
+import ml.echelon133.microblog.user.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -74,13 +75,13 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public boolean checkIfUserWithUuidLikes(User user, UUID postUuid) throws PostDoesntExistException {
+    public boolean checkIfUserWithUuidLikes(UserPrincipal user, UUID postUuid) throws PostDoesntExistException {
         throwIfPostDoesntExist(postUuid);
         return postRepository.checkIfUserWithUuidLikes(user.getUuid(), postUuid).isPresent();
     }
 
     @Override
-    public boolean likePost(User user, UUID postUuid) throws PostDoesntExistException {
+    public boolean likePost(UserPrincipal user, UUID postUuid) throws PostDoesntExistException {
         throwIfPostDoesntExist(postUuid);
         Optional<Long> like = postRepository.checkIfUserWithUuidLikes(user.getUuid(), postUuid);
 
@@ -94,14 +95,14 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public boolean unlikePost(User user, UUID postUuid) throws PostDoesntExistException {
+    public boolean unlikePost(UserPrincipal user, UUID postUuid) throws PostDoesntExistException {
         throwIfPostDoesntExist(postUuid);
         postRepository.unlikePostWithUuid(user.getUuid(), postUuid);
         return postRepository.checkIfUserWithUuidLikes(user.getUuid(), postUuid).isEmpty();
     }
 
     @Override
-    public List<FeedPost> getFeedForUser(User user, PostsSince since, Long skip, Long limit) throws IllegalArgumentException {
+    public List<FeedPost> getFeedForUser(UserPrincipal user, PostsSince since, Long skip, Long limit) throws IllegalArgumentException {
 
         if (limit < 0 || skip < 0) {
             throw new IllegalArgumentException("Invalid skip and/or limit values.");
@@ -115,7 +116,7 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public List<FeedPost> getFeedForUser_Popular(User user, PostsSince since, Long skip, Long limit) throws IllegalArgumentException {
+    public List<FeedPost> getFeedForUser_Popular(UserPrincipal user, PostsSince since, Long skip, Long limit) throws IllegalArgumentException {
 
         if (limit < 0 || skip < 0) {
             throw new IllegalArgumentException("Invalid skip and/or limit values.");

@@ -1,6 +1,7 @@
 package ml.echelon133.microblog.post;
 
 import ml.echelon133.microblog.user.User;
+import ml.echelon133.microblog.user.UserPrincipal;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,11 +29,11 @@ public interface IPostService {
     PostInfo getPostInfo(UUID uuid) throws PostDoesntExistException;
     List<FeedPost> getAllResponsesTo(UUID uuid, Long skip, Long limit) throws PostDoesntExistException, IllegalArgumentException;
     List<FeedPost> getAllQuotesOf(UUID uuid, Long skip, Long limit) throws PostDoesntExistException, IllegalArgumentException;
-    boolean checkIfUserWithUuidLikes(User user, UUID postUuid) throws PostDoesntExistException;
-    boolean likePost(User user, UUID postUuid) throws PostDoesntExistException;
-    boolean unlikePost(User user, UUID postUuid) throws PostDoesntExistException;
-    List<FeedPost> getFeedForUser(User user, PostsSince since, Long skip, Long limit) throws IllegalArgumentException;
-    List<FeedPost> getFeedForUser_Popular(User user, PostsSince since, Long skip, Long limit) throws IllegalArgumentException;
+    boolean checkIfUserWithUuidLikes(UserPrincipal user, UUID postUuid) throws PostDoesntExistException;
+    boolean likePost(UserPrincipal user, UUID postUuid) throws PostDoesntExistException;
+    boolean unlikePost(UserPrincipal user, UUID postUuid) throws PostDoesntExistException;
+    List<FeedPost> getFeedForUser(UserPrincipal user, PostsSince since, Long skip, Long limit) throws IllegalArgumentException;
+    List<FeedPost> getFeedForUser_Popular(UserPrincipal user, PostsSince since, Long skip, Long limit) throws IllegalArgumentException;
     List<FeedPost> getFeedForAnonymousUser(PostsSince since, Long skip, Long limit) throws IllegalArgumentException;
     Post processPostAndSave(Post post);
     Post postPost(User author, String content);

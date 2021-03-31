@@ -70,7 +70,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public boolean followUserWithUuid(User user, UUID followUuid) throws UserDoesntExistException, IllegalArgumentException {
+    public boolean followUserWithUuid(UserPrincipal user, UUID followUuid) throws UserDoesntExistException, IllegalArgumentException {
         throwIfUserDoesntExist(followUuid);
         Optional<Long> following = userRepository.checkIfUserWithUuidFollows(user.getUuid(), followUuid);
 
@@ -88,7 +88,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public boolean unfollowUserWithUuid(User user, UUID unfollowUuid) throws UserDoesntExistException {
+    public boolean unfollowUserWithUuid(UserPrincipal user, UUID unfollowUuid) throws UserDoesntExistException {
         throwIfUserDoesntExist(unfollowUuid);
         userRepository.unfollowUserWithUuid(user.getUuid(), unfollowUuid);
         return userRepository.checkIfUserWithUuidFollows(user.getUuid(), unfollowUuid).isEmpty();
@@ -119,7 +119,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public boolean checkIfUserFollows(User user, UUID followedUuid) throws UserDoesntExistException {
+    public boolean checkIfUserFollows(UserPrincipal user, UUID followedUuid) throws UserDoesntExistException {
         throwIfUserDoesntExist(followedUuid);
         return userRepository.checkIfUserWithUuidFollows(user.getUuid(), followedUuid).isPresent();
     }

@@ -33,6 +33,7 @@ public class MicroblogApplication {
 		configuration.setAllowedHeaders(Collections.singletonList("*"));
 		configuration.setAllowedOrigins(Collections.singletonList("*"));
 		configuration.setAllowedMethods(Arrays.asList("GET", "OPTIONS", "POST", "PUT"));
+		configuration.setAllowCredentials(true);
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;

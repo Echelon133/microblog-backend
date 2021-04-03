@@ -83,6 +83,10 @@ public class UserControllerTests {
         // json
         JsonContent<User> json = jsonUser.write(testUser);
 
+        // given
+        given(userService.findByUsername(testUser.getUsername()))
+                .willReturn(testUser);
+
         // when
         MockHttpServletResponse response = mockMvc.perform(
                 get("/api/users/me")

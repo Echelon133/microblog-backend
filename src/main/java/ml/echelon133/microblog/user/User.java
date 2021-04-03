@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.UUID;
 
 @NodeEntity
-public class User implements UserDetails {
+public class User implements UserDetails, UserPrincipal {
+
     @Id
     @GeneratedValue(strategy = UuidStrategy.class)
     @Convert(UuidStringConverter.class)

@@ -5,15 +5,12 @@ import ml.echelon133.microblog.auth.CustomAuthenticationManager;
 import ml.echelon133.microblog.auth.CustomAuthenticationProvider;
 import ml.echelon133.microblog.token.ITokenService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -22,13 +19,10 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private UserDetailsService userDetailsService;
     private ITokenService tokenService;
 
     @Autowired
-    public SecurityConfig(@Qualifier("customUserDetailsService") UserDetailsService userDetailsService,
-                          ITokenService tokenService) {
-        this.userDetailsService = userDetailsService;
+    public SecurityConfig(ITokenService tokenService) {
         this.tokenService = tokenService;
     }
 
@@ -37,7 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     public CustomAuthenticationProvider customAuthProvider() {
-        return new CustomAuthenticationProvider(userDetailsService, tokenService);
+        return new CustomAuthenticationProvider(tokenService);
     }
 
     public CustomAuthenticationManager customAuthManager() {

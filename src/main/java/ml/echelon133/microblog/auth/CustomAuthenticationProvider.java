@@ -2,23 +2,18 @@ package ml.echelon133.microblog.auth;
 
 import ml.echelon133.microblog.token.AccessToken;
 import ml.echelon133.microblog.token.ITokenService;
-import ml.echelon133.microblog.user.User;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Optional;
 
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
-    private UserDetailsService userDetailsService;
     private ITokenService tokenService;
 
-    public CustomAuthenticationProvider(UserDetailsService userDetailsService, ITokenService tokenService) {
-        this.userDetailsService = userDetailsService;
+    public CustomAuthenticationProvider(ITokenService tokenService) {
         this.tokenService = tokenService;
     }
 
@@ -40,14 +35,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             throw new BadCredentialsException("Invalid token");
         }
 
-        String username = retrievedToken.get().getOwnerUsername();
-        User retrievedUser = (User)userDetailsService.loadUserByUsername(username);
+        AccessToken foundToken = retrievedToken.get();
 
-        if (retrievedUser == null) {
-            throw new UsernameNotFoundException("User not found");
-        }
-
-        return new CustomAuthToken(retrievedUser, accessToken);
+        return new CustomAuthToken(foundToken.getOwnerUuid(),
+                foundToken.getOwnerUsername(),
+                foundToken.getRoles(),
+                accessToken);
     }
 
     @Override

@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 
 // access tokens should expire after 60 minutes
@@ -15,6 +16,7 @@ public class AccessToken implements Serializable {
     @Id
     private String token;
     private UUID ownerUuid;
+    private List<String> roles;
 
     @Indexed
     private String ownerUsername;
@@ -43,5 +45,13 @@ public class AccessToken implements Serializable {
 
     public void setOwnerUsername(String ownerUsername) {
         this.ownerUsername = ownerUsername;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 }

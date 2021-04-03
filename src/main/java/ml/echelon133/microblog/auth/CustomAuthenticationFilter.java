@@ -1,14 +1,15 @@
 package ml.echelon133.microblog.auth;
 
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.web.util.WebUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import java.io.IOException;
 public class CustomAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     private final String AUTH_HEADER_NAME = "Authorization";
+    private final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
 
     public CustomAuthenticationFilter(RequestMatcher requestMatcher) {
         super(requestMatcher);
@@ -29,10 +31,12 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
 
         if (auth == null || !auth.isAuthenticated()) {
             String header = request.getHeader(AUTH_HEADER_NAME);
+            Cookie cookie = WebUtils.getCookie(request, ACCESS_TOKEN_COOKIE_NAME);
             try {
-                Boolean requestMatches = super.requiresAuthentication(request, response);
-                Boolean headerCorrect = header.startsWith("Bearer");
-                if (headerCorrect && requestMatches) {
+                boolean requestMatches = super.requiresAuthentication(request, response);
+                boolean headerCorrect = header != null && header.startsWith("Bearer");
+                boolean cookieIsPresent = cookie != null;
+                if ((headerCorrect || cookieIsPresent) && requestMatches) {
                     return true;
                 }
             } catch (NullPointerException ignore) {}
@@ -43,7 +47,18 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
         String header = request.getHeader(AUTH_HEADER_NAME);
-        String accessToken = header.substring(7); // skip to the actual token
+        Cookie cookie = WebUtils.getCookie(request, ACCESS_TOKEN_COOKIE_NAME);
+
+        String accessToken = "";
+
+        // if both the cookie and the 'Authorization' header are set
+        // cookies have precedence
+        if (cookie != null) {
+            accessToken = cookie.getValue();
+        } else {
+            accessToken = header.substring(7); // skip to the actual token
+        }
+
         TemporaryToken tempToken = new TemporaryToken(accessToken);
         return getAuthenticationManager().authenticate(tempToken);
     }

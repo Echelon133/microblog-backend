@@ -54,6 +54,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .requestMatcher(customRequestMatcher()).addFilterBefore(customAuthFilter(), BasicAuthenticationFilter.class)
                     .authorizeRequests()
                         .antMatchers(HttpMethod.GET, "/api/users/me").hasRole("USER")
+                        .antMatchers(HttpMethod.GET, "/api/posts/*/like").hasRole("USER")
                         .antMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/users/register").permitAll()
                         .anyRequest().hasRole("USER")

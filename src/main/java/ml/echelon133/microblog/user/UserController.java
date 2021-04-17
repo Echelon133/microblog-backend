@@ -120,7 +120,7 @@ public class UserController {
 
     @PostMapping("/{uuid}/unfollow")
     public ResponseEntity<Map<String, Boolean>> unfollowUser(@PathVariable String uuid) throws Exception {
-        User loggedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Boolean result = userService.unfollowUserWithUuid(loggedUser, UUID.fromString(uuid));
 
         Map<String, Boolean> response = Map.of("unfollowed", result);

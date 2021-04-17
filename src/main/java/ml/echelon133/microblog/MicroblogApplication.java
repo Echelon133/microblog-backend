@@ -32,7 +32,7 @@ public class MicroblogApplication {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedHeaders(Collections.singletonList("*"));
 		configuration.setAllowedOrigins(Collections.singletonList("*"));
-		configuration.setAllowedMethods(Arrays.asList("GET", "OPTIONS", "POST", "PUT"));
+		configuration.setAllowedMethods(Arrays.asList("GET", "OPTIONS", "POST", "PUT", "DELETE"));
 		configuration.setAllowCredentials(true);
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);

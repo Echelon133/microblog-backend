@@ -100,6 +100,32 @@ public class NotificationRepositoryTests {
     }
 
     @Test
+    public void findAllNotificationsOfUser_SkipAndLimitWork() {
+        Optional<User> u1 = userRepository.findByUsername("user1");
+        Optional<User> u2 = userRepository.findByUsername("user2");
+
+        // given
+        Post savedPost = postRepository.save(new Post(u1.get(), "test content of a post"));
+        ResponsePost savedResponse = postRepository.save(new ResponsePost(u2.get(), "response", savedPost));
+
+        // make 5 notifications
+        for (int i = 0; i < 5; i++) {
+            notificationRepository.save(new ResponseNotification(savedResponse, u1.get()));
+        }
+
+        // when
+        UUID userUuid = u1.get().getUuid();
+        // limit to 1
+        List<NotificationResult> notifications1 = notificationRepository.findAllNotificationsOfUser(userUuid, 0L, 1L);
+        // skip 3
+        List<NotificationResult> notifications2 = notificationRepository.findAllNotificationsOfUser(userUuid, 3L, 5L);
+
+        // then
+        assertEquals(1, notifications1.size());
+        assertEquals(2, notifications2.size());
+    }
+
+    @Test
     public void countUnreadNotificationsOfUser_ReturnsZeroWhenNoNotifications() {
         Optional<User> u1 = userRepository.findByUsername("user1");
 

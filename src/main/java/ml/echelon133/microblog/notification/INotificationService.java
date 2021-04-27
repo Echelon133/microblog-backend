@@ -16,5 +16,5 @@ public interface INotificationService {
     boolean readSingleNotificationOfUser(UserPrincipal user, UUID notificationUuid);
     boolean notifyAboutResponse(ResponsePost notifyAbout, User notifiedUser);
     boolean notifyAboutQuote(QuotePost notifyAbout, User notifiedUser);
-    void notifyAboutMention(Post notifyAbout, List<User> notifiedUsers);
+    Long notifyAboutMention(Post notifyAbout, List<User> notifiedUsers);
 }

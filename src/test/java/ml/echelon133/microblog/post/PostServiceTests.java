@@ -1,5 +1,6 @@
 package ml.echelon133.microblog.post;
 
+import ml.echelon133.microblog.notification.NotificationService;
 import ml.echelon133.microblog.tag.Tag;
 import ml.echelon133.microblog.tag.TagDoesntExistException;
 import ml.echelon133.microblog.tag.TagService;
@@ -29,6 +30,9 @@ public class PostServiceTests {
 
     @Mock
     private TagService tagService;
+
+    @Mock
+    private NotificationService notificationService;
 
     @InjectMocks
     private PostService postService;

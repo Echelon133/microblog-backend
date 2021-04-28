@@ -1,10 +1,10 @@
 package ml.echelon133.microblog.post;
 
+import ml.echelon133.microblog.notification.*;
 import ml.echelon133.microblog.tag.ITagService;
 import ml.echelon133.microblog.tag.Tag;
 import ml.echelon133.microblog.tag.TagDoesntExistException;
-import ml.echelon133.microblog.user.User;
-import ml.echelon133.microblog.user.UserPrincipal;
+import ml.echelon133.microblog.user.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,15 +20,22 @@ import static java.time.temporal.ChronoUnit.HOURS;
 public class PostService implements IPostService {
 
     private PostRepository postRepository;
+    private IUserService userService;
+    private INotificationService notificationService;
     private ITagService tagService;
     private Clock clock = Clock.systemDefaultZone();
     private Pattern hashtagPattern = Pattern.compile("#([a-zA-Z0-9]{2,20})");
+    private Pattern usernamePattern = Pattern.compile("@([A-Za-z0-9]{1,30})");
 
     @Autowired
     public PostService(PostRepository postRepository,
-                       ITagService tagService) {
+                       INotificationService notificationService,
+                       ITagService tagService,
+                       IUserService userService) {
         this.postRepository = postRepository;
         this.tagService = tagService;
+        this.notificationService = notificationService;
+        this.userService = userService;
     }
 
     private void throwIfPostDoesntExist(UUID uuid) throws PostDoesntExistException {
@@ -171,11 +178,38 @@ public class PostService implements IPostService {
         return allFoundTags;
     }
 
+    private List<User> findMentionedUsersInContent(Post post) {
+        // look for the username pattern in the post content
+        Matcher m = usernamePattern.matcher(post.getContent());
+
+        Set<String> uniqueUsernames = new HashSet<>();
+
+        // find all mentioned usernames
+        while (m.find()) {
+            // every tag name should have all characters lower case
+            uniqueUsernames.add(m.group(1));
+        }
+
+        List<User> allFoundUsers = new ArrayList<>();
+        for (String username : uniqueUsernames) {
+            // for every username check if that user exists in the database
+            try {
+                User u = userService.findByUsername(username);
+                allFoundUsers.add(u);
+            } catch (UserDoesntExistException ignore) {
+            }
+        }
+        return allFoundUsers;
+    }
+
     @Override
     public Post processPostAndSave(Post post) {
         List<Tag> tags = findTagsInContent(post);
         tags.forEach(post::addTag);
-        return postRepository.save(post);
+        Post savedPost = postRepository.save(post);
+        List<User> mentionedUsers = findMentionedUsersInContent(post);
+        notificationService.notifyAboutMention(savedPost, mentionedUsers);
+        return savedPost;
     }
 
     @Override
@@ -190,7 +224,9 @@ public class PostService implements IPostService {
 
         if (quotedPost.isPresent() && !quotedPost.get().isDeleted()) {
             Post quote = new QuotePost(author, content, quotedPost.get());
-            return processPostAndSave(quote);
+            Post savedPost = processPostAndSave(quote);
+            notificationService.notifyAboutQuote((QuotePost)savedPost, quotedPost.get().getAuthor());
+            return savedPost;
         }
         throw new PostDoesntExistException(quotedPostUuid);
     }
@@ -201,7 +237,9 @@ public class PostService implements IPostService {
 
         if (parentPost.isPresent() && !parentPost.get().isDeleted()) {
             Post response = new ResponsePost(author, content, parentPost.get());
-            return processPostAndSave(response);
+            Post savedPost = processPostAndSave(response);
+            notificationService.notifyAboutResponse((ResponsePost)savedPost, parentPost.get().getAuthor());
+            return savedPost;
         }
         throw new PostDoesntExistException(parentPostUuid);
     }

@@ -164,11 +164,12 @@ public class ReportServiceTests {
     }
 
     @Test
-    public void checkReport_AcceptsReport() {
+    public void checkReport_AcceptsReport() throws Exception {
         UUID reportUuid = UUID.randomUUID();
 
         // given
         given(reportRepository.acceptReport(reportUuid)).willReturn(true);
+        given(reportRepository.existsById(reportUuid)).willReturn(true);
 
         // when
         boolean result = reportService.checkReport(reportUuid, true);
@@ -178,16 +179,39 @@ public class ReportServiceTests {
     }
 
     @Test
-    public void checkReport_RejectsReport() {
+    public void checkReport_RejectsReport() throws Exception {
         UUID reportUuid = UUID.randomUUID();
 
         // given
         given(reportRepository.rejectReport(reportUuid)).willReturn(true);
+        given(reportRepository.existsById(reportUuid)).willReturn(true);
 
         // when
         boolean result = reportService.checkReport(reportUuid, false);
 
         // then
         assertTrue(result);
+    }
+
+    @Test
+    public void checkReport_ThrowsWhenReportDoesNotExist() throws Exception {
+        UUID reportUuid = UUID.randomUUID();
+
+        // given
+        given(reportRepository.existsById(reportUuid)).willReturn(false);
+
+        // when
+        String ex1 = assertThrows(ResourceDoesNotExistException.class, () -> {
+            reportService.checkReport(reportUuid, true);
+        }).getMessage();
+
+        String ex2 = assertThrows(ResourceDoesNotExistException.class, () -> {
+            reportService.checkReport(reportUuid, false);
+        }).getMessage();
+
+        // then
+        String expectedMsg = String.format("Report with UUID %s does not exist", reportUuid.toString());
+        assertEquals(expectedMsg, ex1);
+        assertEquals(expectedMsg, ex2);
     }
 }

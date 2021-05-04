@@ -3,7 +3,11 @@ package ml.echelon133.microblog.report;
 import ml.echelon133.microblog.report.validators.ValidReason;
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.NotNull;
+
 public class ReportDto {
+
+    @NotNull(message = "reportedPostUuid is required")
     private String reportedPostUuid;
 
     @ValidReason

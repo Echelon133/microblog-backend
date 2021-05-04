@@ -60,7 +60,9 @@ public class ReportController {
 
     @PostMapping("/{uuid}")
     public ResponseEntity<Map<String, Boolean>> checkReport(@PathVariable String uuid,
-                                                            @RequestParam(required = false) boolean accept) throws IllegalArgumentException {
+                                                            @RequestParam(required = false) boolean accept)
+            throws IllegalArgumentException, ResourceDoesNotExistException {
+
         UUID reportUuid = UUID.fromString(uuid);
         boolean checked = reportService.checkReport(reportUuid, accept);
         return new ResponseEntity<>(Map.of("checked", checked), HttpStatus.OK);

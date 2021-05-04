@@ -64,13 +64,17 @@ public class ReportService implements IReportService {
     }
 
     @Override
-    public boolean checkReport(UUID reportUuid, boolean acceptReport) {
-        boolean report;
-        if (acceptReport) {
-            report = reportRepository.acceptReport(reportUuid);
-        } else {
-            report = reportRepository.rejectReport(reportUuid);
+    public boolean checkReport(UUID reportUuid, boolean acceptReport) throws ResourceDoesNotExistException {
+        if (reportRepository.existsById(reportUuid)) {
+            boolean report;
+            if (acceptReport) {
+                report = reportRepository.acceptReport(reportUuid);
+            } else {
+                report = reportRepository.rejectReport(reportUuid);
+            }
+            return report;
         }
-        return report;
+        String msg = String.format("Report with UUID %s does not exist", reportUuid.toString());
+        throw new ResourceDoesNotExistException(msg);
     }
 }

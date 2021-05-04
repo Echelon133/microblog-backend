@@ -337,6 +337,29 @@ public class ReportControllerTests {
     }
 
     @Test
+    public void createReport_HandlesNullReportedPostUuid() throws Exception {
+        ReportDto dto = new ReportDto();
+        dto.setReason("spam");
+        dto.setDescription("");
+
+        JsonContent<ReportDto> json = jsonReportDto.write(dto);
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/reports")
+                        .accept(APPLICATION_JSON)
+                        .with(user(user))
+                        .contentType(APPLICATION_JSON)
+                        .content(json.getJson())
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString())
+                .contains("reportedPostUuid is required");
+    }
+
+    @Test
     public void createReport_HandlesResourceDoesNotExistException() throws Exception {
         ReportDto dto = new ReportDto();
         dto.setReportedPostUuid(UUID.randomUUID().toString());

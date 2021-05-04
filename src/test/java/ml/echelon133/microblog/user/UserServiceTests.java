@@ -22,6 +22,9 @@ public class UserServiceTests {
     private UserRepository userRepository;
 
     @Mock
+    private RoleRepository roleRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
@@ -59,6 +62,8 @@ public class UserServiceTests {
         given(passwordEncoder.encode(user.getPassword())).willReturn(expectedPassword);
         given(userRepository.save(user)).willReturn(user);
         given(userRepository.followUserWithUuid(user.getUuid(), user.getUuid())).willReturn(Optional.of(1L));
+        given(roleRepository.findByName("ROLE_USER"))
+                .willReturn(Optional.of(new Role("ROLE_USER")));
 
         // when
         User savedUser = userService.setupAndSaveUser(user);
@@ -77,6 +82,8 @@ public class UserServiceTests {
         given(userRepository.save(user)).willReturn(user);
         given(userRepository.followUserWithUuid(user.getUuid(), user.getUuid()))
                 .willReturn(Optional.empty());
+        given(roleRepository.findByName("ROLE_USER"))
+                .willReturn(Optional.of(new Role("ROLE_USER")));
 
         // when
         String msg = assertThrows(UserCreationFailedException.class, () -> {

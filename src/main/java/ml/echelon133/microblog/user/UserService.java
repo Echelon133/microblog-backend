@@ -12,18 +12,29 @@ import java.util.UUID;
 public class UserService implements IUserService {
 
     private UserRepository userRepository;
+    private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
     private void throwIfUserDoesntExist(UUID uuid) throws UserDoesntExistException{
         if (!userRepository.existsById(uuid)) {
             throw new UserDoesntExistException(uuid);
         }
+    }
+
+    private Role getDefaultRole() {
+        Optional<Role> defaultRole = roleRepository.findByName("ROLE_USER");
+        if (defaultRole.isEmpty()) {
+            Role role = new Role("ROLE_USER");
+            return roleRepository.save(role);
+        }
+        return defaultRole.get();
     }
 
     @Override
@@ -34,6 +45,9 @@ public class UserService implements IUserService {
 
         String encodedPassword = passwordEncoder.encode(newUser.getPassword());
         newUser.setPassword(encodedPassword);
+
+        Role defaultRole = getDefaultRole();
+        newUser.addRole(defaultRole);
 
         User savedUser = userRepository.save(newUser);
 

@@ -4,16 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
+import org.neo4j.ogm.annotation.Relationship;
 import org.neo4j.ogm.annotation.typeconversion.Convert;
 import org.neo4j.ogm.id.UuidStrategy;
 import org.neo4j.ogm.typeconversion.UuidStringConverter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @NodeEntity
 public class User implements UserDetails, UserPrincipal {
@@ -30,6 +28,8 @@ public class User implements UserDetails, UserPrincipal {
     private String aviURL;
     private Date creationDate;
 
+    @Relationship(type = "HAS_ROLE")
+    private List<Role> roles;
 
     public User() {}
     public User(String username, String email, String password, String aviURL) {
@@ -41,12 +41,13 @@ public class User implements UserDetails, UserPrincipal {
         this.aviURL = aviURL;
         this.description = "";
         this.creationDate = new Date();
+        this.roles = new ArrayList<>();
     }
 
     @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of((GrantedAuthority) () -> "ROLE_USER");
+        return roles;
     }
 
     @Override
@@ -103,6 +104,14 @@ public class User implements UserDetails, UserPrincipal {
 
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
+    }
+
+    public void addRole(Role role) {
+        this.roles.add(role);
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
     }
 
     @JsonIgnore

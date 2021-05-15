@@ -616,4 +616,78 @@ public class UserServiceTests {
         assertEquals(dto.getDescription(), updated.getDescription());
         assertEquals(dto.getAviURL(), updated.getAviURL());
     }
+
+    @Test
+    public void findCommonFollows_ThrowsWhenOtherUserDoesNotExist() {
+        User testUser = getTestUser();
+        UUID otherUserUuid = UUID.randomUUID();
+
+        // given
+        given(userRepository.existsById(otherUserUuid)).willReturn(false);
+
+        // when
+        String msg = assertThrows(UserDoesntExistException.class, () -> {
+            userService.findCommonFollows(testUser, otherUserUuid, 0L, 5L);
+        }).getMessage();
+
+        // then
+        String expectedMsg = String.format("User with UUID %s doesn't exist", otherUserUuid.toString());
+        assertEquals(expectedMsg, msg);
+    }
+
+    @Test
+    public void findCommonFollows_ThrowsWhenSkipOrLimitNegative() {
+        User testUser = getTestUser();
+        UUID otherUserUuid = UUID.randomUUID();
+
+        // given
+        given(userRepository.existsById(otherUserUuid)).willReturn(true);
+
+        // then
+        String ex = assertThrows(IllegalArgumentException.class, () -> {
+            userService.findCommonFollows(testUser, otherUserUuid, -1L, 5L);
+        }).getMessage();
+
+        assertEquals("Invalid skip and/or limit values.", ex);
+
+        ex = assertThrows(IllegalArgumentException.class, () -> {
+            userService.findCommonFollows(testUser, otherUserUuid, 0L, -1L);
+        }).getMessage();
+
+        assertEquals("Invalid skip and/or limit values.", ex);
+    }
+
+    @Test
+    public void findCommonFollows_ThrowsWhenUserTriesToCheckCommonFollowsWithThemselves() {
+        User testUser = getTestUser();
+        UUID otherUserUuid = testUser.getUuid();
+
+        // given
+        given(userRepository.existsById(otherUserUuid)).willReturn(true);
+
+        // when
+        String msg = assertThrows(IllegalArgumentException.class, () -> {
+            userService.findCommonFollows(testUser, otherUserUuid, 0L, 5L);
+        }).getMessage();
+
+        // then
+        assertEquals("UUID of checked user is equal to the UUID of currently logged in user", msg);
+    }
+
+    @Test
+    public void findCommonFollows_ReturnsObjects() throws Exception {
+        User testUser = getTestUser();
+        UUID otherUserUuid = UUID.randomUUID();
+
+        // given
+        given(userRepository.existsById(otherUserUuid)).willReturn(true);
+        given(userRepository.findCommonFollows(testUser.getUuid(), otherUserUuid, 0L, 5L))
+                .willReturn(List.of(new User(), new User()));
+
+        // when
+        List<User> common = userService.findCommonFollows(testUser, otherUserUuid, 0L, 5L);
+
+        // then
+        assertEquals(2, common.size());
+    }
 }

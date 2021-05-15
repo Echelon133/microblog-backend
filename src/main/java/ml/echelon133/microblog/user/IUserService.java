@@ -7,6 +7,8 @@ public interface IUserService {
     User findByUsername(String username) throws UserDoesntExistException;
     List<User> findAllByUsernameContains(String search);
     User findByUuid(UUID uuid) throws UserDoesntExistException;
+    List<User> findCommonFollows(UserPrincipal user, UUID otherUser, Long skip, Long limit)
+            throws UserDoesntExistException, IllegalArgumentException;
     boolean checkIfUserFollows(UserPrincipal user, UUID followedUuid) throws UserDoesntExistException;
     boolean followUserWithUuid(UserPrincipal user, UUID followUuid) throws UserDoesntExistException, IllegalArgumentException;
     boolean unfollowUserWithUuid(UserPrincipal user, UUID unfollowUuid) throws UserDoesntExistException;

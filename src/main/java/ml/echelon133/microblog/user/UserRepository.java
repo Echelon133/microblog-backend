@@ -42,7 +42,7 @@ public interface UserRepository extends Neo4jRepository<User, UUID> {
             "LIMIT $limit")
     List<User> findAllFollowersOfUserWithUuid(UUID uuid, Long skip, Long limit);
 
-    @Query( "MATCH (u1:User)-[:FOLLOWS]->(common:User)<-[:FOLLOWS]-(u2:User) " +
+    @Query( "MATCH (u1:User)-[:FOLLOWS]->(common:User)-[:FOLLOWS]->(u2:User) " +
             "WHERE u1.uuid = $u1Uuid AND u2.uuid = $u2Uuid " +
             "AND common.uuid <> $u1Uuid AND common.uuid <> $u2Uuid " +
             "RETURN common ORDER BY datetime(common.creationDate) DESC SKIP $skip LIMIT $limit")

@@ -618,7 +618,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void findCommonFollows_ThrowsWhenOtherUserDoesNotExist() {
+    public void findFollowersUserKnows_ThrowsWhenOtherUserDoesNotExist() {
         User testUser = getTestUser();
         UUID otherUserUuid = UUID.randomUUID();
 
@@ -627,7 +627,7 @@ public class UserServiceTests {
 
         // when
         String msg = assertThrows(UserDoesntExistException.class, () -> {
-            userService.findCommonFollows(testUser, otherUserUuid, 0L, 5L);
+            userService.findFollowersUserKnows(testUser, otherUserUuid, 0L, 5L);
         }).getMessage();
 
         // then
@@ -636,7 +636,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void findCommonFollows_ThrowsWhenSkipOrLimitNegative() {
+    public void findFollowersUserKnows_ThrowsWhenSkipOrLimitNegative() {
         User testUser = getTestUser();
         UUID otherUserUuid = UUID.randomUUID();
 
@@ -645,20 +645,20 @@ public class UserServiceTests {
 
         // then
         String ex = assertThrows(IllegalArgumentException.class, () -> {
-            userService.findCommonFollows(testUser, otherUserUuid, -1L, 5L);
+            userService.findFollowersUserKnows(testUser, otherUserUuid, -1L, 5L);
         }).getMessage();
 
         assertEquals("Invalid skip and/or limit values.", ex);
 
         ex = assertThrows(IllegalArgumentException.class, () -> {
-            userService.findCommonFollows(testUser, otherUserUuid, 0L, -1L);
+            userService.findFollowersUserKnows(testUser, otherUserUuid, 0L, -1L);
         }).getMessage();
 
         assertEquals("Invalid skip and/or limit values.", ex);
     }
 
     @Test
-    public void findCommonFollows_ThrowsWhenUserTriesToCheckCommonFollowsWithThemselves() {
+    public void findFollowersUserKnows_ThrowsWhenUserTriesToCheckKnownFollowersWithThemselves() {
         User testUser = getTestUser();
         UUID otherUserUuid = testUser.getUuid();
 
@@ -667,7 +667,7 @@ public class UserServiceTests {
 
         // when
         String msg = assertThrows(IllegalArgumentException.class, () -> {
-            userService.findCommonFollows(testUser, otherUserUuid, 0L, 5L);
+            userService.findFollowersUserKnows(testUser, otherUserUuid, 0L, 5L);
         }).getMessage();
 
         // then
@@ -675,17 +675,17 @@ public class UserServiceTests {
     }
 
     @Test
-    public void findCommonFollows_ReturnsObjects() throws Exception {
+    public void findFollowersUserKnows_ReturnsObjects() throws Exception {
         User testUser = getTestUser();
         UUID otherUserUuid = UUID.randomUUID();
 
         // given
         given(userRepository.existsById(otherUserUuid)).willReturn(true);
-        given(userRepository.findCommonFollows(testUser.getUuid(), otherUserUuid, 0L, 5L))
+        given(userRepository.findFollowersUserKnows(testUser.getUuid(), otherUserUuid, 0L, 5L))
                 .willReturn(List.of(new User(), new User()));
 
         // when
-        List<User> common = userService.findCommonFollows(testUser, otherUserUuid, 0L, 5L);
+        List<User> common = userService.findFollowersUserKnows(testUser, otherUserUuid, 0L, 5L);
 
         // then
         assertEquals(2, common.size());

@@ -84,7 +84,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public List<User> findCommonFollows(UserPrincipal user, UUID otherUser, Long skip, Long limit)
+    public List<User> findFollowersUserKnows(UserPrincipal user, UUID otherUser, Long skip, Long limit)
             throws UserDoesntExistException, IllegalArgumentException {
         throwIfUserDoesntExist(otherUser);
         if (skip < 0 || limit < 0) {
@@ -94,7 +94,7 @@ public class UserService implements IUserService {
         if (user.getUuid().equals(otherUser)) {
             throw new IllegalArgumentException("UUID of checked user is equal to the UUID of currently logged in user");
         }
-        return userRepository.findCommonFollows(user.getUuid(), otherUser, skip, limit);
+        return userRepository.findFollowersUserKnows(user.getUuid(), otherUser, skip, limit);
     }
 
     @Override

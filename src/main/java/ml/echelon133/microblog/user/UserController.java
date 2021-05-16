@@ -100,8 +100,8 @@ public class UserController {
         return new ResponseEntity<>(userService.getUserProfileInfo(UUID.fromString(uuid)), HttpStatus.OK);
     }
 
-    @GetMapping("/{uuid}/commonFollows")
-    public ResponseEntity<List<User>> getCommonFollows(@PathVariable String uuid,
+    @GetMapping("/{uuid}/knownFollowers")
+    public ResponseEntity<List<User>> getKnownFollowers(@PathVariable String uuid,
                                                  @RequestParam(required = false) Long skip,
                                                  @RequestParam(required = false) Long limit) throws Exception {
         if (skip == null) {
@@ -111,7 +111,7 @@ public class UserController {
             limit = 5L;
         }
         UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        List<User> commonFollows = userService.findCommonFollows(loggedUser, UUID.fromString(uuid), skip, limit);
+        List<User> commonFollows = userService.findFollowersUserKnows(loggedUser, UUID.fromString(uuid), skip, limit);
         return new ResponseEntity<>(commonFollows, HttpStatus.OK);
     }
 

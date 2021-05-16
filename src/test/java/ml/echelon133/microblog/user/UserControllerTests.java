@@ -1449,16 +1449,16 @@ public class UserControllerTests {
     }
 
     @Test
-    public void getCommonFollows_UserDoesNotExist() throws Exception {
+    public void getKnownFollowers_UserDoesNotExist() throws Exception {
         UUID otherUuid = UUID.randomUUID();
 
         // given
-        given(userService.findCommonFollows(testUser, otherUuid, 0L, 5L))
+        given(userService.findFollowersUserKnows(testUser, otherUuid, 0L, 5L))
                 .willThrow(new UserDoesntExistException(otherUuid));
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                get("/api/users/" + otherUuid + "/commonFollows")
+                get("/api/users/" + otherUuid + "/knownFollowers")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
         ).andReturn().getResponse();
@@ -1471,16 +1471,16 @@ public class UserControllerTests {
     }
 
     @Test
-    public void getCommonFollows_UserChecksCommonWithThemselves() throws Exception {
+    public void getKnownFollowers_UserChecksCommonWithThemselves() throws Exception {
         UUID otherUuid = testUser.getUuid();
 
         // given
-        given(userService.findCommonFollows(testUser, otherUuid, 0L, 5L))
+        given(userService.findFollowersUserKnows(testUser, otherUuid, 0L, 5L))
                 .willThrow(new IllegalArgumentException("UUID of checked user is equal to the UUID of currently logged in user"));
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                get("/api/users/" + otherUuid + "/commonFollows")
+                get("/api/users/" + otherUuid + "/knownFollowers")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
         ).andReturn().getResponse();
@@ -1492,7 +1492,7 @@ public class UserControllerTests {
     }
 
     @Test
-    public void getCommonFollows_NoSkipAndNoLimitSetsValuesToDefault() throws Exception {
+    public void getKnownFollowers_NoSkipAndNoLimitSetsValuesToDefault() throws Exception {
         UUID otherUuid = UUID.randomUUID();
 
         List<User> common = List.of(
@@ -1503,12 +1503,12 @@ public class UserControllerTests {
         JsonContent<List<User>> json = jsonUsers.write(common);
 
         // given
-        given(userService.findCommonFollows(testUser, otherUuid, 0L, 5L))
+        given(userService.findFollowersUserKnows(testUser, otherUuid, 0L, 5L))
                 .willReturn(common);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                get("/api/users/" + otherUuid + "/commonFollows")
+                get("/api/users/" + otherUuid + "/knownFollowers")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
         ).andReturn().getResponse();
@@ -1519,7 +1519,7 @@ public class UserControllerTests {
     }
 
     @Test
-    public void getCommonFollows_ProvidedSkipAndLimitAreUsed() throws Exception {
+    public void getKnownFollowers_ProvidedSkipAndLimitAreUsed() throws Exception {
         UUID otherUuid = UUID.randomUUID();
 
         List<User> common = List.of(
@@ -1530,12 +1530,12 @@ public class UserControllerTests {
         JsonContent<List<User>> json = jsonUsers.write(common);
 
         // given
-        given(userService.findCommonFollows(testUser, otherUuid, 10L, 15L))
+        given(userService.findFollowersUserKnows(testUser, otherUuid, 10L, 15L))
                 .willReturn(common);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                get("/api/users/" + otherUuid + "/commonFollows")
+                get("/api/users/" + otherUuid + "/knownFollowers")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
                         .param("skip", "10")

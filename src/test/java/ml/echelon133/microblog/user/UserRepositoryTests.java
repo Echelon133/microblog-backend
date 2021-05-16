@@ -398,10 +398,13 @@ public class UserRepositoryTests {
         User u4 = userRepository.findByUsername("user4").orElse(null);
         User u5 = userRepository.findByUsername("user5").orElse(null);
 
-        // make u1 and u2 each follow u3, u4, u5
+        // make u1 follow u3, u4, u5
         for (User u : List.of(u3, u4, u5)) {
             userRepository.followUserWithUuid(u1.getUuid(), u.getUuid());
-            userRepository.followUserWithUuid(u2.getUuid(), u.getUuid());
+        }
+        // make u3, u4, u5 follow u2
+        for (User u: List.of(u3, u4, u5)) {
+            userRepository.followUserWithUuid(u.getUuid(), u2.getUuid());
         }
 
         // when
@@ -424,10 +427,13 @@ public class UserRepositoryTests {
         User u4 = userRepository.findByUsername("user4").orElse(null);
         User u5 = userRepository.findByUsername("user5").orElse(null);
 
-        // make u1 and u2 each follow u3, u4, u5
+        // make u1 follow u3, u4, u5
         for (User u : List.of(u3, u4, u5)) {
             userRepository.followUserWithUuid(u1.getUuid(), u.getUuid());
-            userRepository.followUserWithUuid(u2.getUuid(), u.getUuid());
+        }
+        // make u3, u4, u5 follow u2
+        for (User u: List.of(u3, u4, u5)) {
+            userRepository.followUserWithUuid(u.getUuid(), u2.getUuid());
         }
 
         // when
@@ -445,10 +451,13 @@ public class UserRepositoryTests {
         User u4 = userRepository.findByUsername("user4").orElse(null);
         User u5 = userRepository.findByUsername("user5").orElse(null);
 
-        // make u1 and u2 each follow u3, u4, u5
+        // make u1 follow u3, u4, u5
         for (User u : List.of(u3, u4, u5)) {
             userRepository.followUserWithUuid(u1.getUuid(), u.getUuid());
-            userRepository.followUserWithUuid(u2.getUuid(), u.getUuid());
+        }
+        // make u3, u4, u5 follow u2
+        for (User u: List.of(u3, u4, u5)) {
+            userRepository.followUserWithUuid(u.getUuid(), u2.getUuid());
         }
 
         // when

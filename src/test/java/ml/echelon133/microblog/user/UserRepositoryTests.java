@@ -375,7 +375,7 @@ public class UserRepositoryTests {
     }
 
     @Test
-    public void findCommonFollows_ReturnsEmptyListIfUsersOnlyFollowEachOther() {
+    public void findFollowersUserKnows_ReturnsEmptyListIfUsersOnlyFollowEachOther() {
         User u1 = userRepository.findByUsername("user1").orElse(null);
         User u2 = userRepository.findByUsername("user2").orElse(null);
 
@@ -384,28 +384,31 @@ public class UserRepositoryTests {
         userRepository.followUserWithUuid(u2.getUuid(), u1.getUuid());
 
         // when
-        List<User> common = userRepository.findCommonFollows(u1.getUuid(), u2.getUuid(), 0L, 5L);
+        List<User> common = userRepository.findFollowersUserKnows(u1.getUuid(), u2.getUuid(), 0L, 5L);
 
         // then
         assertEquals(0, common.size());
     }
 
     @Test
-    public void findCommonFollows_ReturnsCommonFollows() {
+    public void findFollowersUserKnows_ReturnsKnownFollowers() {
         User u1 = userRepository.findByUsername("user1").orElse(null);
         User u2 = userRepository.findByUsername("user2").orElse(null);
         User u3 = userRepository.findByUsername("user3").orElse(null);
         User u4 = userRepository.findByUsername("user4").orElse(null);
         User u5 = userRepository.findByUsername("user5").orElse(null);
 
-        // make u1 and u2 each follow u3, u4, u5
+        // make u1 follow u3, u4, u5
         for (User u : List.of(u3, u4, u5)) {
             userRepository.followUserWithUuid(u1.getUuid(), u.getUuid());
-            userRepository.followUserWithUuid(u2.getUuid(), u.getUuid());
+        }
+        // make u3, u4, u5 follow u2
+        for (User u: List.of(u3, u4, u5)) {
+            userRepository.followUserWithUuid(u.getUuid(), u2.getUuid());
         }
 
         // when
-        List<User> common = userRepository.findCommonFollows(u1.getUuid(), u2.getUuid(), 0L, 5L);
+        List<User> common = userRepository.findFollowersUserKnows(u1.getUuid(), u2.getUuid(), 0L, 5L);
 
         // then
         List<String> usernames = common.stream().map(u -> u.getUsername()).collect(Collectors.toList());
@@ -417,42 +420,48 @@ public class UserRepositoryTests {
     }
 
     @Test
-    public void findCommonFollows_SkipsResults() {
+    public void findFollowersUserKnows_SkipsResults() {
         User u1 = userRepository.findByUsername("user1").orElse(null);
         User u2 = userRepository.findByUsername("user2").orElse(null);
         User u3 = userRepository.findByUsername("user3").orElse(null);
         User u4 = userRepository.findByUsername("user4").orElse(null);
         User u5 = userRepository.findByUsername("user5").orElse(null);
 
-        // make u1 and u2 each follow u3, u4, u5
+        // make u1 follow u3, u4, u5
         for (User u : List.of(u3, u4, u5)) {
             userRepository.followUserWithUuid(u1.getUuid(), u.getUuid());
-            userRepository.followUserWithUuid(u2.getUuid(), u.getUuid());
+        }
+        // make u3, u4, u5 follow u2
+        for (User u: List.of(u3, u4, u5)) {
+            userRepository.followUserWithUuid(u.getUuid(), u2.getUuid());
         }
 
         // when
-        List<User> common = userRepository.findCommonFollows(u1.getUuid(), u2.getUuid(), 1L, 5L);
+        List<User> common = userRepository.findFollowersUserKnows(u1.getUuid(), u2.getUuid(), 1L, 5L);
 
         // then
         assertEquals(2, common.size());
     }
 
     @Test
-    public void findCommonFollows_LimitsResults() {
+    public void findFollowersUserKnows_LimitsResults() {
         User u1 = userRepository.findByUsername("user1").orElse(null);
         User u2 = userRepository.findByUsername("user2").orElse(null);
         User u3 = userRepository.findByUsername("user3").orElse(null);
         User u4 = userRepository.findByUsername("user4").orElse(null);
         User u5 = userRepository.findByUsername("user5").orElse(null);
 
-        // make u1 and u2 each follow u3, u4, u5
+        // make u1 follow u3, u4, u5
         for (User u : List.of(u3, u4, u5)) {
             userRepository.followUserWithUuid(u1.getUuid(), u.getUuid());
-            userRepository.followUserWithUuid(u2.getUuid(), u.getUuid());
+        }
+        // make u3, u4, u5 follow u2
+        for (User u: List.of(u3, u4, u5)) {
+            userRepository.followUserWithUuid(u.getUuid(), u2.getUuid());
         }
 
         // when
-        List<User> common = userRepository.findCommonFollows(u1.getUuid(), u2.getUuid(), 0L, 1L);
+        List<User> common = userRepository.findFollowersUserKnows(u1.getUuid(), u2.getUuid(), 0L, 1L);
 
         // then
         assertEquals(1, common.size());

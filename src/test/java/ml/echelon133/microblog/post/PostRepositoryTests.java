@@ -145,11 +145,8 @@ public class PostRepositoryTests {
 
     @Test
     public void getFeedForUserWithUuid_IsEmptyWhenUserDoesntExist() {
-        Date date7DaysAgo = Date.from(Instant.now().minus(1, MINUTES));
         List<FeedPost> posts = postRepository
-                .getFeedForUserWithUuid_PostedBetween(UUID.randomUUID(),
-                        date7DaysAgo,
-                        new Date(), 0L, 10L);
+                .getFeedForUserWithUuid(UUID.randomUUID(), 0L, 10L);
 
         assertEquals(0, posts.size());
     }
@@ -158,13 +155,9 @@ public class PostRepositoryTests {
     public void getFeedForUserWithUuid_ContainsMostRecentPosts() {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
-        Date date15MinAgo = Date.from(Instant.now().minus(15, MINUTES));
-
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForUserWithUuid_PostedBetween(user.getUuid(),
-                        date15MinAgo,
-                        new Date(), 0L, 10L);
+                .getFeedForUserWithUuid(user.getUuid(), 0L, 10L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -186,20 +179,16 @@ public class PostRepositoryTests {
         post.markAsDeleted(); // mark as deleted even before saving it
         postRepository.save(post);
 
-        Date date15MinAgo = Date.from(Instant.now().minus(15, MINUTES));
-
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForUserWithUuid_PostedBetween(user.getUuid(),
-                        date15MinAgo,
-                        new Date(), 0L, 20L);
+                .getFeedForUserWithUuid(user.getUuid(), 0L, 10L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(10, posts.size());
-        // expect posts with content 5, 6, 7, 8, 9, 15, 16, 17, 18, 19 (all made within last 15 minutes)
+        // expect posts with content 5, 6, 7, 8, 9, 15, 16, 17, 18, 19
         Arrays.asList(5, 6, 7, 8, 9, 15, 16, 17, 18, 19).forEach(i -> {
             assertTrue(contents.contains(i.toString()));
         });
@@ -209,13 +198,9 @@ public class PostRepositoryTests {
     public void getFeedForUserWithUuid_SkipArgumentWorks() {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
-        Date date15MinAgo = Date.from(Instant.now().minus(15, MINUTES));
-
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForUserWithUuid_PostedBetween(user.getUuid(),
-                        date15MinAgo,
-                        new Date(), 5L, 10L);
+                .getFeedForUserWithUuid(user.getUuid(), 5L, 5L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -232,13 +217,9 @@ public class PostRepositoryTests {
     public void getFeedForUserWithUuid_LimitArgumentWorks() {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
-        Date date15MinAgo = Date.from(Instant.now().minus(15, MINUTES));
-
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForUserWithUuid_PostedBetween(user.getUuid(),
-                        date15MinAgo,
-                        new Date(), 0L, 5L);
+                .getFeedForUserWithUuid(user.getUuid(), 0L, 5L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -255,14 +236,9 @@ public class PostRepositoryTests {
     public void getFeedForUserWithUuid_FeedWithAllPostsIsSorted() {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
-        // using this date shows all of the posts, since the oldest posts are from 30 min before
-        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
-
         // when
         List<FeedPost> allPosts = postRepository
-                .getFeedForUserWithUuid_PostedBetween(user.getUuid(),
-                        date40MinAgo,
-                        new Date(), 0L, 20L); // limit to 20, to show all posts
+                .getFeedForUserWithUuid(user.getUuid(), 0L, 20L); // limit to 20, to show all posts
 
         // make a list of contents of retrieved posts
         List<String> contents = allPosts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -287,14 +263,9 @@ public class PostRepositoryTests {
         User test2 = userRepository.findByUsername("test2").orElse(new User());
         User test3 = userRepository.findByUsername("test3").orElse(new User());
 
-        // using this date shows all of the posts, since the oldest posts are from 30 min before
-        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
-
         // when
         List<FeedPost> allPosts = postRepository
-                .getFeedForUserWithUuid_PostedBetween(test1.getUuid(),
-                        date40MinAgo,
-                        new Date(), 0L, 20L); // limit to 20, to show all posts
+                .getFeedForUserWithUuid(test1.getUuid(), 0L, 20L); // limit to 20, to show all posts
 
         // then
         // expected posts of test1: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
@@ -789,11 +760,8 @@ public class PostRepositoryTests {
 
     @Test
     public void getFeedForUserWithUuid_Popular_IsEmptyWhenUserDoesntExist() {
-        Date date7DaysAgo = Date.from(Instant.now().minus(1, MINUTES));
         List<FeedPost> posts = postRepository
-                .getFeedForUserWithUuid_Popular_PostedBetween(UUID.randomUUID(),
-                        date7DaysAgo,
-                        new Date(), 0L, 10L);
+                .getFeedForUserWithUuid_Popular(UUID.randomUUID(), 0L, 10L);
 
         assertEquals(0, posts.size());
     }
@@ -807,13 +775,9 @@ public class PostRepositoryTests {
         post.markAsDeleted(); // mark as deleted even before saving it
         postRepository.save(post);
 
-        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
-
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForUserWithUuid_Popular_PostedBetween(user.getUuid(),
-                        date40MinAgo,
-                        new Date(), 0L, 10L);
+                .getFeedForUserWithUuid_Popular(user.getUuid(), 0L, 10L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -830,13 +794,9 @@ public class PostRepositoryTests {
     public void getFeedForUserWithUuid_Popular_SkipArgumentWorks() {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
-        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
-
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForUserWithUuid_Popular_PostedBetween(user.getUuid(),
-                        date40MinAgo,
-                        new Date(), 5L, 5L);
+                .getFeedForUserWithUuid_Popular(user.getUuid(), 5L, 5L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -853,13 +813,9 @@ public class PostRepositoryTests {
     public void getFeedForUserWithUuid_Popular_LimitArgumentWorks() {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
-        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
-
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForUserWithUuid_Popular_PostedBetween(user.getUuid(),
-                        date40MinAgo,
-                        new Date(), 0L, 5L);
+                .getFeedForUserWithUuid_Popular(user.getUuid(), 0L, 5L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -876,14 +832,9 @@ public class PostRepositoryTests {
     public void getFeedForUserWithUuid_Popular_FeedWithAllPostsIsSorted() {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
-        // using this date shows all of the posts, since the oldest posts are from 30 min before
-        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
-
         // when
         List<FeedPost> allPosts = postRepository
-                .getFeedForUserWithUuid_Popular_PostedBetween(user.getUuid(),
-                        date40MinAgo,
-                        new Date(), 0L, 20L); // limit to 20, to show all posts
+                .getFeedForUserWithUuid_Popular(user.getUuid(), 0L, 20L); // limit to 20, to show all posts
 
         // make a list of contents of retrieved posts
         List<String> contents = allPosts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -911,14 +862,9 @@ public class PostRepositoryTests {
         User test2 = userRepository.findByUsername("test2").orElse(new User());
         User test3 = userRepository.findByUsername("test3").orElse(new User());
 
-        // using this date shows all of the posts, since the oldest posts are from 30 min before
-        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
-
         // when
         List<FeedPost> allPosts = postRepository
-                .getFeedForUserWithUuid_Popular_PostedBetween(test1.getUuid(),
-                        date40MinAgo,
-                        new Date(), 0L, 20L); // limit to 20, to show all posts
+                .getFeedForUserWithUuid_Popular(test1.getUuid(), 0L, 20L); // limit to 20, to show all posts
 
         // then
         // expected posts of test1: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
@@ -956,7 +902,7 @@ public class PostRepositoryTests {
     }
 
     @Test
-    public void getFeedForAnonymousUser_Popular_PostedBetween_DoesNotContainDeletedPosts() {
+    public void getFeedForAnonymousUser_Popular_DoesNotContainDeletedPosts() {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
         // create a post
@@ -964,13 +910,9 @@ public class PostRepositoryTests {
         post.markAsDeleted(); // mark as deleted even before saving it
         postRepository.save(post);
 
-        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
-
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForAnonymousUser_Popular_PostedBetween(
-                        date40MinAgo,
-                        new Date(), 0L, 10L);
+                .getFeedForAnonymousUser_Popular(0L, 10L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -984,14 +926,10 @@ public class PostRepositoryTests {
     }
 
     @Test
-    public void getFeedForAnonymousUser_Popular_PostedBetween_SkipArgumentWorks() {
-        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
-
+    public void getFeedForAnonymousUser_Popular_SkipArgumentWorks() {
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForAnonymousUser_Popular_PostedBetween(
-                        date40MinAgo,
-                        new Date(), 5L, 5L);
+                .getFeedForAnonymousUser_Popular(5L, 5L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -1005,16 +943,10 @@ public class PostRepositoryTests {
     }
 
     @Test
-    public void getFeedForAnonymousUser_Popular_PostedBetween_LimitArgumentWorks() {
-        User user = userRepository.findByUsername("test1").orElse(new User());
-
-        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
-
+    public void getFeedForAnonymousUser_Popular_LimitArgumentWorks() {
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForAnonymousUser_Popular_PostedBetween(
-                        date40MinAgo,
-                        new Date(), 0L, 5L);
+                .getFeedForAnonymousUser_Popular(0L, 5L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -1028,15 +960,10 @@ public class PostRepositoryTests {
     }
 
     @Test
-    public void getFeedForAnonymousUser_Popular_PostedBetween_FeedWithAllPostsIsSorted() {
-        // using this date shows all of the posts, since the oldest posts are from 30 min before
-        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
-
+    public void getFeedForAnonymousUser_Popular_FeedWithAllPostsIsSorted() {
         // when
         List<FeedPost> allPosts = postRepository
-                .getFeedForAnonymousUser_Popular_PostedBetween(
-                        date40MinAgo,
-                        new Date(), 0L, 25L); // limit to 25
+                .getFeedForAnonymousUser_Popular(0L, 25L); // limit to 25
 
         // make a list of contents of retrieved posts
         List<String> contents = allPosts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -1061,20 +988,15 @@ public class PostRepositoryTests {
     }
 
     @Test
-    public void getFeedForAnonymousUser_Popular_PostedBetween_PostsHaveCorrectAuthors() {
+    public void getFeedForAnonymousUser_Popular_PostsHaveCorrectAuthors() {
         User test1 = userRepository.findByUsername("test1").orElse(new User());
         User test2 = userRepository.findByUsername("test2").orElse(new User());
         User test3 = userRepository.findByUsername("test3").orElse(new User());
         User test4 = userRepository.findByUsername("test4").orElse(new User());
 
-        // using this date shows all of the posts, since the oldest posts are from 30 min before
-        Date date40MinAgo = Date.from(Instant.now().minus(40, MINUTES));
-
         // when
         List<FeedPost> allPosts = postRepository
-                .getFeedForAnonymousUser_Popular_PostedBetween(
-                        date40MinAgo,
-                        new Date(), 0L, 25L); // limit to 25, to show all posts
+                .getFeedForAnonymousUser_Popular(0L, 25L); // limit to 25, to show all posts
 
         // then
         // expected posts of test1: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9

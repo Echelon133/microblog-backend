@@ -8,23 +8,6 @@ import java.util.UUID;
 
 public interface IPostService {
 
-    enum PostsSince {
-        ONE_HOUR(1),
-        SIX_HOURS(6),
-        TWELVE_HOURS(12),
-        DAY(24);
-
-        private int hours;
-
-        PostsSince(int i) {
-            this.hours = i;
-        }
-
-        int getHours() {
-            return hours;
-        }
-    }
-
     FeedPost getByUuid(UUID uuid) throws PostDoesntExistException;
     PostInfo getPostInfo(UUID uuid) throws PostDoesntExistException;
     List<FeedPost> getAllResponsesTo(UUID uuid, Long skip, Long limit) throws PostDoesntExistException, IllegalArgumentException;
@@ -32,9 +15,9 @@ public interface IPostService {
     boolean checkIfUserWithUuidLikes(UserPrincipal user, UUID postUuid) throws PostDoesntExistException;
     boolean likePost(UserPrincipal user, UUID postUuid) throws PostDoesntExistException;
     boolean unlikePost(UserPrincipal user, UUID postUuid) throws PostDoesntExistException;
-    List<FeedPost> getFeedForUser(UserPrincipal user, PostsSince since, Long skip, Long limit) throws IllegalArgumentException;
-    List<FeedPost> getFeedForUser_Popular(UserPrincipal user, PostsSince since, Long skip, Long limit) throws IllegalArgumentException;
-    List<FeedPost> getFeedForAnonymousUser(PostsSince since, Long skip, Long limit) throws IllegalArgumentException;
+    List<FeedPost> getFeedForUser(UserPrincipal user, Long skip, Long limit) throws IllegalArgumentException;
+    List<FeedPost> getFeedForUser_Popular(UserPrincipal user, Long skip, Long limit) throws IllegalArgumentException;
+    List<FeedPost> getFeedForAnonymousUser(Long skip, Long limit) throws IllegalArgumentException;
     Post processPostAndSave(Post post);
     Post postPost(User author, String content);
     Post postQuote(User author, String content, UUID quoteUuid) throws PostDoesntExistException;

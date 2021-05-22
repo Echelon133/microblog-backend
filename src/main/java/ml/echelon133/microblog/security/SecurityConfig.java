@@ -59,7 +59,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .antMatchers(HttpMethod.GET, "/api/notifications").hasRole("USER")
                         .antMatchers(HttpMethod.GET, "/api/notifications/unreadCounter").hasRole("USER")
                         .antMatchers(HttpMethod.GET, "/api/users/me").hasRole("USER")
-                        .antMatchers(HttpMethod.GET, "/api/users/*/commonFollows").hasRole("USER")
+                        .antMatchers(HttpMethod.GET, "/api/users/*/knownFollowers").hasRole("USER")
                         .antMatchers(HttpMethod.GET, "/api/posts/*/like").hasRole("USER")
                         .antMatchers(HttpMethod.GET, "/api/**").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/users/register").permitAll()

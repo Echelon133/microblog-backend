@@ -8,13 +8,9 @@ import ml.echelon133.microblog.user.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Clock;
-import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.time.temporal.ChronoUnit.HOURS;
 
 @Service
 public class PostService implements IPostService {
@@ -23,7 +19,6 @@ public class PostService implements IPostService {
     private IUserService userService;
     private INotificationService notificationService;
     private ITagService tagService;
-    private Clock clock = Clock.systemDefaultZone();
     private Pattern hashtagPattern = Pattern.compile("#([a-zA-Z0-9]{2,20})");
     private Pattern usernamePattern = Pattern.compile("@([A-Za-z0-9]{1,30})");
 
@@ -109,45 +104,30 @@ public class PostService implements IPostService {
     }
 
     @Override
-    public List<FeedPost> getFeedForUser(UserPrincipal user, PostsSince since, Long skip, Long limit) throws IllegalArgumentException {
-
+    public List<FeedPost> getFeedForUser(UserPrincipal user, Long skip, Long limit) throws IllegalArgumentException {
         if (limit < 0 || skip < 0) {
             throw new IllegalArgumentException("Invalid skip and/or limit values.");
         }
-
-        int hoursToSubtract = since.getHours();
-        Date now = Date.from(Instant.now(clock));
-        Date before =  Date.from(now.toInstant().minus(hoursToSubtract, HOURS));
         return postRepository
-                .getFeedForUserWithUuid_PostedBetween(user.getUuid(), before, now, skip, limit);
+                .getFeedForUserWithUuid(user.getUuid(), skip, limit);
     }
 
     @Override
-    public List<FeedPost> getFeedForUser_Popular(UserPrincipal user, PostsSince since, Long skip, Long limit) throws IllegalArgumentException {
-
+    public List<FeedPost> getFeedForUser_Popular(UserPrincipal user, Long skip, Long limit) throws IllegalArgumentException {
         if (limit < 0 || skip < 0) {
             throw new IllegalArgumentException("Invalid skip and/or limit values.");
         }
-
-        int hoursToSubtract = since.getHours();
-        Date now = Date.from(Instant.now(clock));
-        Date before =  Date.from(now.toInstant().minus(hoursToSubtract, HOURS));
         return postRepository
-                .getFeedForUserWithUuid_Popular_PostedBetween(user.getUuid(), before, now, skip, limit);
+                .getFeedForUserWithUuid_Popular(user.getUuid(), skip, limit);
     }
 
     @Override
-    public List<FeedPost> getFeedForAnonymousUser(PostsSince since, Long skip, Long limit) throws IllegalArgumentException {
-
+    public List<FeedPost> getFeedForAnonymousUser(Long skip, Long limit) throws IllegalArgumentException {
         if (limit < 0 || skip < 0) {
             throw new IllegalArgumentException("Invalid skip and/or limit values.");
         }
-
-        int hoursToSubtract = since.getHours();
-        Date now = Date.from(Instant.now(clock));
-        Date before =  Date.from(now.toInstant().minus(hoursToSubtract, HOURS));
         return postRepository
-                .getFeedForAnonymousUser_Popular_PostedBetween(before, now, skip, limit);
+                .getFeedForAnonymousUser_Popular(skip, limit);
     }
 
     private List<Tag> findTagsInContent(Post post) {
@@ -258,9 +238,5 @@ public class PostService implements IPostService {
             return postRepository.save(b).isDeleted();
         }
         throw new PostDoesntExistException(postUuid);
-    }
-
-    public void setClock(Clock clock) {
-        this.clock = clock;
     }
 }

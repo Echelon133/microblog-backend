@@ -11,12 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Clock;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.time.temporal.ChronoUnit.HOURS;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -424,18 +421,17 @@ public class PostServiceTests {
 
     @Test
     public void getFeedForUser_ThrowsWhenSkipAndLimitArgumentsNegative() {
-        UUID uuid = UUID.randomUUID();
         User u = new User();
 
         // then
         Exception ex = assertThrows(IllegalArgumentException.class, () -> {
-            postService.getFeedForUser(u, IPostService.PostsSince.ONE_HOUR, -1L, 5L);
+            postService.getFeedForUser(u, -1L, 5L);
         });
 
         assertEquals("Invalid skip and/or limit values.", ex.getMessage());
 
         ex = assertThrows(IllegalArgumentException.class, () -> {
-            postService.getFeedForUser(u, IPostService.PostsSince.ONE_HOUR, 0L, -1L);
+            postService.getFeedForUser(u, 0L, -1L);
         });
 
         assertEquals("Invalid skip and/or limit values.", ex.getMessage());
@@ -447,47 +443,17 @@ public class PostServiceTests {
         User u = new User();
         u.setUuid(uuid);
 
-        Date dateNow = new Date();
-        Date dateOneHourAgo = Date.from(dateNow.toInstant().minus(1, HOURS));
-        Date dateSixHoursAgo = Date.from(dateNow.toInstant().minus(6, HOURS));
-        Date dateTwelveHoursAgo = Date.from(dateNow.toInstant().minus(12, HOURS));
-        Date dayAgo = Date.from(dateNow.toInstant().minus(24, HOURS));
-
-        // inject fixed clock into the service
-        postService.setClock(Clock.fixed(dateNow.toInstant(), ZoneId.systemDefault()));
-
         // given
         given(postRepository
-                .getFeedForUserWithUuid_PostedBetween(uuid, dateOneHourAgo, dateNow, 0L, 5L))
+                .getFeedForUserWithUuid(uuid, 0L, 5L))
                 .willReturn(List.of(new FeedPost()));
-        given(postRepository
-                .getFeedForUserWithUuid_PostedBetween(uuid, dateSixHoursAgo, dateNow, 0L, 5L))
-                .willReturn(List.of(new FeedPost(), new FeedPost()));
-        given(postRepository
-                .getFeedForUserWithUuid_PostedBetween(uuid, dateTwelveHoursAgo, dateNow, 0L, 5L))
-                .willReturn(List.of(new FeedPost(), new FeedPost(), new FeedPost()));
-        given(postRepository
-                .getFeedForUserWithUuid_PostedBetween(uuid, dayAgo, dateNow, 0L, 5L))
-                .willReturn(List.of(new FeedPost(), new FeedPost(), new FeedPost(), new FeedPost()));
 
         // when
         List<FeedPost> oneHourResults = postService
-                .getFeedForUser(u, IPostService.PostsSince.ONE_HOUR, 0L, 5L);
-
-        List<FeedPost> sixHoursResults = postService
-                .getFeedForUser(u, IPostService.PostsSince.SIX_HOURS, 0L, 5L);
-
-        List<FeedPost> twelveHoursResults = postService
-                .getFeedForUser(u, IPostService.PostsSince.TWELVE_HOURS, 0L, 5L);
-
-        List<FeedPost> dayResults = postService
-                .getFeedForUser(u, IPostService.PostsSince.DAY, 0L, 5L);
+                .getFeedForUser(u, 0L, 5L);
 
         // then
         assertEquals(1, oneHourResults.size());
-        assertEquals(2, sixHoursResults.size());
-        assertEquals(3, twelveHoursResults.size());
-        assertEquals(4, dayResults.size());
     }
 
     @Test
@@ -758,13 +724,13 @@ public class PostServiceTests {
 
         // then
         Exception ex = assertThrows(IllegalArgumentException.class, () -> {
-            postService.getFeedForUser_Popular(u, IPostService.PostsSince.ONE_HOUR, -1L, 5L);
+            postService.getFeedForUser_Popular(u, -1L, 5L);
         });
 
         assertEquals("Invalid skip and/or limit values.", ex.getMessage());
 
         ex = assertThrows(IllegalArgumentException.class, () -> {
-            postService.getFeedForUser_Popular(u, IPostService.PostsSince.ONE_HOUR, 0L, -1L);
+            postService.getFeedForUser_Popular(u, 0L, -1L);
         });
 
         assertEquals("Invalid skip and/or limit values.", ex.getMessage());
@@ -776,48 +742,17 @@ public class PostServiceTests {
         User u = new User();
         u.setUuid(uuid);
 
-        Date dateNow = new Date();
-        Date dateOneHourAgo = Date.from(dateNow.toInstant().minus(1, HOURS));
-        Date dateSixHoursAgo = Date.from(dateNow.toInstant().minus(6, HOURS));
-        Date dateTwelveHoursAgo = Date.from(dateNow.toInstant().minus(12, HOURS));
-        Date dayAgo = Date.from(dateNow.toInstant().minus(24, HOURS));
-
-        // inject fixed clock into the service
-        postService.setClock(Clock.fixed(dateNow.toInstant(), ZoneId.systemDefault()));
-
         // given
         given(postRepository
-                .getFeedForUserWithUuid_Popular_PostedBetween(uuid, dateOneHourAgo, dateNow, 0L, 5L))
+                .getFeedForUserWithUuid_Popular(uuid, 0L, 5L))
                 .willReturn(List.of(new FeedPost()));
-        given(postRepository
-                .getFeedForUserWithUuid_Popular_PostedBetween(uuid, dateSixHoursAgo, dateNow, 0L, 5L))
-                .willReturn(List.of(new FeedPost(), new FeedPost()));
-        given(postRepository
-                .getFeedForUserWithUuid_Popular_PostedBetween(uuid, dateTwelveHoursAgo, dateNow, 0L, 5L))
-                .willReturn(List.of(new FeedPost(), new FeedPost(), new FeedPost()));
-        given(postRepository
-                .getFeedForUserWithUuid_Popular_PostedBetween(uuid, dayAgo, dateNow, 0L, 5L))
-                .willReturn(List.of(new FeedPost(), new FeedPost(), new FeedPost(), new FeedPost()));
 
         // when
         List<FeedPost> oneHourResults = postService
-                .getFeedForUser_Popular(u, IPostService.PostsSince.ONE_HOUR, 0L, 5L);
-
-        List<FeedPost> sixHoursResults = postService
-                .getFeedForUser_Popular(u, IPostService.PostsSince.SIX_HOURS, 0L, 5L);
-
-        List<FeedPost> twelveHoursResults = postService
-                .getFeedForUser_Popular(u, IPostService.PostsSince.TWELVE_HOURS, 0L, 5L);
-
-        List<FeedPost> dayResults = postService
-                .getFeedForUser_Popular(u, IPostService.PostsSince.DAY, 0L, 5L);
-
+                .getFeedForUser_Popular(u, 0L, 5L);
 
         // then
         assertEquals(1, oneHourResults.size());
-        assertEquals(2, sixHoursResults.size());
-        assertEquals(3, twelveHoursResults.size());
-        assertEquals(4, dayResults.size());
     }
 
     @Test
@@ -825,13 +760,13 @@ public class PostServiceTests {
 
         // then
         Exception ex = assertThrows(IllegalArgumentException.class, () -> {
-            postService.getFeedForAnonymousUser(IPostService.PostsSince.ONE_HOUR, -1L, 5L);
+            postService.getFeedForAnonymousUser(-1L, 5L);
         });
 
         assertEquals("Invalid skip and/or limit values.", ex.getMessage());
 
         ex = assertThrows(IllegalArgumentException.class, () -> {
-            postService.getFeedForAnonymousUser(IPostService.PostsSince.ONE_HOUR, 0L, -1L);
+            postService.getFeedForAnonymousUser(0L, -1L);
         });
 
         assertEquals("Invalid skip and/or limit values.", ex.getMessage());
@@ -839,48 +774,16 @@ public class PostServiceTests {
 
     @Test
     public void getFeedForAnonymousUser_ReturnsCorrectlyFilteredResults() {
-
-        Date dateNow = new Date();
-        Date dateOneHourAgo = Date.from(dateNow.toInstant().minus(1, HOURS));
-        Date dateSixHoursAgo = Date.from(dateNow.toInstant().minus(6, HOURS));
-        Date dateTwelveHoursAgo = Date.from(dateNow.toInstant().minus(12, HOURS));
-        Date dayAgo = Date.from(dateNow.toInstant().minus(24, HOURS));
-
-        // inject fixed clock into the service
-        postService.setClock(Clock.fixed(dateNow.toInstant(), ZoneId.systemDefault()));
-
         // given
         given(postRepository
-                .getFeedForAnonymousUser_Popular_PostedBetween(dateOneHourAgo, dateNow, 0L, 5L))
+                .getFeedForAnonymousUser_Popular(0L, 5L))
                 .willReturn(List.of(new FeedPost()));
-        given(postRepository
-                .getFeedForAnonymousUser_Popular_PostedBetween(dateSixHoursAgo, dateNow, 0L, 5L))
-                .willReturn(List.of(new FeedPost(), new FeedPost()));
-        given(postRepository
-                .getFeedForAnonymousUser_Popular_PostedBetween(dateTwelveHoursAgo, dateNow, 0L, 5L))
-                .willReturn(List.of(new FeedPost(), new FeedPost(), new FeedPost()));
-        given(postRepository
-                .getFeedForAnonymousUser_Popular_PostedBetween(dayAgo, dateNow, 0L, 5L))
-                .willReturn(List.of(new FeedPost(), new FeedPost(), new FeedPost(), new FeedPost()));
 
         // when
         List<FeedPost> oneHourResults = postService
-                .getFeedForAnonymousUser(IPostService.PostsSince.ONE_HOUR, 0L, 5L);
-
-        List<FeedPost> sixHoursResults = postService
-                .getFeedForAnonymousUser(IPostService.PostsSince.SIX_HOURS, 0L, 5L);
-
-        List<FeedPost> twelveHoursResults = postService
-                .getFeedForAnonymousUser(IPostService.PostsSince.TWELVE_HOURS, 0L, 5L);
-
-        List<FeedPost> dayResults = postService
-                .getFeedForAnonymousUser(IPostService.PostsSince.DAY, 0L, 5L);
-
+                .getFeedForAnonymousUser(0L, 5L);
 
         // then
         assertEquals(1, oneHourResults.size());
-        assertEquals(2, sixHoursResults.size());
-        assertEquals(3, twelveHoursResults.size());
-        assertEquals(4, dayResults.size());
     }
 }

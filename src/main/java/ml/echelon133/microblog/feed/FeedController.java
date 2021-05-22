@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static ml.echelon133.microblog.post.IPostService.PostsSince.*;
-
 @RestController
 @RequestMapping("/api/feed")
 public class FeedController {
@@ -30,8 +28,7 @@ public class FeedController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FeedPost>> getUserFeed(@RequestParam(required = false) String since,
-                                                      @RequestParam(required = false) String by,
+    public ResponseEntity<List<FeedPost>> getUserFeed(@RequestParam(required = false) String by,
                                                       @RequestParam(required = false) Long skip,
                                                       @RequestParam(required = false) Long limit) throws IllegalArgumentException {
 
@@ -43,41 +40,21 @@ public class FeedController {
             limit = 20L;
         }
 
-        IPostService.PostsSince postsSince = ONE_HOUR;
-        if (since != null) {
-            switch(since.toUpperCase()) {
-                case "SIX_HOURS":
-                    postsSince = SIX_HOURS;
-                    break;
-                case "TWELVE_HOURS":
-                    postsSince = TWELVE_HOURS;
-                    break;
-                case "DAY":
-                    postsSince = DAY;
-                    break;
-                case "HOUR":
-                default:
-                    // postsSince holds ONE_HOUR already
-                    break;
-            }
-        }
-
         List<FeedPost> feed;
-
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth == null || auth instanceof AnonymousAuthenticationToken) {
-            feed = postService.getFeedForAnonymousUser(postsSince, skip, limit);
+            feed = postService.getFeedForAnonymousUser(skip, limit);
         } else {
             UserPrincipal loggedUser = (UserPrincipal) auth.getPrincipal();
             if (by != null && by.equalsIgnoreCase("POPULARITY")) {
                 // if 'by' is provided and contains 'POPULARITY'
                 // get most popular posts
-                feed = postService.getFeedForUser_Popular(loggedUser, postsSince, skip, limit);
+                feed = postService.getFeedForUser_Popular(loggedUser, skip, limit);
             } else {
                 // if 'by' is not provided or has some different value
                 // get most recent posts
-                feed = postService.getFeedForUser(loggedUser, postsSince, skip, limit);
+                feed = postService.getFeedForUser(loggedUser, skip, limit);
             }
         }
 

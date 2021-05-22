@@ -3,7 +3,6 @@ package ml.echelon133.microblog.feed;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ml.echelon133.microblog.post.PostService;
 import ml.echelon133.microblog.post.FeedPost;
-import ml.echelon133.microblog.post.IPostService;
 import ml.echelon133.microblog.user.User;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,7 +77,7 @@ public class FeedControllerTests {
         JsonContent<List<FeedPost>> json = jsonFeedPosts.write(testPosts);
 
         // given
-        given(postService.getFeedForUser(testUser, IPostService.PostsSince.ONE_HOUR, 0L, 20L))
+        given(postService.getFeedForUser(testUser, 0L, 20L))
                 .willReturn(testPosts);
 
         // when
@@ -101,7 +100,7 @@ public class FeedControllerTests {
         JsonContent<List<FeedPost>> json = jsonFeedPosts.write(testPosts);
 
         // given
-        given(postService.getFeedForUser(testUser, IPostService.PostsSince.ONE_HOUR, 5L, 50L))
+        given(postService.getFeedForUser(testUser, 5L, 50L))
                 .willReturn(testPosts);
 
         // when
@@ -119,73 +118,9 @@ public class FeedControllerTests {
     }
 
     @Test
-    public void getUserFeed_ProvidedSinceParameterIsUsed() throws Exception {
-        List<FeedPost> hour = List.of(new FeedPost());
-        List<FeedPost> sixHours = List.of(new FeedPost(), new FeedPost());
-        List<FeedPost> twelveHours = List.of(new FeedPost(), new FeedPost(), new FeedPost());
-        List<FeedPost> day = List.of(new FeedPost(), new FeedPost(), new FeedPost(), new FeedPost());
-
-        // json
-        JsonContent<List<FeedPost>> json1 = jsonFeedPosts.write(hour);
-        JsonContent<List<FeedPost>> json2 = jsonFeedPosts.write(sixHours);
-        JsonContent<List<FeedPost>> json3 = jsonFeedPosts.write(twelveHours);
-        JsonContent<List<FeedPost>> json4 = jsonFeedPosts.write(day);
-
-        // given
-        given(postService.getFeedForUser(testUser, IPostService.PostsSince.ONE_HOUR, 0L, 20L))
-                .willReturn(hour);
-        given(postService.getFeedForUser(testUser, IPostService.PostsSince.SIX_HOURS, 0L, 20L))
-                .willReturn(sixHours);
-        given(postService.getFeedForAnonymousUser(IPostService.PostsSince.TWELVE_HOURS, 0L, 20L))
-                .willReturn(twelveHours);
-        given(postService.getFeedForAnonymousUser(IPostService.PostsSince.DAY, 0L, 20L))
-                .willReturn(day);
-
-        // when
-        MockHttpServletResponse response1 = mockMvc.perform(
-                get("/api/feed")
-                        .accept(APPLICATION_JSON)
-                        .with(user(testUser))
-                        .param("since", "hOuR")
-        ).andReturn().getResponse();
-
-        MockHttpServletResponse response2 = mockMvc.perform(
-                get("/api/feed")
-                        .accept(APPLICATION_JSON)
-                        .with(user(testUser))
-                        .param("since", "six_HOURS")
-        ).andReturn().getResponse();
-
-        MockHttpServletResponse response3 = mockMvc.perform(
-                get("/api/feed")
-                        .accept(APPLICATION_JSON)
-                        .param("since", "tweLVE_houRS")
-        ).andReturn().getResponse();
-
-        MockHttpServletResponse response4 = mockMvc.perform(
-                get("/api/feed")
-                        .accept(APPLICATION_JSON)
-                        .param("since", "Day")
-        ).andReturn().getResponse();
-
-        // then
-        assertThat(response1.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response1.getContentAsString()).isEqualTo(json1.getJson());
-
-        assertThat(response2.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response2.getContentAsString()).isEqualTo(json2.getJson());
-
-        assertThat(response3.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response3.getContentAsString()).isEqualTo(json3.getJson());
-
-        assertThat(response4.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response4.getContentAsString()).isEqualTo(json4.getJson());
-    }
-
-    @Test
     public void getUserFeed_HandlesNegativeSkipValue() throws Exception {
         // given
-        given(postService.getFeedForUser(testUser, IPostService.PostsSince.ONE_HOUR, -1L, 20L))
+        given(postService.getFeedForUser(testUser, -1L, 20L))
                 .willThrow(new IllegalArgumentException("Invalid skip and/or limit values."));
 
         // when
@@ -204,7 +139,7 @@ public class FeedControllerTests {
     @Test
     public void getUserFeed_HandlesNegativeLimitValue() throws Exception {
         // given
-        given(postService.getFeedForUser(testUser, IPostService.PostsSince.ONE_HOUR, 0L, -1L))
+        given(postService.getFeedForUser(testUser, 0L, -1L))
                 .willThrow(new IllegalArgumentException("Invalid skip and/or limit values."));
 
         // when
@@ -230,9 +165,9 @@ public class FeedControllerTests {
         JsonContent<List<FeedPost>> json2 = jsonFeedPosts.write(testPosts2);
 
         // given
-        given(postService.getFeedForUser_Popular(testUser, IPostService.PostsSince.ONE_HOUR, 0L, 20L))
+        given(postService.getFeedForUser_Popular(testUser,0L, 20L))
                 .willReturn(testPosts1);
-        given(postService.getFeedForUser_Popular(testUser, IPostService.PostsSince.SIX_HOURS, 5L, 12L))
+        given(postService.getFeedForUser_Popular(testUser, 5L, 12L))
                 .willReturn(testPosts2);
 
         // when
@@ -248,7 +183,6 @@ public class FeedControllerTests {
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
                         .param("by", "PoPULarITY")
-                        .param("since", "six_HOURS")
                         .param("limit", "12")
                         .param("skip", "5")
         ).andReturn().getResponse();

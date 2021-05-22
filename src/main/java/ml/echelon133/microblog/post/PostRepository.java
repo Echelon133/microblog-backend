@@ -3,7 +3,6 @@ package ml.echelon133.microblog.post;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -19,16 +18,16 @@ public interface PostRepository extends Neo4jRepository<Post, UUID> {
         results.
      */
     @Query( "MATCH (u:User)-[:FOLLOWS]->(poster:User)-[:POSTS]->(posts:Post) " +
-            "WHERE u.uuid = $uuid AND posts.creationDate >= $first AND posts.creationDate <= $second AND posts.deleted <> true " +
+            "WHERE u.uuid = $uuid AND posts.deleted <> true " +
             "OPTIONAL MATCH (posts:Post)-[:RESPONDS]->(respondsTo:Post) " +
             "OPTIONAL MATCH (posts:Post)-[:QUOTES]->(quotes:Post) " +
             "RETURN posts.uuid AS uuid, posts.content AS content, posts.creationDate AS date, poster AS author, " +
             "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo " +
             "ORDER BY datetime(posts.creationDate) DESC SKIP $skip LIMIT $limit ")
-    List<FeedPost> getFeedForUserWithUuid_PostedBetween(UUID uuid, Date first, Date second, Long skip, Long limit);
+    List<FeedPost> getFeedForUserWithUuid(UUID uuid, Long skip, Long limit);
 
     @Query( "MATCH (u:User)-[:FOLLOWS]->(poster:User)-[:POSTS]->(posts:Post) " +
-            "WHERE u.uuid = $uuid AND posts.creationDate >= $first AND posts.creationDate <= $second AND posts.deleted <> true " +
+            "WHERE u.uuid = $uuid AND posts.deleted <> true " +
             "OPTIONAL MATCH (posts:Post)-[:RESPONDS]->(respondsTo:Post) " +
             "OPTIONAL MATCH (posts:Post)-[:QUOTES]->(quotes:Post) " +
             "OPTIONAL MATCH (:User)-[l:LIKES]->(posts) " +
@@ -36,10 +35,10 @@ public interface PostRepository extends Neo4jRepository<Post, UUID> {
             "RETURN posts.uuid AS uuid, posts.content AS content, posts.creationDate AS date, poster AS author, " +
             "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo " +
             "ORDER BY amountLikes DESC, datetime(posts.creationDate) DESC SKIP $skip LIMIT $limit ")
-    List<FeedPost> getFeedForUserWithUuid_Popular_PostedBetween(UUID uuid, Date first, Date second, Long skip, Long limit);
+    List<FeedPost> getFeedForUserWithUuid_Popular(UUID uuid, Long skip, Long limit);
 
     @Query( "MATCH (poster:User)-[:POSTS]->(posts:Post) " +
-            "WHERE posts.creationDate >= $first AND posts.creationDate <= $second AND posts.deleted <> true " +
+            "WHERE posts.deleted <> true " +
             "OPTIONAL MATCH (posts:Post)-[:RESPONDS]->(respondsTo:Post) " +
             "OPTIONAL MATCH (posts:Post)-[:QUOTES]->(quotes:Post) " +
             "OPTIONAL MATCH (:User)-[l:LIKES]->(posts) " +
@@ -47,7 +46,7 @@ public interface PostRepository extends Neo4jRepository<Post, UUID> {
             "RETURN posts.uuid AS uuid, posts.content AS content, posts.creationDate AS date, poster AS author, " +
             "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo " +
             "ORDER BY amountLikes DESC, datetime(posts.creationDate) DESC SKIP $skip LIMIT $limit ")
-    List<FeedPost> getFeedForAnonymousUser_Popular_PostedBetween(Date first, Date second, Long skip, Long limit);
+    List<FeedPost> getFeedForAnonymousUser_Popular(Long skip, Long limit);
 
     @Query( "MATCH (u:User)-[:POSTS]->(post:Post) WHERE post.uuid = $uuid AND post.deleted <> true " +
             "OPTIONAL MATCH (post:Post)-[:RESPONDS]->(respondsTo:Post) " +

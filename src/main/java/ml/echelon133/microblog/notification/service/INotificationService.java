@@ -1,11 +1,11 @@
 package ml.echelon133.microblog.notification.service;
 
 import ml.echelon133.microblog.notification.model.NotificationResult;
-import ml.echelon133.microblog.post.Post;
-import ml.echelon133.microblog.post.QuotePost;
-import ml.echelon133.microblog.post.ResponsePost;
-import ml.echelon133.microblog.user.User;
-import ml.echelon133.microblog.user.UserPrincipal;
+import ml.echelon133.microblog.post.model.Post;
+import ml.echelon133.microblog.post.model.QuotePost;
+import ml.echelon133.microblog.post.model.ResponsePost;
+import ml.echelon133.microblog.user.model.User;
+import ml.echelon133.microblog.user.model.UserPrincipal;
 
 import java.util.List;
 import java.util.UUID;

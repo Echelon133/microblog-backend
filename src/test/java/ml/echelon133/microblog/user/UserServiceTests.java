@@ -1,5 +1,12 @@
 package ml.echelon133.microblog.user;
 
+import ml.echelon133.microblog.user.exception.UserCreationFailedException;
+import ml.echelon133.microblog.user.exception.UserDoesntExistException;
+import ml.echelon133.microblog.user.exception.UsernameAlreadyTakenException;
+import ml.echelon133.microblog.user.model.*;
+import ml.echelon133.microblog.user.repository.RoleRepository;
+import ml.echelon133.microblog.user.repository.UserRepository;
+import ml.echelon133.microblog.user.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

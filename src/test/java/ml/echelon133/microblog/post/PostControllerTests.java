@@ -1,8 +1,14 @@
 package ml.echelon133.microblog.post;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ml.echelon133.microblog.user.User;
-import ml.echelon133.microblog.user.UserService;
+import ml.echelon133.microblog.post.controller.PostController;
+import ml.echelon133.microblog.post.exception.PostDoesntExistException;
+import ml.echelon133.microblog.post.exception.PostExceptionHandler;
+import ml.echelon133.microblog.post.exception.UserCannotDeletePostException;
+import ml.echelon133.microblog.post.model.*;
+import ml.echelon133.microblog.post.service.PostService;
+import ml.echelon133.microblog.user.model.User;
+import ml.echelon133.microblog.user.service.UserService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

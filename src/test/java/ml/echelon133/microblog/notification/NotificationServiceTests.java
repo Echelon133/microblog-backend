@@ -1,10 +1,13 @@
 package ml.echelon133.microblog.notification;
 
-import ml.echelon133.microblog.post.Post;
-import ml.echelon133.microblog.post.QuotePost;
-import ml.echelon133.microblog.post.ResponsePost;
-import ml.echelon133.microblog.user.User;
-import ml.echelon133.microblog.user.UserPrincipal;
+import ml.echelon133.microblog.notification.model.NotificationResult;
+import ml.echelon133.microblog.notification.repository.NotificationRepository;
+import ml.echelon133.microblog.notification.service.NotificationService;
+import ml.echelon133.microblog.post.model.Post;
+import ml.echelon133.microblog.post.model.QuotePost;
+import ml.echelon133.microblog.post.model.ResponsePost;
+import ml.echelon133.microblog.user.model.User;
+import ml.echelon133.microblog.user.model.UserPrincipal;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

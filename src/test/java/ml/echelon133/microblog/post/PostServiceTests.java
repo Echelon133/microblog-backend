@@ -1,10 +1,17 @@
 package ml.echelon133.microblog.post;
 
-import ml.echelon133.microblog.notification.NotificationService;
-import ml.echelon133.microblog.tag.Tag;
-import ml.echelon133.microblog.tag.TagDoesntExistException;
-import ml.echelon133.microblog.tag.TagService;
-import ml.echelon133.microblog.user.User;
+import ml.echelon133.microblog.notification.service.NotificationService;
+import ml.echelon133.microblog.post.exception.PostDoesntExistException;
+import ml.echelon133.microblog.post.exception.UserCannotDeletePostException;
+import ml.echelon133.microblog.post.model.FeedPost;
+import ml.echelon133.microblog.post.model.Post;
+import ml.echelon133.microblog.post.model.PostInfo;
+import ml.echelon133.microblog.post.repository.PostRepository;
+import ml.echelon133.microblog.post.service.PostService;
+import ml.echelon133.microblog.tag.model.Tag;
+import ml.echelon133.microblog.tag.exception.TagDoesntExistException;
+import ml.echelon133.microblog.tag.service.TagService;
+import ml.echelon133.microblog.user.model.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

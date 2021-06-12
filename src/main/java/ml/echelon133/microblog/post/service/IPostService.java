@@ -1,5 +1,10 @@
-package ml.echelon133.microblog.post;
+package ml.echelon133.microblog.post.service;
 
+import ml.echelon133.microblog.post.exception.PostDoesntExistException;
+import ml.echelon133.microblog.post.exception.UserCannotDeletePostException;
+import ml.echelon133.microblog.post.model.FeedPost;
+import ml.echelon133.microblog.post.model.Post;
+import ml.echelon133.microblog.post.model.PostInfo;
 import ml.echelon133.microblog.user.User;
 import ml.echelon133.microblog.user.UserPrincipal;
 

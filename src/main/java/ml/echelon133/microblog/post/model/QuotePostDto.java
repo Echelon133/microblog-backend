@@ -1,13 +1,13 @@
-package ml.echelon133.microblog.post;
+package ml.echelon133.microblog.post.model;
 
 import org.hibernate.validator.constraints.Length;
 
-public class ResponseDto {
+public class QuotePostDto {
 
-    @Length(min = 1, max = 300, message = "Response length is invalid")
+    @Length(max = 300, message = "Quote length is invalid")
     private String content;
 
-    public ResponseDto() {}
+    public QuotePostDto() {}
 
     public String getContent() {
         return content;

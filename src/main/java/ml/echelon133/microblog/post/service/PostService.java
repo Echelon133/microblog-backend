@@ -1,6 +1,10 @@
-package ml.echelon133.microblog.post;
+package ml.echelon133.microblog.post.service;
 
-import ml.echelon133.microblog.notification.*;
+import ml.echelon133.microblog.notification.service.INotificationService;
+import ml.echelon133.microblog.post.exception.PostDoesntExistException;
+import ml.echelon133.microblog.post.exception.UserCannotDeletePostException;
+import ml.echelon133.microblog.post.model.*;
+import ml.echelon133.microblog.post.repository.PostRepository;
 import ml.echelon133.microblog.tag.ITagService;
 import ml.echelon133.microblog.tag.Tag;
 import ml.echelon133.microblog.tag.TagDoesntExistException;

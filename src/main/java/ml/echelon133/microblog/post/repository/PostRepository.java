@@ -1,5 +1,8 @@
-package ml.echelon133.microblog.post;
+package ml.echelon133.microblog.post.repository;
 
+import ml.echelon133.microblog.post.model.FeedPost;
+import ml.echelon133.microblog.post.model.Post;
+import ml.echelon133.microblog.post.model.PostInfo;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 

@@ -1,5 +1,8 @@
-package ml.echelon133.microblog.post;
+package ml.echelon133.microblog.post.controller;
 
+import ml.echelon133.microblog.post.exception.InvalidPostContentException;
+import ml.echelon133.microblog.post.model.*;
+import ml.echelon133.microblog.post.service.IPostService;
 import ml.echelon133.microblog.user.IUserService;
 import ml.echelon133.microblog.user.User;
 import ml.echelon133.microblog.user.UserPrincipal;

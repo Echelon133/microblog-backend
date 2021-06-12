@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.post;
+package ml.echelon133.microblog.post.exception;
 
 public class InvalidPostContentException extends Exception {
 

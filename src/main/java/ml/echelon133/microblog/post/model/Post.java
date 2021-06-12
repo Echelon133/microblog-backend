@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.post;
+package ml.echelon133.microblog.post.model;
 
 import ml.echelon133.microblog.tag.Tag;
 import ml.echelon133.microblog.user.User;

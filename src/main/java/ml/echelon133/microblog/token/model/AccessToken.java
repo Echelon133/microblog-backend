@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.token;
+package ml.echelon133.microblog.token.model;
 
 
 import org.springframework.data.annotation.Id;

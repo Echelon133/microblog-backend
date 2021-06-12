@@ -1,5 +1,8 @@
-package ml.echelon133.microblog.token;
+package ml.echelon133.microblog.token.service;
 
+import ml.echelon133.microblog.token.model.AccessToken;
+import ml.echelon133.microblog.token.repository.AccessTokenRepository;
+import ml.echelon133.microblog.token.service.ITokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

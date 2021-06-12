@@ -1,4 +1,6 @@
-package ml.echelon133.microblog.token;
+package ml.echelon133.microblog.token.service;
+
+import ml.echelon133.microblog.token.model.AccessToken;
 
 import java.util.Optional;
 

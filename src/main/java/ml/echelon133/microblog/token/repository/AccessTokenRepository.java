@@ -1,5 +1,6 @@
-package ml.echelon133.microblog.token;
+package ml.echelon133.microblog.token.repository;
 
+import ml.echelon133.microblog.token.model.AccessToken;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

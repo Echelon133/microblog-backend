@@ -3,7 +3,7 @@ package ml.echelon133.microblog.security;
 import ml.echelon133.microblog.auth.CustomAuthenticationFilter;
 import ml.echelon133.microblog.auth.CustomAuthenticationManager;
 import ml.echelon133.microblog.auth.CustomAuthenticationProvider;
-import ml.echelon133.microblog.token.ITokenService;
+import ml.echelon133.microblog.token.service.ITokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

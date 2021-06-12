@@ -1,6 +1,6 @@
 package ml.echelon133.microblog.auth;
 
-import ml.echelon133.microblog.user.UserPrincipal;
+import ml.echelon133.microblog.user.model.UserPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 

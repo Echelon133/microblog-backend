@@ -5,15 +5,19 @@ import ml.echelon133.microblog.tag.Tag;
 import ml.echelon133.microblog.tag.TagDoesntExistException;
 import ml.echelon133.microblog.tag.TagService;
 import ml.echelon133.microblog.user.User;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,6 +37,12 @@ public class PostServiceTests {
 
     @InjectMocks
     private PostService postService;
+
+    @AfterEach
+    public void afterEach() {
+        // set clock to default in case it was modified by a test case
+        postService.setClock(Clock.systemDefaultZone());
+    }
 
     @Test
     public void getByUuid_ThrowsWhenPostDoesntExist() throws Exception {
@@ -742,17 +752,24 @@ public class PostServiceTests {
         User u = new User();
         u.setUuid(uuid);
 
+        // date needed to create a fixed clock
+        Date now = new Date();
+        // date that's expected to be created inside the service method
+        Date dayAgo = Date.from(now.toInstant().minus(1, DAYS));
+        // inject fixed clock
+        postService.setClock(Clock.fixed(now.toInstant(), ZoneId.systemDefault()));
+
         // given
         given(postRepository
-                .getFeedForUserWithUuid_Popular(uuid, 0L, 5L))
+                .getFeedForUserWithUuid_Popular(uuid, dayAgo,0L, 5L))
                 .willReturn(List.of(new FeedPost()));
 
         // when
-        List<FeedPost> oneHourResults = postService
+        List<FeedPost> results = postService
                 .getFeedForUser_Popular(u, 0L, 5L);
 
         // then
-        assertEquals(1, oneHourResults.size());
+        assertEquals(1, results.size());
     }
 
     @Test
@@ -774,9 +791,16 @@ public class PostServiceTests {
 
     @Test
     public void getFeedForAnonymousUser_ReturnsCorrectlyFilteredResults() {
+        // date needed to create a fixed clock
+        Date now = new Date();
+        // date that's expected to be created inside the service method
+        Date dayAgo = Date.from(now.toInstant().minus(1, DAYS));
+        // inject fixed clock
+        postService.setClock(Clock.fixed(now.toInstant(), ZoneId.systemDefault()));
+
         // given
         given(postRepository
-                .getFeedForAnonymousUser_Popular(0L, 5L))
+                .getFeedForAnonymousUser_Popular(dayAgo, 0L, 5L))
                 .willReturn(List.of(new FeedPost()));
 
         // when

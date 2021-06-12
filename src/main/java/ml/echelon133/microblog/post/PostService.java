@@ -8,13 +8,18 @@ import ml.echelon133.microblog.user.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+
 @Service
 public class PostService implements IPostService {
 
+    private Clock clock = Clock.systemDefaultZone();
     private PostRepository postRepository;
     private IUserService userService;
     private INotificationService notificationService;
@@ -117,8 +122,11 @@ public class PostService implements IPostService {
         if (limit < 0 || skip < 0) {
             throw new IllegalArgumentException("Invalid skip and/or limit values.");
         }
+
+        // only get posts that had been posted after this date
+        Date dayAgo = Date.from(Instant.now(clock).minus(1, DAYS));
         return postRepository
-                .getFeedForUserWithUuid_Popular(user.getUuid(), skip, limit);
+                .getFeedForUserWithUuid_Popular(user.getUuid(), dayAgo, skip, limit);
     }
 
     @Override
@@ -126,8 +134,11 @@ public class PostService implements IPostService {
         if (limit < 0 || skip < 0) {
             throw new IllegalArgumentException("Invalid skip and/or limit values.");
         }
+
+        // only get posts that had been posted after this date
+        Date dayAgo = Date.from(Instant.now(clock).minus(1, DAYS));
         return postRepository
-                .getFeedForAnonymousUser_Popular(skip, limit);
+                .getFeedForAnonymousUser_Popular(dayAgo, skip, limit);
     }
 
     private List<Tag> findTagsInContent(Post post) {
@@ -238,5 +249,9 @@ public class PostService implements IPostService {
             return postRepository.save(b).isDeleted();
         }
         throw new PostDoesntExistException(postUuid);
+    }
+
+    public void setClock(Clock clock) {
+        this.clock = clock;
     }
 }

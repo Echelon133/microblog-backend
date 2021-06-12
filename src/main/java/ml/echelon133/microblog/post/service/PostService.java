@@ -5,10 +5,13 @@ import ml.echelon133.microblog.post.exception.PostDoesntExistException;
 import ml.echelon133.microblog.post.exception.UserCannotDeletePostException;
 import ml.echelon133.microblog.post.model.*;
 import ml.echelon133.microblog.post.repository.PostRepository;
-import ml.echelon133.microblog.tag.ITagService;
-import ml.echelon133.microblog.tag.Tag;
-import ml.echelon133.microblog.tag.TagDoesntExistException;
-import ml.echelon133.microblog.user.*;
+import ml.echelon133.microblog.tag.service.ITagService;
+import ml.echelon133.microblog.tag.model.Tag;
+import ml.echelon133.microblog.tag.exception.TagDoesntExistException;
+import ml.echelon133.microblog.user.exception.UserDoesntExistException;
+import ml.echelon133.microblog.user.model.User;
+import ml.echelon133.microblog.user.model.UserPrincipal;
+import ml.echelon133.microblog.user.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

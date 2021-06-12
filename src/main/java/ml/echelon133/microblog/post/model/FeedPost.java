@@ -1,6 +1,6 @@
 package ml.echelon133.microblog.post.model;
 
-import ml.echelon133.microblog.user.User;
+import ml.echelon133.microblog.user.model.User;
 import org.neo4j.ogm.annotation.typeconversion.Convert;
 import org.neo4j.ogm.typeconversion.UuidStringConverter;
 import org.springframework.data.neo4j.annotation.QueryResult;

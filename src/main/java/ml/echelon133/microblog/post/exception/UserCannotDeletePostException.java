@@ -1,6 +1,6 @@
 package ml.echelon133.microblog.post.exception;
 
-import ml.echelon133.microblog.user.User;
+import ml.echelon133.microblog.user.model.User;
 
 import java.util.UUID;
 

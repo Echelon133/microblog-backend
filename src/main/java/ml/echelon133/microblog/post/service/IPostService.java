@@ -5,8 +5,8 @@ import ml.echelon133.microblog.post.exception.UserCannotDeletePostException;
 import ml.echelon133.microblog.post.model.FeedPost;
 import ml.echelon133.microblog.post.model.Post;
 import ml.echelon133.microblog.post.model.PostInfo;
-import ml.echelon133.microblog.user.User;
-import ml.echelon133.microblog.user.UserPrincipal;
+import ml.echelon133.microblog.user.model.User;
+import ml.echelon133.microblog.user.model.UserPrincipal;
 
 import java.util.List;
 import java.util.UUID;

@@ -1,7 +1,11 @@
 package ml.echelon133.microblog.notification;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ml.echelon133.microblog.user.User;
+import ml.echelon133.microblog.notification.controller.NotificationController;
+import ml.echelon133.microblog.notification.exception.NotificationExceptionHandler;
+import ml.echelon133.microblog.notification.model.NotificationResult;
+import ml.echelon133.microblog.notification.service.NotificationService;
+import ml.echelon133.microblog.user.model.User;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,7 @@
 package ml.echelon133.microblog.auth;
 
-import ml.echelon133.microblog.token.AccessToken;
-import ml.echelon133.microblog.token.ITokenService;
+import ml.echelon133.microblog.token.model.AccessToken;
+import ml.echelon133.microblog.token.service.ITokenService;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;

@@ -1,6 +1,6 @@
 package ml.echelon133.microblog.user.validators;
 
-import ml.echelon133.microblog.user.NewUserDto;
+import ml.echelon133.microblog.user.model.NewUserDto;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

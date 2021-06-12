@@ -1,9 +1,11 @@
 package ml.echelon133.microblog.feed;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ml.echelon133.microblog.post.PostService;
-import ml.echelon133.microblog.post.FeedPost;
-import ml.echelon133.microblog.user.User;
+import ml.echelon133.microblog.feed.controller.FeedController;
+import ml.echelon133.microblog.feed.exception.FeedExceptionHandler;
+import ml.echelon133.microblog.post.service.PostService;
+import ml.echelon133.microblog.post.model.FeedPost;
+import ml.echelon133.microblog.user.model.User;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

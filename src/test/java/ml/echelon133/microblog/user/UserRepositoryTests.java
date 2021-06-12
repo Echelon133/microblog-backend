@@ -1,7 +1,11 @@
 package ml.echelon133.microblog.user;
 
-import ml.echelon133.microblog.post.Post;
-import ml.echelon133.microblog.post.PostRepository;
+import ml.echelon133.microblog.post.model.Post;
+import ml.echelon133.microblog.post.repository.PostRepository;
+import ml.echelon133.microblog.user.model.User;
+import ml.echelon133.microblog.user.model.UserPost;
+import ml.echelon133.microblog.user.model.UserProfileInfo;
+import ml.echelon133.microblog.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

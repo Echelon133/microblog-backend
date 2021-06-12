@@ -1,5 +1,11 @@
-package ml.echelon133.microblog.user;
+package ml.echelon133.microblog.user.controller;
 
+import ml.echelon133.microblog.user.exception.InvalidUserDetailsFieldException;
+import ml.echelon133.microblog.user.exception.NewUserDataInvalidException;
+import ml.echelon133.microblog.user.exception.UserCreationFailedException;
+import ml.echelon133.microblog.user.exception.UsernameAlreadyTakenException;
+import ml.echelon133.microblog.user.model.*;
+import ml.echelon133.microblog.user.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -174,8 +180,8 @@ public class UserController {
 
     @GetMapping("/{uuid}/recentPosts")
     public ResponseEntity<List<UserPost>> getRecentPosts(@PathVariable String uuid,
-                                                          @RequestParam(required = false) Long skip,
-                                                          @RequestParam(required = false) Long limit) throws Exception {
+                                                         @RequestParam(required = false) Long skip,
+                                                         @RequestParam(required = false) Long limit) throws Exception {
         if (skip == null) {
             skip = 0L;
         }

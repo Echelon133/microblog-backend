@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.user;
+package ml.echelon133.microblog.user.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.neo4j.ogm.annotation.GeneratedValue;

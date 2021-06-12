@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.user;
+package ml.echelon133.microblog.user.model;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;

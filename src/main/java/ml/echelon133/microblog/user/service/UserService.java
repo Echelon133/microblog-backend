@@ -1,5 +1,11 @@
-package ml.echelon133.microblog.user;
+package ml.echelon133.microblog.user.service;
 
+import ml.echelon133.microblog.user.exception.UserCreationFailedException;
+import ml.echelon133.microblog.user.exception.UserDoesntExistException;
+import ml.echelon133.microblog.user.exception.UsernameAlreadyTakenException;
+import ml.echelon133.microblog.user.model.*;
+import ml.echelon133.microblog.user.repository.RoleRepository;
+import ml.echelon133.microblog.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,7 +28,7 @@ public class UserService implements IUserService {
         this.roleRepository = roleRepository;
     }
 
-    private void throwIfUserDoesntExist(UUID uuid) throws UserDoesntExistException{
+    private void throwIfUserDoesntExist(UUID uuid) throws UserDoesntExistException {
         if (!userRepository.existsById(uuid)) {
             throw new UserDoesntExistException(uuid);
         }

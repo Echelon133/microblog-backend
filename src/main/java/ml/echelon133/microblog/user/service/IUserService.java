@@ -1,4 +1,9 @@
-package ml.echelon133.microblog.user;
+package ml.echelon133.microblog.user.service;
+
+import ml.echelon133.microblog.user.exception.UserCreationFailedException;
+import ml.echelon133.microblog.user.exception.UserDoesntExistException;
+import ml.echelon133.microblog.user.exception.UsernameAlreadyTakenException;
+import ml.echelon133.microblog.user.model.*;
 
 import java.util.List;
 import java.util.UUID;

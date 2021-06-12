@@ -1,6 +1,7 @@
-package ml.echelon133.microblog.user;
+package ml.echelon133.microblog.user.exception;
 
 import ml.echelon133.microblog.exception.AbstractExceptionHandler;
+import ml.echelon133.microblog.user.controller.UserController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

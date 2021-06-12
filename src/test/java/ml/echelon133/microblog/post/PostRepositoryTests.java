@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.time.temporal.ChronoUnit.HOURS;
 import static java.time.temporal.ChronoUnit.MINUTES;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,6 +58,10 @@ public class PostRepositoryTests {
         return postRepository.save(post);
     }
 
+    private Date getDateHoursAgo(int numberOfHours) {
+        return Date.from(Instant.now().minus(numberOfHours, HOURS));
+    }
+
     @BeforeEach
     public void beforeEach() {
         // five test users
@@ -84,9 +89,9 @@ public class PostRepositoryTests {
             postRepository.likePostWithUuid(test5.getUuid(), post.getUuid());
         }
 
-        // create 10 posts as "test2" (all of them made 30 min ago)
+        // create 5 posts as "test2" (all of them made 80 min ago)
         for (int i = 10; i < 15; i++) {
-            Post post = createTestPost(test2, "" + i, 30L);
+            Post post = createTestPost(test2, "" + i, 80L);
             // make 3 users like every one of these posts
             postRepository.likePostWithUuid(test3.getUuid(), post.getUuid());
             postRepository.likePostWithUuid(test4.getUuid(), post.getUuid());
@@ -103,7 +108,7 @@ public class PostRepositoryTests {
             postRepository.likePostWithUuid(test5.getUuid(), post.getUuid());
         }
 
-        // create 10 posts as "test4"
+        // create 5 posts as "test4"
         for (int i = 20; i < 25; i++) {
             Post post = createTestPost(test4, "" + i, 0L);
             postRepository.likePostWithUuid(test1.getUuid(), post.getUuid());
@@ -114,12 +119,12 @@ public class PostRepositoryTests {
         }
 
         /*
-            Test database has 30 posts
+            Test database has 25 posts
             User "test1":
                 * posts 0, 1, 2, 3, 4 made 30 min before
                 * posts 5, 6, 7, 8, 9 made 10 min before
             User "test2":
-                * posts 10, 11, 12, 13, 14 made 30 min before
+                * posts 10, 11, 12, 13, 14 made 80 min before
             User "test3":
                 * posts 15, 16, 17, 18, 19 made 1 min before
             User "test4":
@@ -238,7 +243,7 @@ public class PostRepositoryTests {
 
         // when
         List<FeedPost> allPosts = postRepository
-                .getFeedForUserWithUuid(user.getUuid(), 0L, 20L); // limit to 20, to show all posts
+                .getFeedForUserWithUuid(user.getUuid(), 0L, 25L);
 
         // make a list of contents of retrieved posts
         List<String> contents = allPosts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -249,9 +254,9 @@ public class PostRepositoryTests {
         // expect order:
         // first: 19, 18, 17, 16, 15 (posted 1 min ago)
         // then: 9, 8, 7, 6, 5       (posted 10 min ago)
-        // then: 14, 13, 12, 11, 10  (posted 30 min ago)
         // then: 4, 3, 2, 1, 0       (posted 30 min ago, but before posts above were made)
-        List<Integer> correctOrder = Arrays.asList(19, 18, 17, 16, 15, 9, 8, 7, 6, 5, 14, 13, 12, 11, 10, 4, 3, 2, 1, 0);
+        // then: 14, 13, 12, 11, 10  (posted 80 min ago)
+        List<Integer> correctOrder = Arrays.asList(19, 18, 17, 16, 15, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 14, 13, 12, 11, 10);
         for (int i = 0; i < correctOrder.size(); i++) {
             assertEquals(correctOrder.get(i).toString(), contents.get(i));
         }
@@ -761,7 +766,9 @@ public class PostRepositoryTests {
     @Test
     public void getFeedForUserWithUuid_Popular_IsEmptyWhenUserDoesntExist() {
         List<FeedPost> posts = postRepository
-                .getFeedForUserWithUuid_Popular(UUID.randomUUID(), 0L, 10L);
+                .getFeedForUserWithUuid_Popular(
+                        UUID.randomUUID(), getDateHoursAgo(24),
+                        0L, 10L);
 
         assertEquals(0, posts.size());
     }
@@ -777,7 +784,9 @@ public class PostRepositoryTests {
 
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForUserWithUuid_Popular(user.getUuid(), 0L, 10L);
+                .getFeedForUserWithUuid_Popular(
+                        user.getUuid(), getDateHoursAgo(24),
+                        0L, 10L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -796,7 +805,9 @@ public class PostRepositoryTests {
 
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForUserWithUuid_Popular(user.getUuid(), 5L, 5L);
+                .getFeedForUserWithUuid_Popular(
+                        user.getUuid(), getDateHoursAgo(24),
+                        5L, 5L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -815,7 +826,9 @@ public class PostRepositoryTests {
 
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForUserWithUuid_Popular(user.getUuid(), 0L, 5L);
+                .getFeedForUserWithUuid_Popular(
+                        user.getUuid(), getDateHoursAgo(24),
+                        0L, 5L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -834,7 +847,9 @@ public class PostRepositoryTests {
 
         // when
         List<FeedPost> allPosts = postRepository
-                .getFeedForUserWithUuid_Popular(user.getUuid(), 0L, 20L); // limit to 20, to show all posts
+                .getFeedForUserWithUuid_Popular(
+                        user.getUuid(), getDateHoursAgo(24),
+                        0L, 25L);
 
         // make a list of contents of retrieved posts
         List<String> contents = allPosts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -857,6 +872,39 @@ public class PostRepositoryTests {
     }
 
     @Test
+    public void getFeedForUserWithUuid_Popular_FeedFiltersByDate() {
+        User user = userRepository.findByUsername("test1").orElse(new User());
+
+        // when
+        List<FeedPost> allPosts = postRepository
+                .getFeedForUserWithUuid_Popular(
+                        user.getUuid(), getDateHoursAgo(1),
+                        0L, 20L);
+
+        // make a list of contents of retrieved posts
+        List<String> contents = allPosts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+
+        // then
+        assertEquals(15, allPosts.size());
+
+        /*
+         since we expect 15 posts sorted by likes and date (in that order)
+         we should expect them in order:
+            * first 19, 18, 17, 16, 15 (because each post has 4 likes)
+            * second 9, 8, 7, 6, 5 (because each post has 2 likes)
+            * third 4, 3, 2, 1, 0 (because each post has 1 like)
+
+         posts 14, 13, 12, 11, 10 won't show up, because they should be
+         filtered out (they had been posted 80 minutes before, and we only get
+         posts posted in the last 60 minutes)
+         */
+        List<Integer> correctOrder = Arrays.asList(19, 18, 17, 16, 15, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0);
+        for (int i = 0; i < correctOrder.size(); i++) {
+            assertEquals(correctOrder.get(i).toString(), contents.get(i));
+        }
+    }
+
+    @Test
     public void getFeedForUserWithUuid_Popular_PostsHaveCorrectAuthors() {
         User test1 = userRepository.findByUsername("test1").orElse(new User());
         User test2 = userRepository.findByUsername("test2").orElse(new User());
@@ -864,7 +912,9 @@ public class PostRepositoryTests {
 
         // when
         List<FeedPost> allPosts = postRepository
-                .getFeedForUserWithUuid_Popular(test1.getUuid(), 0L, 20L); // limit to 20, to show all posts
+                .getFeedForUserWithUuid_Popular(
+                        test1.getUuid(), getDateHoursAgo(24),
+                        0L, 25L);
 
         // then
         // expected posts of test1: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
@@ -912,7 +962,7 @@ public class PostRepositoryTests {
 
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForAnonymousUser_Popular(0L, 10L);
+                .getFeedForAnonymousUser_Popular(getDateHoursAgo(24),0L, 10L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -929,7 +979,7 @@ public class PostRepositoryTests {
     public void getFeedForAnonymousUser_Popular_SkipArgumentWorks() {
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForAnonymousUser_Popular(5L, 5L);
+                .getFeedForAnonymousUser_Popular(getDateHoursAgo(24),5L, 5L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -946,7 +996,7 @@ public class PostRepositoryTests {
     public void getFeedForAnonymousUser_Popular_LimitArgumentWorks() {
         // when
         List<FeedPost> posts = postRepository
-                .getFeedForAnonymousUser_Popular(0L, 5L);
+                .getFeedForAnonymousUser_Popular(getDateHoursAgo(24),0L, 5L);
 
         // make a list of contents of retrieved posts
         List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -963,7 +1013,7 @@ public class PostRepositoryTests {
     public void getFeedForAnonymousUser_Popular_FeedWithAllPostsIsSorted() {
         // when
         List<FeedPost> allPosts = postRepository
-                .getFeedForAnonymousUser_Popular(0L, 25L); // limit to 25
+                .getFeedForAnonymousUser_Popular(getDateHoursAgo(24),0L, 25L);
 
         // make a list of contents of retrieved posts
         List<String> contents = allPosts.stream().map(FeedPost::getContent).collect(Collectors.toList());
@@ -988,6 +1038,37 @@ public class PostRepositoryTests {
     }
 
     @Test
+    public void getFeedForAnonymousUser_Popular_FeedFiltersByDate() {
+        // when
+        List<FeedPost> allPosts = postRepository
+                .getFeedForAnonymousUser_Popular(getDateHoursAgo(1),0L, 25L); // limit to 25
+
+        // make a list of contents of retrieved posts
+        List<String> contents = allPosts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+
+        // then
+        assertEquals(20, allPosts.size());
+
+        /*
+         since we expect 20 posts sorted by likes and date (in that order)
+         we should expect them in order:
+            * first 24, 23, 22, 21, 20 (because each post has 5 likes)
+            * second 19, 18, 17, 16, 15 (because each post has 4 likes)
+            * third 9, 8, 7, 6, 5 (because each post has 2 likes)
+            * fourth 4, 3, 2, 1, 0 (because each post has 1 like)
+
+         posts 14, 13, 12, 11, 10 won't show up, because they should be
+         filtered out (they had been posted 80 minutes before, and we only get
+         posts posted in the last 60 minutes)
+         */
+        List<Integer> correctOrder = Arrays.asList(24, 23, 22, 21, 20, 19, 18, 17, 16, 15,
+                9, 8, 7, 6, 5, 4, 3, 2, 1, 0);
+        for (int i = 0; i < correctOrder.size(); i++) {
+            assertEquals(correctOrder.get(i).toString(), contents.get(i));
+        }
+    }
+
+    @Test
     public void getFeedForAnonymousUser_Popular_PostsHaveCorrectAuthors() {
         User test1 = userRepository.findByUsername("test1").orElse(new User());
         User test2 = userRepository.findByUsername("test2").orElse(new User());
@@ -996,7 +1077,7 @@ public class PostRepositoryTests {
 
         // when
         List<FeedPost> allPosts = postRepository
-                .getFeedForAnonymousUser_Popular(0L, 25L); // limit to 25, to show all posts
+                .getFeedForAnonymousUser_Popular(getDateHoursAgo(24),0L, 25L); // limit to 25, to show all posts
 
         // then
         // expected posts of test1: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9

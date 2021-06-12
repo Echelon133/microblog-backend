@@ -1,6 +1,8 @@
-package ml.echelon133.microblog.tag;
+package ml.echelon133.microblog.tag.exception;
 
 import ml.echelon133.microblog.exception.AbstractExceptionHandler;
+import ml.echelon133.microblog.tag.controller.TagController;
+import ml.echelon133.microblog.tag.exception.TagDoesntExistException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

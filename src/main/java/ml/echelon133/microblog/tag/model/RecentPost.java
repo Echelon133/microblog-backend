@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.tag;
+package ml.echelon133.microblog.tag.model;
 
 import ml.echelon133.microblog.user.User;
 import org.neo4j.ogm.annotation.typeconversion.Convert;

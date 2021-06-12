@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.tag;
+package ml.echelon133.microblog.tag.model;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;

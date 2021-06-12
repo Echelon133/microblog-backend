@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.tag;
+package ml.echelon133.microblog.tag.exception;
 
 import java.util.UUID;
 

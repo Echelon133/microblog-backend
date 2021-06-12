@@ -1,5 +1,8 @@
-package ml.echelon133.microblog.tag;
+package ml.echelon133.microblog.tag.controller;
 
+import ml.echelon133.microblog.tag.service.ITagService;
+import ml.echelon133.microblog.tag.model.RecentPost;
+import ml.echelon133.microblog.tag.model.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,8 +59,8 @@ public class TagController {
 
     @GetMapping("/{uuid}/recentPosts")
     public ResponseEntity<List<RecentPost>> findRecentPosts(@PathVariable String uuid,
-                                                             @RequestParam(required = false) Long skip,
-                                                             @RequestParam(required = false) Long limit) throws Exception {
+                                                            @RequestParam(required = false) Long skip,
+                                                            @RequestParam(required = false) Long limit) throws Exception {
 
         if (skip == null) {
             skip = 0L;

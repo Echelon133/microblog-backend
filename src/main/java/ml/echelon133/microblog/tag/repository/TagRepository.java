@@ -1,5 +1,7 @@
-package ml.echelon133.microblog.tag;
+package ml.echelon133.microblog.tag.repository;
 
+import ml.echelon133.microblog.tag.model.RecentPost;
+import ml.echelon133.microblog.tag.model.Tag;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 

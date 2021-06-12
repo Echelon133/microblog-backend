@@ -6,8 +6,8 @@ import ml.echelon133.microblog.report.model.Report;
 import ml.echelon133.microblog.report.repository.ReportRepository;
 import ml.echelon133.microblog.report.model.ReportResult;
 import ml.echelon133.microblog.report.exception.ResourceDoesNotExistException;
-import ml.echelon133.microblog.user.User;
-import ml.echelon133.microblog.user.UserRepository;
+import ml.echelon133.microblog.user.model.User;
+import ml.echelon133.microblog.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

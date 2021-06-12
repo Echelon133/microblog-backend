@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.feed;
+package ml.echelon133.microblog.feed.controller;
 
 import ml.echelon133.microblog.post.FeedPost;
 import ml.echelon133.microblog.post.IPostService;

@@ -1,8 +1,8 @@
 package ml.echelon133.microblog.feed.controller;
 
-import ml.echelon133.microblog.post.FeedPost;
-import ml.echelon133.microblog.post.IPostService;
-import ml.echelon133.microblog.user.UserPrincipal;
+import ml.echelon133.microblog.post.model.FeedPost;
+import ml.echelon133.microblog.post.service.IPostService;
+import ml.echelon133.microblog.user.model.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,6 +1,6 @@
-package ml.echelon133.microblog.report;
+package ml.echelon133.microblog.report.model;
 
-import ml.echelon133.microblog.post.Post;
+import ml.echelon133.microblog.post.model.Post;
 import ml.echelon133.microblog.user.User;
 import org.neo4j.ogm.annotation.*;
 import org.neo4j.ogm.annotation.typeconversion.Convert;

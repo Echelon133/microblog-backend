@@ -1,5 +1,10 @@
-package ml.echelon133.microblog.report;
+package ml.echelon133.microblog.report.controller;
 
+import ml.echelon133.microblog.report.model.ReportDto;
+import ml.echelon133.microblog.report.model.ReportResult;
+import ml.echelon133.microblog.report.exception.InvalidReportDataException;
+import ml.echelon133.microblog.report.exception.ResourceDoesNotExistException;
+import ml.echelon133.microblog.report.service.IReportService;
 import ml.echelon133.microblog.user.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;

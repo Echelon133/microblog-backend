@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.report;
+package ml.echelon133.microblog.report.exception;
 
 import java.util.List;
 

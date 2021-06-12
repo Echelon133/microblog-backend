@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.report;
+package ml.echelon133.microblog.report.model;
 
 import org.neo4j.ogm.annotation.typeconversion.Convert;
 import org.neo4j.ogm.typeconversion.UuidStringConverter;

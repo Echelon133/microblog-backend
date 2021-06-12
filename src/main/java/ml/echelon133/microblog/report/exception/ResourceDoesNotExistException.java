@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.report;
+package ml.echelon133.microblog.report.exception;
 
 public class ResourceDoesNotExistException extends Exception {
 

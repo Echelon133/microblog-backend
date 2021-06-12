@@ -1,6 +1,6 @@
 package ml.echelon133.microblog.report.validators;
 
-import ml.echelon133.microblog.report.Report;
+import ml.echelon133.microblog.report.model.Report;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

@@ -1,7 +1,7 @@
-package ml.echelon133.microblog.report;
+package ml.echelon133.microblog.report.exception;
 
 import ml.echelon133.microblog.exception.AbstractExceptionHandler;
-import ml.echelon133.microblog.post.PostDoesntExistException;
+import ml.echelon133.microblog.report.controller.ReportController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

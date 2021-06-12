@@ -1,4 +1,7 @@
-package ml.echelon133.microblog.report;
+package ml.echelon133.microblog.report.service;
+
+import ml.echelon133.microblog.report.model.ReportResult;
+import ml.echelon133.microblog.report.exception.ResourceDoesNotExistException;
 
 import java.util.List;
 import java.util.UUID;

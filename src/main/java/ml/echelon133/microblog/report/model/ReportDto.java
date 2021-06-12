@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.report;
+package ml.echelon133.microblog.report.model;
 
 import ml.echelon133.microblog.report.validators.ValidReason;
 import org.hibernate.validator.constraints.Length;

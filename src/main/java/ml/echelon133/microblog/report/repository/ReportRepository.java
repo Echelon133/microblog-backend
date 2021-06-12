@@ -1,5 +1,7 @@
-package ml.echelon133.microblog.report;
+package ml.echelon133.microblog.report.repository;
 
+import ml.echelon133.microblog.report.model.Report;
+import ml.echelon133.microblog.report.model.ReportResult;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.annotation.Query;
 

@@ -1,5 +1,7 @@
-package ml.echelon133.microblog.notification;
+package ml.echelon133.microblog.notification.repository;
 
+import ml.echelon133.microblog.notification.model.NotificationResult;
+import ml.echelon133.microblog.notification.model.Notification;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 

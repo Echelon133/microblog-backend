@@ -1,5 +1,7 @@
-package ml.echelon133.microblog.notification;
+package ml.echelon133.microblog.notification.service;
 
+import ml.echelon133.microblog.notification.model.*;
+import ml.echelon133.microblog.notification.repository.NotificationRepository;
 import ml.echelon133.microblog.post.Post;
 import ml.echelon133.microblog.post.QuotePost;
 import ml.echelon133.microblog.post.ResponsePost;

@@ -1,5 +1,7 @@
-package ml.echelon133.microblog.notification;
+package ml.echelon133.microblog.notification.controller;
 
+import ml.echelon133.microblog.notification.service.INotificationService;
+import ml.echelon133.microblog.notification.model.NotificationResult;
 import ml.echelon133.microblog.user.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

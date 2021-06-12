@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.notification;
+package ml.echelon133.microblog.notification.model;
 
 import ml.echelon133.microblog.post.Post;
 import ml.echelon133.microblog.user.User;

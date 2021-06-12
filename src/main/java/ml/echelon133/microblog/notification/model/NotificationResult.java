@@ -1,4 +1,4 @@
-package ml.echelon133.microblog.notification;
+package ml.echelon133.microblog.notification.model;
 
 import org.neo4j.ogm.annotation.typeconversion.Convert;
 import org.neo4j.ogm.typeconversion.UuidStringConverter;

@@ -1,5 +1,6 @@
-package ml.echelon133.microblog.notification;
+package ml.echelon133.microblog.notification.model;
 
+import ml.echelon133.microblog.notification.model.Notification;
 import ml.echelon133.microblog.post.QuotePost;
 import ml.echelon133.microblog.user.User;
 import org.neo4j.ogm.annotation.RelationshipEntity;

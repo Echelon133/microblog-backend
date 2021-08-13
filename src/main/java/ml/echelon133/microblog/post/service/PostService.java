@@ -184,7 +184,6 @@ public class PostService implements IPostService {
 
         // find all mentioned usernames
         while (m.find()) {
-            // every tag name should have all characters lower case
             uniqueUsernames.add(m.group(1));
         }
 

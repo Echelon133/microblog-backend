@@ -3,6 +3,7 @@ package ml.echelon133.microblog.user.service;
 import ml.echelon133.microblog.user.exception.UserCreationFailedException;
 import ml.echelon133.microblog.user.exception.UserDoesntExistException;
 import ml.echelon133.microblog.user.exception.UsernameAlreadyTakenException;
+import ml.echelon133.microblog.user.exception.HiddenStateModificationAttemptException;
 import ml.echelon133.microblog.user.model.*;
 
 import java.util.List;
@@ -15,8 +16,10 @@ public interface IUserService {
     List<User> findFollowersUserKnows(UserPrincipal user, UUID otherUser, Long skip, Long limit)
             throws UserDoesntExistException, IllegalArgumentException;
     boolean checkIfUserFollows(UserPrincipal user, UUID followedUuid) throws UserDoesntExistException;
-    boolean followUserWithUuid(UserPrincipal user, UUID followUuid) throws UserDoesntExistException, IllegalArgumentException;
-    boolean unfollowUserWithUuid(UserPrincipal user, UUID unfollowUuid) throws UserDoesntExistException;
+    boolean followUserWithUuid(UserPrincipal user, UUID followUuid) throws UserDoesntExistException,
+            HiddenStateModificationAttemptException;
+    boolean unfollowUserWithUuid(UserPrincipal user, UUID unfollowUuid) throws UserDoesntExistException,
+            HiddenStateModificationAttemptException;
     List<User> findAllFollowsOfUser(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException;
     List<User> findAllFollowersOfUser(UUID uuid, Long skip, Long limit) throws UserDoesntExistException, IllegalArgumentException;
     UserProfileInfo getUserProfileInfo(UUID uuid) throws UserDoesntExistException;

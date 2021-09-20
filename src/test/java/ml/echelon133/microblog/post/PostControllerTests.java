@@ -703,7 +703,7 @@ public class PostControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"liked\":true}");
+                .contains("{\"liked\":false}");
     }
 
     @Test
@@ -724,7 +724,7 @@ public class PostControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"liked\":false}");
+                .contains("{\"liked\":true}");
     }
 
     @Test

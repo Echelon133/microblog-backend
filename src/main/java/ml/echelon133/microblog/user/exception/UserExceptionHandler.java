@@ -37,6 +37,18 @@ public class UserExceptionHandler extends AbstractExceptionHandler {
         );
     }
 
+    @ExceptionHandler(value = HiddenStateModificationAttemptException.class)
+    protected ResponseEntity<ErrorMessage> handleHiddenStateModificationAttemptException(HiddenStateModificationAttemptException ex,
+                                                                                  WebRequest request) {
+        return new ResponseEntity<>(
+                new ErrorMessage(new Date(),
+                        request.getDescription(false),
+                        HttpStatus.BAD_REQUEST,
+                        ex.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
     @ExceptionHandler(value = NewUserDataInvalidException.class)
     protected ResponseEntity<ErrorMessage> handleNewUserDataInvalidException(NewUserDataInvalidException ex,
                                                                                   WebRequest request) {

@@ -2,10 +2,7 @@ package ml.echelon133.microblog.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ml.echelon133.microblog.user.controller.UserController;
-import ml.echelon133.microblog.user.exception.UserCreationFailedException;
-import ml.echelon133.microblog.user.exception.UserDoesntExistException;
-import ml.echelon133.microblog.user.exception.UserExceptionHandler;
-import ml.echelon133.microblog.user.exception.UsernameAlreadyTakenException;
+import ml.echelon133.microblog.user.exception.*;
 import ml.echelon133.microblog.user.model.*;
 import ml.echelon133.microblog.user.service.UserService;
 import org.junit.jupiter.api.BeforeAll;
@@ -435,7 +432,7 @@ public class UserControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"followed\":false}");
+                .contains("{\"follows\":false}");
     }
 
     @Test
@@ -456,7 +453,28 @@ public class UserControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"followed\":true}");
+                .contains("{\"follows\":true}");
+    }
+
+    @Test
+    public void followUser_HandlesUserFollowingThemselves() throws Exception {
+        UUID uuid = testUser.getUuid();
+
+        // given
+        given(userService.followUserWithUuid(testUser, uuid))
+                .willThrow(new HiddenStateModificationAttemptException("Users cannot follow themselves."));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                post("/api/users/" + uuid + "/follow")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString())
+                .contains("Users cannot follow themselves.");
     }
 
     @Test
@@ -465,7 +483,7 @@ public class UserControllerTests {
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/users/" + invalidUuid + "/unfollow")
+                delete("/api/users/" + invalidUuid + "/follow")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
         ).andReturn().getResponse();
@@ -485,7 +503,7 @@ public class UserControllerTests {
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/users/" + uuid + "/unfollow")
+                delete("/api/users/" + uuid + "/follow")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
         ).andReturn().getResponse();
@@ -506,7 +524,7 @@ public class UserControllerTests {
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/users/" + uuid + "/unfollow")
+                delete("/api/users/" + uuid + "/follow")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
         ).andReturn().getResponse();
@@ -514,7 +532,7 @@ public class UserControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"unfollowed\":false}");
+                .contains("{\"follows\":true}");
     }
 
     @Test
@@ -527,7 +545,7 @@ public class UserControllerTests {
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/users/" + uuid + "/unfollow")
+                delete("/api/users/" + uuid + "/follow")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
         ).andReturn().getResponse();
@@ -535,7 +553,28 @@ public class UserControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"unfollowed\":true}");
+                .contains("{\"follows\":false}");
+    }
+
+    @Test
+    public void unfollowUser_HandlesUserUnfollowingThemselves() throws Exception {
+        UUID uuid = testUser.getUuid();
+
+        // given
+        given(userService.unfollowUserWithUuid(testUser, uuid))
+                .willThrow(new HiddenStateModificationAttemptException("Users cannot unfollow themselves."));
+
+        // when
+        MockHttpServletResponse response = mockMvc.perform(
+                delete("/api/users/" + uuid + "/follow")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+        ).andReturn().getResponse();
+
+        // then
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response.getContentAsString())
+                .contains("Users cannot unfollow themselves.");
     }
 
     @Test

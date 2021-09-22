@@ -3,6 +3,7 @@ package ml.echelon133.microblog.user.service;
 import ml.echelon133.microblog.user.exception.UserCreationFailedException;
 import ml.echelon133.microblog.user.exception.UserDoesntExistException;
 import ml.echelon133.microblog.user.exception.UsernameAlreadyTakenException;
+import ml.echelon133.microblog.user.exception.HiddenStateModificationAttemptException;
 import ml.echelon133.microblog.user.model.*;
 import ml.echelon133.microblog.user.repository.RoleRepository;
 import ml.echelon133.microblog.user.repository.UserRepository;
@@ -104,12 +105,14 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public boolean followUserWithUuid(UserPrincipal user, UUID followUuid) throws UserDoesntExistException, IllegalArgumentException {
+    public boolean followUserWithUuid(UserPrincipal user, UUID followUuid)
+            throws UserDoesntExistException, HiddenStateModificationAttemptException {
+
         throwIfUserDoesntExist(followUuid);
         Optional<Long> following = userRepository.checkIfUserWithUuidFollows(user.getUuid(), followUuid);
 
         if (user.getUuid().equals(followUuid)) {
-            throw new IllegalArgumentException("Users cannot follow themselves.");
+            throw new HiddenStateModificationAttemptException("Users cannot follow themselves.");
         }
 
         // only follow if there is no already existing 'follows' relationship
@@ -122,8 +125,14 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public boolean unfollowUserWithUuid(UserPrincipal user, UUID unfollowUuid) throws UserDoesntExistException {
+    public boolean unfollowUserWithUuid(UserPrincipal user, UUID unfollowUuid)
+            throws UserDoesntExistException, HiddenStateModificationAttemptException {
+
         throwIfUserDoesntExist(unfollowUuid);
+
+        if (user.getUuid().equals(unfollowUuid)) {
+            throw new HiddenStateModificationAttemptException("Users cannot unfollow themselves.");
+        }
         userRepository.unfollowUserWithUuid(user.getUuid(), unfollowUuid);
         return userRepository.checkIfUserWithUuidFollows(user.getUuid(), unfollowUuid).isEmpty();
     }

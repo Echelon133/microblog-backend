@@ -1,5 +1,6 @@
 package ml.echelon133.microblog.user;
 
+import ml.echelon133.microblog.user.exception.HiddenStateModificationAttemptException;
 import ml.echelon133.microblog.user.exception.UserCreationFailedException;
 import ml.echelon133.microblog.user.exception.UserDoesntExistException;
 import ml.echelon133.microblog.user.exception.UsernameAlreadyTakenException;
@@ -176,7 +177,7 @@ public class UserServiceTests {
         given(userRepository.checkIfUserWithUuidFollows(user.getUuid(), user.getUuid())).willReturn(Optional.empty());
 
         // then
-        String message = assertThrows(IllegalArgumentException.class, () -> {
+        String message = assertThrows(HiddenStateModificationAttemptException.class, () -> {
             userService.followUserWithUuid(user, user.getUuid());
         }).getMessage();
 
@@ -230,6 +231,22 @@ public class UserServiceTests {
 
         // then
         assertFalse(result);
+    }
+
+    @Test
+    public void unfollowUserWithUuid_ThrowsWhenUserTriesToUnfollowThemselves() {
+        User user = getTestUser();
+        UUID u2Uuid = user.getUuid();
+
+        // given
+        given(userRepository.existsById(u2Uuid)).willReturn(true);
+
+        // then
+        String message = assertThrows(HiddenStateModificationAttemptException.class, () -> {
+            userService.unfollowUserWithUuid(user, user.getUuid());
+        }).getMessage();
+
+        assertEquals("Users cannot unfollow themselves.", message);
     }
 
     @Test

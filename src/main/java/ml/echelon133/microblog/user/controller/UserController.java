@@ -135,16 +135,16 @@ public class UserController {
         UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Boolean result = userService.followUserWithUuid(loggedUser, UUID.fromString(uuid));
 
-        Map<String, Boolean> response = Map.of("followed", result);
+        Map<String, Boolean> response = Map.of("follows", result);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("/{uuid}/unfollow")
+    @DeleteMapping("/{uuid}/follow")
     public ResponseEntity<Map<String, Boolean>> unfollowUser(@PathVariable String uuid) throws Exception {
         UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Boolean result = userService.unfollowUserWithUuid(loggedUser, UUID.fromString(uuid));
 
-        Map<String, Boolean> response = Map.of("unfollowed", result);
+        Map<String, Boolean> response = Map.of("follows", !result);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

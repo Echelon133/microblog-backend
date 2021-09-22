@@ -654,7 +654,7 @@ public class PostControllerTests {
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/posts/" + invalidUuid + "/unlike")
+                delete("/api/posts/" + invalidUuid + "/like")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
         ).andReturn().getResponse();
@@ -674,7 +674,7 @@ public class PostControllerTests {
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/posts/" + uuid + "/unlike")
+                delete("/api/posts/" + uuid + "/like")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
         ).andReturn().getResponse();
@@ -691,11 +691,11 @@ public class PostControllerTests {
 
         // given
         given(postService.unlikePost(testUser, uuid))
-                .willReturn(false);
+                .willReturn(true);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/posts/" + uuid + "/unlike")
+                delete("/api/posts/" + uuid + "/like")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
         ).andReturn().getResponse();
@@ -703,7 +703,7 @@ public class PostControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"unliked\":false}");
+                .contains("{\"liked\":false}");
     }
 
     @Test
@@ -712,11 +712,11 @@ public class PostControllerTests {
 
         // given
         given(postService.unlikePost(testUser, uuid))
-                .willReturn(true);
+                .willReturn(false);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/posts/" + uuid + "/unlike")
+                delete("/api/posts/" + uuid + "/like")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
         ).andReturn().getResponse();
@@ -724,7 +724,7 @@ public class PostControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"unliked\":true}");
+                .contains("{\"liked\":true}");
     }
 
     @Test

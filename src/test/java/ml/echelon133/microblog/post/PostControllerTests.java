@@ -911,7 +911,9 @@ public class PostControllerTests {
     public void quoteOfPost_RejectsInvalidPostLength() throws Exception {
         UUID postUuid = UUID.randomUUID();
         QuotePostDto dto1 = new QuotePostDto();
-        dto1.setContent(
+        QuotePostDto dto2 = new QuotePostDto();
+        dto1.setContent("");
+        dto2.setContent(
                 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
                         "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
                         "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -919,50 +921,7 @@ public class PostControllerTests {
 
         // json
         JsonContent<QuotePostDto> json1 = jsonQuotesDto.write(dto1);
-
-        // when
-        MockHttpServletResponse response1 = mockMvc.perform(
-                post("/api/posts/" + postUuid + "/quote")
-                        .accept(APPLICATION_JSON)
-                        .with(user(testUser))
-                        .contentType(APPLICATION_JSON)
-                        .content(json1.getJson())
-        ).andReturn().getResponse();
-
-        // then
-        assertThat(response1.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
-        assertThat(response1.getContentAsString())
-                .contains("Quote length is invalid");
-    }
-
-    @Test
-    public void quoteOfPost_AcceptsValidPostLength() throws Exception {
-        UUID postUuid = UUID.randomUUID();
-        QuotePostDto dto1 = new QuotePostDto();
-        QuotePostDto dto2 = new QuotePostDto();
-        dto1.setContent(""); // quote should accept empty content
-        dto2.setContent("Test quote content");
-
-        Post b1 = new QuotePost(testUser, dto1.getContent(), new Post());
-        b1.setUuid(UUID.randomUUID());
-        Post b2 = new QuotePost(testUser, dto2.getContent(), new Post());
-        b2.setUuid(UUID.randomUUID());
-
-        // json
-        JsonContent<QuotePostDto> json1 = jsonQuotesDto.write(dto1);
         JsonContent<QuotePostDto> json2 = jsonQuotesDto.write(dto2);
-        JsonContent<Map<String, String>> expected1 = jsonPostResult.write(
-                Map.of("uuid", b1.getUuid().toString())
-        );
-        JsonContent<Map<String, String>> expected2 = jsonPostResult.write(
-                Map.of("uuid", b2.getUuid().toString())
-        );
-
-        // given
-        given(postService.postQuote(testUser, dto1.getContent(), postUuid)).willReturn(b1);
-        given(postService.postQuote(testUser, dto2.getContent(), postUuid)).willReturn(b2);
-        given(userService.findByUsername(testUser.getUsername()))
-                .willReturn(testUser);
 
         // when
         MockHttpServletResponse response1 = mockMvc.perform(
@@ -982,11 +941,47 @@ public class PostControllerTests {
         ).andReturn().getResponse();
 
         // then
+        assertThat(response1.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response1.getContentAsString())
+                .contains("Quote length is invalid");
+
+        assertThat(response2.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+        assertThat(response2.getContentAsString())
+                .contains("Quote length is invalid");
+    }
+
+    @Test
+    public void quoteOfPost_AcceptsValidPostLength() throws Exception {
+        UUID postUuid = UUID.randomUUID();
+        QuotePostDto dto1 = new QuotePostDto();
+        dto1.setContent("Test quote content");
+
+        Post b1 = new QuotePost(testUser, dto1.getContent(), new Post());
+        b1.setUuid(UUID.randomUUID());
+
+        // json
+        JsonContent<QuotePostDto> json1 = jsonQuotesDto.write(dto1);
+        JsonContent<Map<String, String>> expected1 = jsonPostResult.write(
+                Map.of("uuid", b1.getUuid().toString())
+        );
+
+        // given
+        given(postService.postQuote(testUser, dto1.getContent(), postUuid)).willReturn(b1);
+        given(userService.findByUsername(testUser.getUsername()))
+                .willReturn(testUser);
+
+        // when
+        MockHttpServletResponse response1 = mockMvc.perform(
+                post("/api/posts/" + postUuid + "/quote")
+                        .accept(APPLICATION_JSON)
+                        .with(user(testUser))
+                        .contentType(APPLICATION_JSON)
+                        .content(json1.getJson())
+        ).andReturn().getResponse();
+
+        // then
         assertThat(response1.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response1.getContentAsString()).isEqualTo(expected1.getJson());
-
-        assertThat(response2.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response2.getContentAsString()).isEqualTo(expected2.getJson());
     }
 
     @Test

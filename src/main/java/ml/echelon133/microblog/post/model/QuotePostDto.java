@@ -4,7 +4,7 @@ import org.hibernate.validator.constraints.Length;
 
 public class QuotePostDto {
 
-    @Length(max = 300, message = "Quote length is invalid")
+    @Length(min= 1, max = 300, message = "Quote length is invalid")
     private String content;
 
     public QuotePostDto() {}

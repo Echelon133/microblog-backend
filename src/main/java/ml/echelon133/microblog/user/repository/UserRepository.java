@@ -60,10 +60,10 @@ public interface UserRepository extends Neo4jRepository<User, UUID> {
 
     @Query( "MATCH (u:User)-[:POSTS]->(p:Post) " +
             "WHERE u.uuid = $userUuid AND p.deleted <> true " +
-            "OPTIONAL MATCH (p:Post)-[:RESPONDS]->(respondsTo:Post) " +
+            "OPTIONAL MATCH (p:Post)-[:RESPONDS]->(respondsTo:Post)<-[:POSTS]-(respondsToUser:User)  " +
             "OPTIONAL MATCH (p:Post)-[:QUOTES]->(quotes:Post) " +
             "RETURN p.uuid AS uuid, p.content AS content, p.creationDate AS date, u AS author, " +
-            "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo " +
+            "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo, respondsToUser.username AS respondsToUsername " +
             "ORDER BY datetime(p.creationDate) DESC SKIP $skip LIMIT $limit ")
     List<UserPost> findRecentPostsOfUser(UUID userUuid, Long skip, Long limit);
 }

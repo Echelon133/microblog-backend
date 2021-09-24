@@ -253,7 +253,7 @@ public class PostControllerTests {
         UUID uuid = UUID.randomUUID();
 
         // expected json
-        JsonContent<List<UserPost>> json = jsonFeedPostList.write(responses);
+        JsonContent<List<UserPost>> json = jsonUserPostList.write(responses);
 
         // given
         given(postService.getAllResponsesTo(uuid, 0L, 20L))

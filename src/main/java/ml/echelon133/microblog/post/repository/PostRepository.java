@@ -1,8 +1,8 @@
 package ml.echelon133.microblog.post.repository;
 
-import ml.echelon133.microblog.post.model.FeedPost;
 import ml.echelon133.microblog.post.model.Post;
 import ml.echelon133.microblog.post.model.PostInfo;
+import ml.echelon133.microblog.user.model.UserPost;
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 
@@ -28,7 +28,7 @@ public interface PostRepository extends Neo4jRepository<Post, UUID> {
             "RETURN posts.uuid AS uuid, posts.content AS content, posts.creationDate AS date, poster AS author, " +
             "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo " +
             "ORDER BY datetime(posts.creationDate) DESC SKIP $skip LIMIT $limit ")
-    List<FeedPost> getFeedForUserWithUuid(UUID uuid, Long skip, Long limit);
+    List<UserPost> getFeedForUserWithUuid(UUID uuid, Long skip, Long limit);
 
     @Query( "MATCH (u:User)-[:FOLLOWS]->(poster:User)-[:POSTS]->(posts:Post) " +
             "WHERE u.uuid = $uuid AND posts.deleted <> true AND posts.creationDate >= $oldestDateAllowed " +
@@ -39,7 +39,7 @@ public interface PostRepository extends Neo4jRepository<Post, UUID> {
             "RETURN posts.uuid AS uuid, posts.content AS content, posts.creationDate AS date, poster AS author, " +
             "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo " +
             "ORDER BY numberOfLikes DESC, datetime(posts.creationDate) DESC SKIP $skip LIMIT $limit ")
-    List<FeedPost> getFeedForUserWithUuid_Popular(UUID uuid, Date oldestDateAllowed, Long skip, Long limit);
+    List<UserPost> getFeedForUserWithUuid_Popular(UUID uuid, Date oldestDateAllowed, Long skip, Long limit);
 
     @Query( "MATCH (poster:User)-[:POSTS]->(posts:Post) " +
             "WHERE posts.deleted <> true AND posts.creationDate >= $oldestDateAllowed " +
@@ -50,14 +50,14 @@ public interface PostRepository extends Neo4jRepository<Post, UUID> {
             "RETURN posts.uuid AS uuid, posts.content AS content, posts.creationDate AS date, poster AS author, " +
             "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo " +
             "ORDER BY numberOfLikes DESC, datetime(posts.creationDate) DESC SKIP $skip LIMIT $limit ")
-    List<FeedPost> getFeedForAnonymousUser_Popular(Date oldestDateAllowed, Long skip, Long limit);
+    List<UserPost> getFeedForAnonymousUser_Popular(Date oldestDateAllowed, Long skip, Long limit);
 
     @Query( "MATCH (u:User)-[:POSTS]->(post:Post) WHERE post.uuid = $uuid AND post.deleted <> true " +
             "OPTIONAL MATCH (post:Post)-[:RESPONDS]->(respondsTo:Post) " +
             "OPTIONAL MATCH (post:Post)-[:QUOTES]->(quotes:Post) " +
             "RETURN post.uuid AS uuid, post.content AS content, post.creationDate AS date, u AS author, " +
             "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo ")
-    Optional<FeedPost> getPostWithUuid(UUID uuid);
+    Optional<UserPost> getPostWithUuid(UUID uuid);
 
     @Query( "MATCH (post:Post) WHERE post.uuid = $uuid AND post.deleted <> true " +
             "OPTIONAL MATCH (:User)-[likes:LIKES]->(post:Post) " +
@@ -90,7 +90,7 @@ public interface PostRepository extends Neo4jRepository<Post, UUID> {
             "RETURN response.uuid AS uuid, response.content AS content, response.creationDate AS date, u AS author, " +
             "NULL AS quotes, post.uuid AS respondsTo " +
             "ORDER BY date ASC SKIP $skip LIMIT $limit")
-    List<FeedPost> getAllResponsesToPostWithUuid(UUID uuid, Long skip, Long limit);
+    List<UserPost> getAllResponsesToPostWithUuid(UUID uuid, Long skip, Long limit);
 
     // allow listing quotes even when referenced post is marked as deleted
     // but don't list quotes that are marked as deleted
@@ -99,5 +99,5 @@ public interface PostRepository extends Neo4jRepository<Post, UUID> {
             "RETURN quotes.uuid AS uuid, quotes.content AS content, quotes.creationDate AS date, u AS author, " +
             "post.uuid AS quotes, NULL AS respondsTo " +
             "ORDER BY date ASC SKIP $skip LIMIT $limit")
-    List<FeedPost> getAllQuotesOfPostWithUuid(UUID uuid, Long skip, Long limit);
+    List<UserPost> getAllQuotesOfPostWithUuid(UUID uuid, Long skip, Long limit);
 }

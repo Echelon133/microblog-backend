@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ml.echelon133.microblog.feed.controller.FeedController;
 import ml.echelon133.microblog.feed.exception.FeedExceptionHandler;
 import ml.echelon133.microblog.post.service.PostService;
-import ml.echelon133.microblog.post.model.FeedPost;
 import ml.echelon133.microblog.user.model.User;
+import ml.echelon133.microblog.user.model.UserPost;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ public class FeedControllerTests {
     @InjectMocks
     private FeedExceptionHandler feedExceptionHandler;
 
-    private JacksonTester<List<FeedPost>> jsonFeedPosts;
+    private JacksonTester<List<UserPost>> jsonUserPosts;
 
     @BeforeAll
     public static void beforeAll() {
@@ -73,10 +73,10 @@ public class FeedControllerTests {
 
     @Test
     public void getUserFeed_SetsCorrectDefaultParameters() throws Exception {
-        List<FeedPost> testPosts = List.of(new FeedPost());
+        List<UserPost> testPosts = List.of(new UserPost());
 
         // json
-        JsonContent<List<FeedPost>> json = jsonFeedPosts.write(testPosts);
+        JsonContent<List<UserPost>> json = jsonUserPosts.write(testPosts);
 
         // given
         given(postService.getFeedForUser(testUser, 0L, 20L))
@@ -96,10 +96,10 @@ public class FeedControllerTests {
 
     @Test
     public void getUserFeed_ProvidedSkipAndLimitAreUsed() throws Exception {
-        List<FeedPost> testPosts = List.of(new FeedPost());
+        List<UserPost> testPosts = List.of(new UserPost());
 
         // json
-        JsonContent<List<FeedPost>> json = jsonFeedPosts.write(testPosts);
+        JsonContent<List<UserPost>> json = jsonUserPosts.write(testPosts);
 
         // given
         given(postService.getFeedForUser(testUser, 5L, 50L))
@@ -159,12 +159,12 @@ public class FeedControllerTests {
 
     @Test
     public void getUserFeed_ProvidedByParameterIsUsed() throws Exception {
-        List<FeedPost> testPosts1 = List.of(new FeedPost());
-        List<FeedPost> testPosts2 = List.of(new FeedPost(), new FeedPost());
+        List<UserPost> testPosts1 = List.of(new UserPost());
+        List<UserPost> testPosts2 = List.of(new UserPost(), new UserPost());
 
         // json
-        JsonContent<List<FeedPost>> json1 = jsonFeedPosts.write(testPosts1);
-        JsonContent<List<FeedPost>> json2 = jsonFeedPosts.write(testPosts2);
+        JsonContent<List<UserPost>> json1 = jsonUserPosts.write(testPosts1);
+        JsonContent<List<UserPost>> json2 = jsonUserPosts.write(testPosts2);
 
         // given
         given(postService.getFeedForUser_Popular(testUser,0L, 20L))

@@ -1,7 +1,7 @@
 package ml.echelon133.microblog.feed.controller;
 
-import ml.echelon133.microblog.post.model.FeedPost;
 import ml.echelon133.microblog.post.service.IPostService;
+import ml.echelon133.microblog.user.model.UserPost;
 import ml.echelon133.microblog.user.model.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,7 +28,7 @@ public class FeedController {
     }
 
     @GetMapping
-    public ResponseEntity<List<FeedPost>> getUserFeed(@RequestParam(required = false) String by,
+    public ResponseEntity<List<UserPost>> getUserFeed(@RequestParam(required = false) String by,
                                                       @RequestParam(required = false) Long skip,
                                                       @RequestParam(required = false) Long limit) throws IllegalArgumentException {
 
@@ -40,7 +40,7 @@ public class FeedController {
             limit = 20L;
         }
 
-        List<FeedPost> feed;
+        List<UserPost> feed;
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth == null || auth instanceof AnonymousAuthenticationToken) {

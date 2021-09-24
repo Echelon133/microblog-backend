@@ -23,40 +23,40 @@ public interface PostRepository extends Neo4jRepository<Post, UUID> {
      */
     @Query( "MATCH (u:User)-[:FOLLOWS]->(poster:User)-[:POSTS]->(posts:Post) " +
             "WHERE u.uuid = $uuid AND posts.deleted <> true " +
-            "OPTIONAL MATCH (posts:Post)-[:RESPONDS]->(respondsTo:Post) " +
+            "OPTIONAL MATCH (posts:Post)-[:RESPONDS]->(respondsTo:Post)<-[:POSTS]-(respondsToUser:User) " +
             "OPTIONAL MATCH (posts:Post)-[:QUOTES]->(quotes:Post) " +
             "RETURN posts.uuid AS uuid, posts.content AS content, posts.creationDate AS date, poster AS author, " +
-            "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo " +
+            "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo, respondsToUser.username AS respondsToUsername " +
             "ORDER BY datetime(posts.creationDate) DESC SKIP $skip LIMIT $limit ")
     List<UserPost> getFeedForUserWithUuid(UUID uuid, Long skip, Long limit);
 
     @Query( "MATCH (u:User)-[:FOLLOWS]->(poster:User)-[:POSTS]->(posts:Post) " +
             "WHERE u.uuid = $uuid AND posts.deleted <> true AND posts.creationDate >= $oldestDateAllowed " +
-            "OPTIONAL MATCH (posts:Post)-[:RESPONDS]->(respondsTo:Post) " +
+            "OPTIONAL MATCH (posts:Post)-[:RESPONDS]->(respondsTo:Post)<-[:POSTS]-(respondsToUser:User) " +
             "OPTIONAL MATCH (posts:Post)-[:QUOTES]->(quotes:Post) " +
             "OPTIONAL MATCH (:User)-[l:LIKES]->(posts) " +
-            "WITH posts, quotes, respondsTo, poster, count(l) as numberOfLikes " +
+            "WITH posts, quotes, respondsTo, poster, count(l) as numberOfLikes, respondsToUser " +
             "RETURN posts.uuid AS uuid, posts.content AS content, posts.creationDate AS date, poster AS author, " +
-            "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo " +
+            "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo, respondsToUser.username AS respondsToUsername  " +
             "ORDER BY numberOfLikes DESC, datetime(posts.creationDate) DESC SKIP $skip LIMIT $limit ")
     List<UserPost> getFeedForUserWithUuid_Popular(UUID uuid, Date oldestDateAllowed, Long skip, Long limit);
 
     @Query( "MATCH (poster:User)-[:POSTS]->(posts:Post) " +
             "WHERE posts.deleted <> true AND posts.creationDate >= $oldestDateAllowed " +
-            "OPTIONAL MATCH (posts:Post)-[:RESPONDS]->(respondsTo:Post) " +
+            "OPTIONAL MATCH (posts:Post)-[:RESPONDS]->(respondsTo:Post)<-[:POSTS]-(respondsToUser:User) " +
             "OPTIONAL MATCH (posts:Post)-[:QUOTES]->(quotes:Post) " +
             "OPTIONAL MATCH (:User)-[l:LIKES]->(posts) " +
-            "WITH posts, quotes, respondsTo, poster, count(l) as numberOfLikes " +
+            "WITH posts, quotes, respondsTo, poster, count(l) as numberOfLikes, respondsToUser " +
             "RETURN posts.uuid AS uuid, posts.content AS content, posts.creationDate AS date, poster AS author, " +
-            "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo " +
+            "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo, respondsToUser.username AS respondsToUsername  " +
             "ORDER BY numberOfLikes DESC, datetime(posts.creationDate) DESC SKIP $skip LIMIT $limit ")
     List<UserPost> getFeedForAnonymousUser_Popular(Date oldestDateAllowed, Long skip, Long limit);
 
     @Query( "MATCH (u:User)-[:POSTS]->(post:Post) WHERE post.uuid = $uuid AND post.deleted <> true " +
-            "OPTIONAL MATCH (post:Post)-[:RESPONDS]->(respondsTo:Post) " +
+            "OPTIONAL MATCH (post:Post)-[:RESPONDS]->(respondsTo:Post)<-[:POSTS]-(respondsToUser:User) " +
             "OPTIONAL MATCH (post:Post)-[:QUOTES]->(quotes:Post) " +
             "RETURN post.uuid AS uuid, post.content AS content, post.creationDate AS date, u AS author, " +
-            "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo ")
+            "quotes.uuid AS quotes, respondsTo.uuid AS respondsTo, respondsToUser.username AS respondsToUsername ")
     Optional<UserPost> getPostWithUuid(UUID uuid);
 
     @Query( "MATCH (post:Post) WHERE post.uuid = $uuid AND post.deleted <> true " +
@@ -86,9 +86,10 @@ public interface PostRepository extends Neo4jRepository<Post, UUID> {
     // allow listing responses to posts marked as deleted
     // but dont list responses that are marked as deleted
     @Query( "MATCH (post:Post) WHERE post.uuid = $uuid " +
-            "MATCH (u:User)-[:POSTS]->(response:ResponsePost)-[:RESPONDS]->(post) WHERE response.deleted <> true " +
+            "MATCH (u:User)-[:POSTS]->(response:ResponsePost)-[:RESPONDS]->(post)<-[:POSTS]-(respondsToUser:User) " +
+            "WHERE response.deleted <> true " +
             "RETURN response.uuid AS uuid, response.content AS content, response.creationDate AS date, u AS author, " +
-            "NULL AS quotes, post.uuid AS respondsTo " +
+            "NULL AS quotes, post.uuid AS respondsTo, respondsToUser.username AS respondsToUsername " +
             "ORDER BY date ASC SKIP $skip LIMIT $limit")
     List<UserPost> getAllResponsesToPostWithUuid(UUID uuid, Long skip, Long limit);
 
@@ -97,7 +98,7 @@ public interface PostRepository extends Neo4jRepository<Post, UUID> {
     @Query( "MATCH (post:Post) WHERE post.uuid = $uuid " +
             "MATCH (u:User)-[:POSTS]->(quotes:QuotePost)-[:QUOTES]->(post) WHERE quotes.deleted <> true " +
             "RETURN quotes.uuid AS uuid, quotes.content AS content, quotes.creationDate AS date, u AS author, " +
-            "post.uuid AS quotes, NULL AS respondsTo " +
+            "post.uuid AS quotes, NULL AS respondsTo, NULL AS respondsToUsername " +
             "ORDER BY date ASC SKIP $skip LIMIT $limit")
     List<UserPost> getAllQuotesOfPostWithUuid(UUID uuid, Long skip, Long limit);
 }

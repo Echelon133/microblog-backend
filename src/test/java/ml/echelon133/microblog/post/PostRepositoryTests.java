@@ -311,6 +311,27 @@ public class PostRepositoryTests {
     }
 
     @Test
+    public void getFeedForUserWithUuid_ProvidesExtraInfoAboutResponsePost() {
+        User u1 = userRepository.findByUsername("test1").orElse(null);
+        User u2 = userRepository.findByUsername("test2").orElse(null);
+
+        // create two posts - one regular and one responding
+        Post b1 = new Post(u1, "content1");
+        postRepository.save(b1);
+        Post r = new ResponsePost(u2, "content2", b1);
+        postRepository.save(r);
+
+        // when
+        List<UserPost> feed = postRepository
+                .getFeedForUserWithUuid(u2.getUuid(), 0L, 1L);
+
+        // then
+        assertEquals(1, feed.size());
+        assertEquals(b1.getUuid(), feed.get(0).getRespondsTo());
+        assertEquals(u1.getUsername(), feed.get(0).getRespondsToUsername());
+    }
+
+    @Test
     public void getPostWithUuid_ReturnsEmptyObjectWhenUuidDoesNotExistInDb() {
 
         // when
@@ -401,6 +422,27 @@ public class PostRepositoryTests {
         UserPost feedPost = post.get();
         UUID referencedUuid = b.getUuid();
         assertEquals(referencedUuid, feedPost.getQuotes());
+    }
+
+    @Test
+    public void getPostWithUuid_ProvidesExtraInfoAboutResponsePost() {
+        User u1 = userRepository.findByUsername("test1").orElse(null);
+        User u2 = userRepository.findByUsername("test2").orElse(null);
+
+        // create two posts - one regular and one responding
+        Post b1 = new Post(u1, "content1");
+        postRepository.save(b1);
+        Post r = new ResponsePost(u2, "content2", b1);
+        postRepository.save(r);
+
+        // when
+        Optional<UserPost> post = postRepository
+                .getPostWithUuid(r.getUuid());
+
+        // then
+        assertTrue(post.isPresent());
+        assertEquals(b1.getUuid(), post.get().getRespondsTo());
+        assertEquals(u1.getUsername(), post.get().getRespondsToUsername());
     }
 
     @Test
@@ -656,6 +698,27 @@ public class PostRepositoryTests {
             assertEquals(b.getUuid(), fPost.getRespondsTo());
             assertNull(fPost.getQuotes());
         }
+    }
+
+    @Test
+    public void getAllResponsesToPostWithUuid_ProvidesExtraInfoAboutResponsePost() {
+        User u1 = userRepository.findByUsername("test1").orElse(null);
+        User u2 = userRepository.findByUsername("test2").orElse(null);
+
+        // create two posts - one regular and one responding
+        Post b1 = new Post(u1, "content1");
+        postRepository.save(b1);
+        Post r = new ResponsePost(u2, "content2", b1);
+        postRepository.save(r);
+
+        // when
+        List<UserPost> responses = postRepository
+                .getAllResponsesToPostWithUuid(b1.getUuid(), 0L, 5L);
+
+        // then
+        assertEquals(1L, responses.size());
+        assertEquals(b1.getUuid(), responses.get(0).getRespondsTo());
+        assertEquals(u1.getUsername(), responses.get(0).getRespondsToUsername());
     }
 
     @Test
@@ -955,6 +1018,31 @@ public class PostRepositoryTests {
     }
 
     @Test
+    public void getFeedForUserWithUuid_Popular_ProvidesExtraInfoAboutResponsePost() {
+        User u1 = userRepository.findByUsername("test1").orElse(null);
+        User u2 = userRepository.findByUsername("test2").orElse(null);
+
+        // create two posts - one regular and one responding
+        Post b1 = new Post(u1, "content1");
+        postRepository.save(b1);
+        Post r = new ResponsePost(u2, "content2", b1);
+        postRepository.save(r);
+
+        // like the response, to make it first on the list
+        postRepository.likePostWithUuid(u2.getUuid(), r.getUuid());
+
+        // when
+        Date ago = Date.from(Instant.now().minus(60, MINUTES));
+        List<UserPost> feed = postRepository
+                .getFeedForUserWithUuid_Popular(u2.getUuid(), ago,0L, 5L);
+
+        // then
+        assertEquals(1, feed.size());
+        assertEquals(b1.getUuid(), feed.get(0).getRespondsTo());
+        assertEquals(u1.getUsername(), feed.get(0).getRespondsToUsername());
+    }
+
+    @Test
     public void getFeedForAnonymousUser_Popular_DoesNotContainDeletedPosts() {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
@@ -1126,5 +1214,33 @@ public class PostRepositoryTests {
         Arrays.asList(20, 21, 22, 23, 24).forEach(c -> {
             assertTrue(test4Contents.contains(c.toString()));
         });
+    }
+
+    @Test
+    public void getFeedForAnonymousUser_Popular_ProvidesExtraInfoAboutResponsePost() {
+        // this is the only test case that requires the list of existing posts to be empty
+        postRepository.deleteAll();
+
+        User u1 = userRepository.findByUsername("test1").orElse(null);
+        User u2 = userRepository.findByUsername("test2").orElse(null);
+
+        // create two posts - one regular and one responding
+        Post b1 = new Post(u1, "content1");
+        postRepository.save(b1);
+        Post r = new ResponsePost(u2, "content2", b1);
+        postRepository.save(r);
+
+        // like the response, to make it first on the list by popularity
+        postRepository.likePostWithUuid(u2.getUuid(), r.getUuid());
+
+        // when
+        Date ago = Date.from(Instant.now().minus(60, MINUTES));
+        List<UserPost> feed = postRepository
+                .getFeedForAnonymousUser_Popular(ago,0L, 1L);
+
+        // then
+        assertEquals(1, feed.size());
+        assertEquals(b1.getUuid(), feed.get(0).getRespondsTo());
+        assertEquals(u1.getUsername(), feed.get(0).getRespondsToUsername());
     }
 }

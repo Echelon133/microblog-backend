@@ -3,14 +3,19 @@
 Simple twitter-like API.
 
 ## Features
-* following other users
-* posting posts (the equivalent of tweets)
-* posting quotes (the equivalent of retweets)
-* posting response posts (the equivalent of twitter responses)
-* liking/unliking other users posts
-* tagging posts with tags just by mentioning them in the post content
-* retrieving most popular tags in the last hour/day/week
-* getting user feed based on popularity/recency of posts 
+* follow/unfollow other users
+* post posts (the equivalent of tweets)
+* post quotes (the equivalent of quote tweets)
+* post response posts (the equivalent of twitter replies)
+* like/unlike other users' posts
+* tag posts
+* mention other users in posts
+* retrieve most popular tags in the last hour/day/week
+* user's feed based on popularity/recency of posts
+* notifications (when being quoted, responded to, or mentioned in another post)
+* report posts
+* search for users
+
 
 ## API
 

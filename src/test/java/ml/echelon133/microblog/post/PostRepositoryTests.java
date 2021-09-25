@@ -3,6 +3,7 @@ package ml.echelon133.microblog.post;
 import ml.echelon133.microblog.post.model.*;
 import ml.echelon133.microblog.post.repository.PostRepository;
 import ml.echelon133.microblog.user.model.User;
+import ml.echelon133.microblog.user.model.UserPost;
 import ml.echelon133.microblog.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -152,7 +153,7 @@ public class PostRepositoryTests {
 
     @Test
     public void getFeedForUserWithUuid_IsEmptyWhenUserDoesntExist() {
-        List<FeedPost> posts = postRepository
+        List<UserPost> posts = postRepository
                 .getFeedForUserWithUuid(UUID.randomUUID(), 0L, 10L);
 
         assertEquals(0, posts.size());
@@ -163,11 +164,11 @@ public class PostRepositoryTests {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
         // when
-        List<FeedPost> posts = postRepository
+        List<UserPost> posts = postRepository
                 .getFeedForUserWithUuid(user.getUuid(), 0L, 10L);
 
         // make a list of contents of retrieved posts
-        List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = posts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(10, posts.size());
@@ -187,11 +188,11 @@ public class PostRepositoryTests {
         postRepository.save(post);
 
         // when
-        List<FeedPost> posts = postRepository
+        List<UserPost> posts = postRepository
                 .getFeedForUserWithUuid(user.getUuid(), 0L, 10L);
 
         // make a list of contents of retrieved posts
-        List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = posts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(10, posts.size());
@@ -206,11 +207,11 @@ public class PostRepositoryTests {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
         // when
-        List<FeedPost> posts = postRepository
+        List<UserPost> posts = postRepository
                 .getFeedForUserWithUuid(user.getUuid(), 5L, 5L);
 
         // make a list of contents of retrieved posts
-        List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = posts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(5, posts.size());
@@ -225,11 +226,11 @@ public class PostRepositoryTests {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
         // when
-        List<FeedPost> posts = postRepository
+        List<UserPost> posts = postRepository
                 .getFeedForUserWithUuid(user.getUuid(), 0L, 5L);
 
         // make a list of contents of retrieved posts
-        List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = posts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(5, posts.size());
@@ -244,11 +245,11 @@ public class PostRepositoryTests {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
         // when
-        List<FeedPost> allPosts = postRepository
+        List<UserPost> allPosts = postRepository
                 .getFeedForUserWithUuid(user.getUuid(), 0L, 25L);
 
         // make a list of contents of retrieved posts
-        List<String> contents = allPosts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = allPosts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(20, allPosts.size());
@@ -271,49 +272,70 @@ public class PostRepositoryTests {
         User test3 = userRepository.findByUsername("test3").orElse(new User());
 
         // when
-        List<FeedPost> allPosts = postRepository
+        List<UserPost> allPosts = postRepository
                 .getFeedForUserWithUuid(test1.getUuid(), 0L, 20L); // limit to 20, to show all posts
 
         // then
         // expected posts of test1: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-        List<FeedPost> test1Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test1.getUuid())
+        List<UserPost> test1Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test1.getUuid())
                 .collect(Collectors.toList());
 
         assertEquals(10, test1Posts.size());
 
-        List<String> test1Contents = test1Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> test1Contents = test1Posts.stream().map(UserPost::getContent).collect(Collectors.toList());
         Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9).forEach(c -> {
             assertTrue(test1Contents.contains(c.toString()));
         });
 
         // expected posts of test2: 10, 11, 12, 13, 14
-        List<FeedPost> test2Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test2.getUuid())
+        List<UserPost> test2Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test2.getUuid())
                 .collect(Collectors.toList());
 
         assertEquals(5, test2Posts.size());
 
-        List<String> test2Contents = test2Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> test2Contents = test2Posts.stream().map(UserPost::getContent).collect(Collectors.toList());
         Arrays.asList(10, 11, 12, 13, 14).forEach(c -> {
             assertTrue(test2Contents.contains(c.toString()));
         });
 
         // expected posts of test3: 15, 16, 17, 18, 19
-        List<FeedPost> test3Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test3.getUuid())
+        List<UserPost> test3Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test3.getUuid())
                 .collect(Collectors.toList());
 
         assertEquals(5, test3Posts.size());
 
-        List<String> test3Contents = test3Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> test3Contents = test3Posts.stream().map(UserPost::getContent).collect(Collectors.toList());
         Arrays.asList(15, 16, 17, 18, 19).forEach(c -> {
             assertTrue(test3Contents.contains(c.toString()));
         });
     }
 
     @Test
+    public void getFeedForUserWithUuid_ProvidesExtraInfoAboutResponsePost() {
+        User u1 = userRepository.findByUsername("test1").orElse(null);
+        User u2 = userRepository.findByUsername("test2").orElse(null);
+
+        // create two posts - one regular and one responding
+        Post b1 = new Post(u1, "content1");
+        postRepository.save(b1);
+        Post r = new ResponsePost(u2, "content2", b1);
+        postRepository.save(r);
+
+        // when
+        List<UserPost> feed = postRepository
+                .getFeedForUserWithUuid(u2.getUuid(), 0L, 1L);
+
+        // then
+        assertEquals(1, feed.size());
+        assertEquals(b1.getUuid(), feed.get(0).getRespondsTo());
+        assertEquals(u1.getUsername(), feed.get(0).getRespondsToUsername());
+    }
+
+    @Test
     public void getPostWithUuid_ReturnsEmptyObjectWhenUuidDoesNotExistInDb() {
 
         // when
-        Optional<FeedPost> post = postRepository.getPostWithUuid(UUID.randomUUID());
+        Optional<UserPost> post = postRepository.getPostWithUuid(UUID.randomUUID());
 
         // then
         assertTrue(post.isEmpty());
@@ -328,7 +350,7 @@ public class PostRepositoryTests {
         postRepository.save(b);
 
         // when
-        Optional<FeedPost> post = postRepository.getPostWithUuid(b.getUuid());
+        Optional<UserPost> post = postRepository.getPostWithUuid(b.getUuid());
 
         // then
         assertTrue(post.isEmpty());
@@ -342,12 +364,12 @@ public class PostRepositoryTests {
         Post b = createTestPost(u, "this is a test post", 0L);
 
         // when
-        Optional<FeedPost> post = postRepository.getPostWithUuid(b.getUuid());
+        Optional<UserPost> post = postRepository.getPostWithUuid(b.getUuid());
 
         // then
         assertTrue(post.isPresent());
 
-        FeedPost feedPost = post.get();
+        UserPost feedPost = post.get();
         assertEquals(b.getUuid(), feedPost.getUuid());
         assertEquals(b.getAuthor(), feedPost.getAuthor());
         assertEquals(b.getContent(), feedPost.getContent());
@@ -369,12 +391,12 @@ public class PostRepositoryTests {
 
         // when
         // find the response
-        Optional<FeedPost> post = postRepository.getPostWithUuid(r.getUuid());
+        Optional<UserPost> post = postRepository.getPostWithUuid(r.getUuid());
 
         // then
         assertTrue(post.isPresent());
 
-        FeedPost feedPost = post.get();
+        UserPost feedPost = post.get();
         UUID parentUuid = b.getUuid();
         assertEquals(parentUuid, feedPost.getRespondsTo());
     }
@@ -392,14 +414,35 @@ public class PostRepositoryTests {
 
         // when
         // find the quote
-        Optional<FeedPost> post = postRepository.getPostWithUuid(r.getUuid());
+        Optional<UserPost> post = postRepository.getPostWithUuid(r.getUuid());
 
         // then
         assertTrue(post.isPresent());
 
-        FeedPost feedPost = post.get();
+        UserPost feedPost = post.get();
         UUID referencedUuid = b.getUuid();
         assertEquals(referencedUuid, feedPost.getQuotes());
+    }
+
+    @Test
+    public void getPostWithUuid_ProvidesExtraInfoAboutResponsePost() {
+        User u1 = userRepository.findByUsername("test1").orElse(null);
+        User u2 = userRepository.findByUsername("test2").orElse(null);
+
+        // create two posts - one regular and one responding
+        Post b1 = new Post(u1, "content1");
+        postRepository.save(b1);
+        Post r = new ResponsePost(u2, "content2", b1);
+        postRepository.save(r);
+
+        // when
+        Optional<UserPost> post = postRepository
+                .getPostWithUuid(r.getUuid());
+
+        // then
+        assertTrue(post.isPresent());
+        assertEquals(b1.getUuid(), post.get().getRespondsTo());
+        assertEquals(u1.getUsername(), post.get().getRespondsToUsername());
     }
 
     @Test
@@ -558,7 +601,7 @@ public class PostRepositoryTests {
         Post b = createTestPost(u, "content", 0L);
 
         // when
-        List<FeedPost> posts = postRepository.getAllResponsesToPostWithUuid(b.getUuid(), 0L, 10L);
+        List<UserPost> posts = postRepository.getAllResponsesToPostWithUuid(b.getUuid(), 0L, 10L);
 
         // then
         assertEquals(0, posts.size());
@@ -578,7 +621,7 @@ public class PostRepositoryTests {
         postRepository.save(r2);
 
         // when
-        List<FeedPost> posts = postRepository.getAllResponsesToPostWithUuid(b.getUuid(), 0L, 10L);
+        List<UserPost> posts = postRepository.getAllResponsesToPostWithUuid(b.getUuid(), 0L, 10L);
 
         // then
         assertEquals(1, posts.size());
@@ -599,7 +642,7 @@ public class PostRepositoryTests {
         }
 
         // when
-        List<FeedPost> posts = postRepository.getAllResponsesToPostWithUuid(b.getUuid(), 2L, 10L);
+        List<UserPost> posts = postRepository.getAllResponsesToPostWithUuid(b.getUuid(), 2L, 10L);
 
         // then
         assertEquals(3, posts.size());
@@ -620,7 +663,7 @@ public class PostRepositoryTests {
         }
 
         // when
-        List<FeedPost> posts = postRepository.getAllResponsesToPostWithUuid(b.getUuid(), 0L, 4L);
+        List<UserPost> posts = postRepository.getAllResponsesToPostWithUuid(b.getUuid(), 0L, 4L);
 
         // then
         assertEquals(4, posts.size());
@@ -641,20 +684,41 @@ public class PostRepositoryTests {
         }
 
         // when
-        List<FeedPost> posts = postRepository.getAllResponsesToPostWithUuid(b.getUuid(), 0L, 5L);
+        List<UserPost> posts = postRepository.getAllResponsesToPostWithUuid(b.getUuid(), 0L, 5L);
 
         // then
         assertEquals(5, posts.size());
 
         // response number 0 is the oldest one, expect it first
         for (int i = 0; i < posts.size(); i++) {
-            FeedPost fPost = posts.get(i);
+            UserPost fPost = posts.get(i);
 
             assertTrue(fPost.getContent().contains("response " + i));
             assertEquals("u1", fPost.getAuthor().getUsername());
             assertEquals(b.getUuid(), fPost.getRespondsTo());
             assertNull(fPost.getQuotes());
         }
+    }
+
+    @Test
+    public void getAllResponsesToPostWithUuid_ProvidesExtraInfoAboutResponsePost() {
+        User u1 = userRepository.findByUsername("test1").orElse(null);
+        User u2 = userRepository.findByUsername("test2").orElse(null);
+
+        // create two posts - one regular and one responding
+        Post b1 = new Post(u1, "content1");
+        postRepository.save(b1);
+        Post r = new ResponsePost(u2, "content2", b1);
+        postRepository.save(r);
+
+        // when
+        List<UserPost> responses = postRepository
+                .getAllResponsesToPostWithUuid(b1.getUuid(), 0L, 5L);
+
+        // then
+        assertEquals(1L, responses.size());
+        assertEquals(b1.getUuid(), responses.get(0).getRespondsTo());
+        assertEquals(u1.getUsername(), responses.get(0).getRespondsToUsername());
     }
 
     @Test
@@ -666,7 +730,7 @@ public class PostRepositoryTests {
         Post b = createTestPost(u, "content", 0L);
 
         // when
-        List<FeedPost> posts = postRepository.getAllQuotesOfPostWithUuid(b.getUuid(), 0L, 10L);
+        List<UserPost> posts = postRepository.getAllQuotesOfPostWithUuid(b.getUuid(), 0L, 10L);
 
         // then
         assertEquals(0, posts.size());
@@ -686,7 +750,7 @@ public class PostRepositoryTests {
         postRepository.save(r2);
 
         // when
-        List<FeedPost> posts = postRepository.getAllQuotesOfPostWithUuid(b.getUuid(), 0L, 10L);
+        List<UserPost> posts = postRepository.getAllQuotesOfPostWithUuid(b.getUuid(), 0L, 10L);
 
         // then
         assertEquals(1, posts.size());
@@ -707,7 +771,7 @@ public class PostRepositoryTests {
         }
 
         // when
-        List<FeedPost> posts = postRepository.getAllQuotesOfPostWithUuid(b.getUuid(), 2L, 10L);
+        List<UserPost> posts = postRepository.getAllQuotesOfPostWithUuid(b.getUuid(), 2L, 10L);
 
         // then
         assertEquals(3, posts.size());
@@ -728,7 +792,7 @@ public class PostRepositoryTests {
         }
 
         // when
-        List<FeedPost> posts = postRepository.getAllQuotesOfPostWithUuid(b.getUuid(), 0L, 4L);
+        List<UserPost> posts = postRepository.getAllQuotesOfPostWithUuid(b.getUuid(), 0L, 4L);
 
         // then
         assertEquals(4, posts.size());
@@ -749,14 +813,14 @@ public class PostRepositoryTests {
         }
 
         // when
-        List<FeedPost> posts = postRepository.getAllQuotesOfPostWithUuid(b.getUuid(), 0L, 5L);
+        List<UserPost> posts = postRepository.getAllQuotesOfPostWithUuid(b.getUuid(), 0L, 5L);
 
         // then
         assertEquals(5, posts.size());
 
         // quote number 0 is the oldest one, expect it first
         for (int i = 0; i < posts.size(); i++) {
-            FeedPost fPost = posts.get(i);
+            UserPost fPost = posts.get(i);
 
             assertTrue(fPost.getContent().contains("quote " + i));
             assertEquals("u1", fPost.getAuthor().getUsername());
@@ -767,7 +831,7 @@ public class PostRepositoryTests {
 
     @Test
     public void getFeedForUserWithUuid_Popular_IsEmptyWhenUserDoesntExist() {
-        List<FeedPost> posts = postRepository
+        List<UserPost> posts = postRepository
                 .getFeedForUserWithUuid_Popular(
                         UUID.randomUUID(), getDateHoursAgo(24),
                         0L, 10L);
@@ -785,13 +849,13 @@ public class PostRepositoryTests {
         postRepository.save(post);
 
         // when
-        List<FeedPost> posts = postRepository
+        List<UserPost> posts = postRepository
                 .getFeedForUserWithUuid_Popular(
                         user.getUuid(), getDateHoursAgo(24),
                         0L, 10L);
 
         // make a list of contents of retrieved posts
-        List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = posts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(10, posts.size());
@@ -806,13 +870,13 @@ public class PostRepositoryTests {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
         // when
-        List<FeedPost> posts = postRepository
+        List<UserPost> posts = postRepository
                 .getFeedForUserWithUuid_Popular(
                         user.getUuid(), getDateHoursAgo(24),
                         5L, 5L);
 
         // make a list of contents of retrieved posts
-        List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = posts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(5, posts.size());
@@ -827,13 +891,13 @@ public class PostRepositoryTests {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
         // when
-        List<FeedPost> posts = postRepository
+        List<UserPost> posts = postRepository
                 .getFeedForUserWithUuid_Popular(
                         user.getUuid(), getDateHoursAgo(24),
                         0L, 5L);
 
         // make a list of contents of retrieved posts
-        List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = posts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(5, posts.size());
@@ -848,13 +912,13 @@ public class PostRepositoryTests {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
         // when
-        List<FeedPost> allPosts = postRepository
+        List<UserPost> allPosts = postRepository
                 .getFeedForUserWithUuid_Popular(
                         user.getUuid(), getDateHoursAgo(24),
                         0L, 25L);
 
         // make a list of contents of retrieved posts
-        List<String> contents = allPosts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = allPosts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(20, allPosts.size());
@@ -878,13 +942,13 @@ public class PostRepositoryTests {
         User user = userRepository.findByUsername("test1").orElse(new User());
 
         // when
-        List<FeedPost> allPosts = postRepository
+        List<UserPost> allPosts = postRepository
                 .getFeedForUserWithUuid_Popular(
                         user.getUuid(), getDateHoursAgo(1),
                         0L, 20L);
 
         // make a list of contents of retrieved posts
-        List<String> contents = allPosts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = allPosts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(15, allPosts.size());
@@ -913,44 +977,69 @@ public class PostRepositoryTests {
         User test3 = userRepository.findByUsername("test3").orElse(new User());
 
         // when
-        List<FeedPost> allPosts = postRepository
+        List<UserPost> allPosts = postRepository
                 .getFeedForUserWithUuid_Popular(
                         test1.getUuid(), getDateHoursAgo(24),
                         0L, 25L);
 
         // then
         // expected posts of test1: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-        List<FeedPost> test1Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test1.getUuid())
+        List<UserPost> test1Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test1.getUuid())
                 .collect(Collectors.toList());
 
         assertEquals(10, test1Posts.size());
 
-        List<String> test1Contents = test1Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> test1Contents = test1Posts.stream().map(UserPost::getContent).collect(Collectors.toList());
         Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9).forEach(c -> {
             assertTrue(test1Contents.contains(c.toString()));
         });
 
         // expected posts of test2: 10, 11, 12, 13, 14
-        List<FeedPost> test2Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test2.getUuid())
+        List<UserPost> test2Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test2.getUuid())
                 .collect(Collectors.toList());
 
         assertEquals(5, test2Posts.size());
 
-        List<String> test2Contents = test2Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> test2Contents = test2Posts.stream().map(UserPost::getContent).collect(Collectors.toList());
         Arrays.asList(10, 11, 12, 13, 14).forEach(c -> {
             assertTrue(test2Contents.contains(c.toString()));
         });
 
         // expected posts of test3: 15, 16, 17, 18, 19
-        List<FeedPost> test3Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test3.getUuid())
+        List<UserPost> test3Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test3.getUuid())
                 .collect(Collectors.toList());
 
         assertEquals(5, test3Posts.size());
 
-        List<String> test3Contents = test3Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> test3Contents = test3Posts.stream().map(UserPost::getContent).collect(Collectors.toList());
         Arrays.asList(15, 16, 17, 18, 19).forEach(c -> {
             assertTrue(test3Contents.contains(c.toString()));
         });
+    }
+
+    @Test
+    public void getFeedForUserWithUuid_Popular_ProvidesExtraInfoAboutResponsePost() {
+        User u1 = userRepository.findByUsername("test1").orElse(null);
+        User u2 = userRepository.findByUsername("test2").orElse(null);
+
+        // create two posts - one regular and one responding
+        Post b1 = new Post(u1, "content1");
+        postRepository.save(b1);
+        Post r = new ResponsePost(u2, "content2", b1);
+        postRepository.save(r);
+
+        // like the response, to make it first on the list
+        postRepository.likePostWithUuid(u2.getUuid(), r.getUuid());
+
+        // when
+        Date ago = Date.from(Instant.now().minus(60, MINUTES));
+        List<UserPost> feed = postRepository
+                .getFeedForUserWithUuid_Popular(u2.getUuid(), ago,0L, 5L);
+
+        // then
+        assertEquals(1, feed.size());
+        assertEquals(b1.getUuid(), feed.get(0).getRespondsTo());
+        assertEquals(u1.getUsername(), feed.get(0).getRespondsToUsername());
     }
 
     @Test
@@ -963,11 +1052,11 @@ public class PostRepositoryTests {
         postRepository.save(post);
 
         // when
-        List<FeedPost> posts = postRepository
+        List<UserPost> posts = postRepository
                 .getFeedForAnonymousUser_Popular(getDateHoursAgo(24),0L, 10L);
 
         // make a list of contents of retrieved posts
-        List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = posts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(10, posts.size());
@@ -980,11 +1069,11 @@ public class PostRepositoryTests {
     @Test
     public void getFeedForAnonymousUser_Popular_SkipArgumentWorks() {
         // when
-        List<FeedPost> posts = postRepository
+        List<UserPost> posts = postRepository
                 .getFeedForAnonymousUser_Popular(getDateHoursAgo(24),5L, 5L);
 
         // make a list of contents of retrieved posts
-        List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = posts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(5, posts.size());
@@ -997,11 +1086,11 @@ public class PostRepositoryTests {
     @Test
     public void getFeedForAnonymousUser_Popular_LimitArgumentWorks() {
         // when
-        List<FeedPost> posts = postRepository
+        List<UserPost> posts = postRepository
                 .getFeedForAnonymousUser_Popular(getDateHoursAgo(24),0L, 5L);
 
         // make a list of contents of retrieved posts
-        List<String> contents = posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = posts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(5, posts.size());
@@ -1014,11 +1103,11 @@ public class PostRepositoryTests {
     @Test
     public void getFeedForAnonymousUser_Popular_FeedWithAllPostsIsSorted() {
         // when
-        List<FeedPost> allPosts = postRepository
+        List<UserPost> allPosts = postRepository
                 .getFeedForAnonymousUser_Popular(getDateHoursAgo(24),0L, 25L);
 
         // make a list of contents of retrieved posts
-        List<String> contents = allPosts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = allPosts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(25, allPosts.size());
@@ -1042,11 +1131,11 @@ public class PostRepositoryTests {
     @Test
     public void getFeedForAnonymousUser_Popular_FeedFiltersByDate() {
         // when
-        List<FeedPost> allPosts = postRepository
+        List<UserPost> allPosts = postRepository
                 .getFeedForAnonymousUser_Popular(getDateHoursAgo(1),0L, 25L); // limit to 25
 
         // make a list of contents of retrieved posts
-        List<String> contents = allPosts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> contents = allPosts.stream().map(UserPost::getContent).collect(Collectors.toList());
 
         // then
         assertEquals(20, allPosts.size());
@@ -1078,52 +1167,80 @@ public class PostRepositoryTests {
         User test4 = userRepository.findByUsername("test4").orElse(new User());
 
         // when
-        List<FeedPost> allPosts = postRepository
+        List<UserPost> allPosts = postRepository
                 .getFeedForAnonymousUser_Popular(getDateHoursAgo(24),0L, 25L); // limit to 25, to show all posts
 
         // then
         // expected posts of test1: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-        List<FeedPost> test1Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test1.getUuid())
+        List<UserPost> test1Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test1.getUuid())
                 .collect(Collectors.toList());
 
         assertEquals(10, test1Posts.size());
 
-        List<String> test1Contents = test1Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> test1Contents = test1Posts.stream().map(UserPost::getContent).collect(Collectors.toList());
         Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9).forEach(c -> {
             assertTrue(test1Contents.contains(c.toString()));
         });
 
         // expected posts of test2: 10, 11, 12, 13, 14
-        List<FeedPost> test2Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test2.getUuid())
+        List<UserPost> test2Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test2.getUuid())
                 .collect(Collectors.toList());
 
         assertEquals(5, test2Posts.size());
 
-        List<String> test2Contents = test2Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> test2Contents = test2Posts.stream().map(UserPost::getContent).collect(Collectors.toList());
         Arrays.asList(10, 11, 12, 13, 14).forEach(c -> {
             assertTrue(test2Contents.contains(c.toString()));
         });
 
         // expected posts of test3: 15, 16, 17, 18, 19
-        List<FeedPost> test3Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test3.getUuid())
+        List<UserPost> test3Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test3.getUuid())
                 .collect(Collectors.toList());
 
         assertEquals(5, test3Posts.size());
 
-        List<String> test3Contents = test3Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> test3Contents = test3Posts.stream().map(UserPost::getContent).collect(Collectors.toList());
         Arrays.asList(15, 16, 17, 18, 19).forEach(c -> {
             assertTrue(test3Contents.contains(c.toString()));
         });
 
         // expected posts of test4: 20, 21, 22, 23, 24
-        List<FeedPost> test4Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test4.getUuid())
+        List<UserPost> test4Posts = allPosts.stream().filter(b -> b.getAuthor().getUuid() == test4.getUuid())
                 .collect(Collectors.toList());
 
         assertEquals(5, test4Posts.size());
 
-        List<String> test4Contents = test4Posts.stream().map(FeedPost::getContent).collect(Collectors.toList());
+        List<String> test4Contents = test4Posts.stream().map(UserPost::getContent).collect(Collectors.toList());
         Arrays.asList(20, 21, 22, 23, 24).forEach(c -> {
             assertTrue(test4Contents.contains(c.toString()));
         });
+    }
+
+    @Test
+    public void getFeedForAnonymousUser_Popular_ProvidesExtraInfoAboutResponsePost() {
+        // this is the only test case that requires the list of existing posts to be empty
+        postRepository.deleteAll();
+
+        User u1 = userRepository.findByUsername("test1").orElse(null);
+        User u2 = userRepository.findByUsername("test2").orElse(null);
+
+        // create two posts - one regular and one responding
+        Post b1 = new Post(u1, "content1");
+        postRepository.save(b1);
+        Post r = new ResponsePost(u2, "content2", b1);
+        postRepository.save(r);
+
+        // like the response, to make it first on the list by popularity
+        postRepository.likePostWithUuid(u2.getUuid(), r.getUuid());
+
+        // when
+        Date ago = Date.from(Instant.now().minus(60, MINUTES));
+        List<UserPost> feed = postRepository
+                .getFeedForAnonymousUser_Popular(ago,0L, 1L);
+
+        // then
+        assertEquals(1, feed.size());
+        assertEquals(b1.getUuid(), feed.get(0).getRespondsTo());
+        assertEquals(u1.getUsername(), feed.get(0).getRespondsToUsername());
     }
 }

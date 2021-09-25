@@ -1,6 +1,7 @@
 package ml.echelon133.microblog.user;
 
 import ml.echelon133.microblog.post.model.Post;
+import ml.echelon133.microblog.post.model.ResponsePost;
 import ml.echelon133.microblog.post.repository.PostRepository;
 import ml.echelon133.microblog.user.model.User;
 import ml.echelon133.microblog.user.model.UserPost;
@@ -376,6 +377,27 @@ public class UserRepositoryTests {
 
         // then
         assertEquals(0, recent.size());
+    }
+
+    @Test
+    public void findRecentPostsOfUser_ProvidesExtraInfoAboutResponsePost() {
+        User u1 = userRepository.findByUsername("user1").orElse(null);
+        User u2 = userRepository.findByUsername("user2").orElse(null);
+
+        // create two posts - one regular and one responding
+        Post b1 = new Post(u1, "content1");
+        postRepository.save(b1);
+        Post r = new ResponsePost(u2, "content2", b1);
+        postRepository.save(r);
+
+        // when
+        List<UserPost> recent = userRepository
+                .findRecentPostsOfUser(u2.getUuid(), 0L, 5L);
+
+        // then
+        assertEquals(1, recent.size());
+        assertEquals(b1.getUuid(), recent.get(0).getRespondsTo());
+        assertEquals(u1.getUsername(), recent.get(0).getRespondsToUsername());
     }
 
     @Test

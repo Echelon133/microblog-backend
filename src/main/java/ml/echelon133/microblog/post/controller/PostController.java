@@ -3,6 +3,7 @@ package ml.echelon133.microblog.post.controller;
 import ml.echelon133.microblog.post.exception.InvalidPostContentException;
 import ml.echelon133.microblog.post.model.*;
 import ml.echelon133.microblog.post.service.IPostService;
+import ml.echelon133.microblog.user.model.UserPost;
 import ml.echelon133.microblog.user.service.IUserService;
 import ml.echelon133.microblog.user.model.User;
 import ml.echelon133.microblog.user.model.UserPrincipal;
@@ -33,7 +34,7 @@ public class PostController {
     }
 
     @GetMapping("/{uuid}")
-    public ResponseEntity<FeedPost> getPostWithUuid(@PathVariable String uuid) throws Exception {
+    public ResponseEntity<UserPost> getPostWithUuid(@PathVariable String uuid) throws Exception {
         return new ResponseEntity<>(
                 postService.getByUuid(UUID.fromString(uuid)),
                 HttpStatus.OK);
@@ -48,7 +49,7 @@ public class PostController {
 
 
     @GetMapping("/{uuid}/responses")
-    public ResponseEntity<List<FeedPost>> getResponsesToPost(@PathVariable String uuid,
+    public ResponseEntity<List<UserPost>> getResponsesToPost(@PathVariable String uuid,
                                                               @RequestParam(required = false) Long skip,
                                                               @RequestParam(required = false) Long limit) throws Exception {
         if (skip == null) {
@@ -64,7 +65,7 @@ public class PostController {
     }
 
     @GetMapping("/{uuid}/quotes")
-    public ResponseEntity<List<FeedPost>> getQuotesOfPost(@PathVariable String uuid,
+    public ResponseEntity<List<UserPost>> getQuotesOfPost(@PathVariable String uuid,
                                                              @RequestParam(required = false) Long skip,
                                                              @RequestParam(required = false) Long limit) throws Exception {
         if (skip == null) {

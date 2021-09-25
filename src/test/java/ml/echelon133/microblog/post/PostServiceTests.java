@@ -3,7 +3,6 @@ package ml.echelon133.microblog.post;
 import ml.echelon133.microblog.notification.service.NotificationService;
 import ml.echelon133.microblog.post.exception.PostDoesntExistException;
 import ml.echelon133.microblog.post.exception.UserCannotDeletePostException;
-import ml.echelon133.microblog.post.model.FeedPost;
 import ml.echelon133.microblog.post.model.Post;
 import ml.echelon133.microblog.post.model.PostInfo;
 import ml.echelon133.microblog.post.repository.PostRepository;
@@ -12,6 +11,7 @@ import ml.echelon133.microblog.tag.model.Tag;
 import ml.echelon133.microblog.tag.exception.TagDoesntExistException;
 import ml.echelon133.microblog.tag.service.TagService;
 import ml.echelon133.microblog.user.model.User;
+import ml.echelon133.microblog.user.model.UserPost;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,14 +70,14 @@ public class PostServiceTests {
     public void getByUuid_ReturnsObject() throws Exception {
         UUID uuid = UUID.randomUUID();
 
-        FeedPost post = new FeedPost();
+        UserPost post = new UserPost();
         post.setUuid(uuid);
 
         // given
         given(postRepository.getPostWithUuid(uuid)).willReturn(Optional.of(post));
 
         // when
-        FeedPost fPost = postService.getByUuid(uuid);
+        UserPost fPost = postService.getByUuid(uuid);
 
         // then
         assertEquals(uuid, fPost.getUuid());
@@ -162,7 +162,7 @@ public class PostServiceTests {
                 .willReturn(List.of());
 
         // when
-        List<FeedPost> responses = postService.getAllResponsesTo(uuid, 0L, 5L);
+        List<UserPost> responses = postService.getAllResponsesTo(uuid, 0L, 5L);
 
         // then
         assertEquals(0, responses.size());
@@ -172,7 +172,7 @@ public class PostServiceTests {
     public void getAllResponsesTo_ReturnsListOfResponses() throws Exception {
         UUID uuid = UUID.randomUUID();
 
-        List<FeedPost> mockList = List.of(new FeedPost(), new FeedPost());
+        List<UserPost> mockList = List.of(new UserPost(), new UserPost());
 
         // given
         given(postRepository.existsById(uuid)).willReturn(true);
@@ -180,7 +180,7 @@ public class PostServiceTests {
                 .willReturn(mockList);
 
         // when
-        List<FeedPost> responses = postService.getAllResponsesTo(uuid, 0L, 5L);
+        List<UserPost> responses = postService.getAllResponsesTo(uuid, 0L, 5L);
 
         // then
         assertEquals(2, responses.size());
@@ -233,7 +233,7 @@ public class PostServiceTests {
                 .willReturn(List.of());
 
         // when
-        List<FeedPost> responses = postService.getAllQuotesOf(uuid, 0L, 5L);
+        List<UserPost> responses = postService.getAllQuotesOf(uuid, 0L, 5L);
 
         // then
         assertEquals(0, responses.size());
@@ -243,7 +243,7 @@ public class PostServiceTests {
     public void getAllQuotesOf_ReturnsListOfQuotes() throws Exception {
         UUID uuid = UUID.randomUUID();
 
-        List<FeedPost> mockList = List.of(new FeedPost(), new FeedPost());
+        List<UserPost> mockList = List.of(new UserPost(), new UserPost());
 
         // given
         given(postRepository.existsById(uuid)).willReturn(true);
@@ -251,7 +251,7 @@ public class PostServiceTests {
                 .willReturn(mockList);
 
         // when
-        List<FeedPost> responses = postService.getAllQuotesOf(uuid, 0L, 5L);
+        List<UserPost> responses = postService.getAllQuotesOf(uuid, 0L, 5L);
 
         // then
         assertEquals(2, responses.size());
@@ -463,10 +463,10 @@ public class PostServiceTests {
         // given
         given(postRepository
                 .getFeedForUserWithUuid(uuid, 0L, 5L))
-                .willReturn(List.of(new FeedPost()));
+                .willReturn(List.of(new UserPost()));
 
         // when
-        List<FeedPost> oneHourResults = postService
+        List<UserPost> oneHourResults = postService
                 .getFeedForUser(u, 0L, 5L);
 
         // then
@@ -769,10 +769,10 @@ public class PostServiceTests {
         // given
         given(postRepository
                 .getFeedForUserWithUuid_Popular(uuid, dayAgo,0L, 5L))
-                .willReturn(List.of(new FeedPost()));
+                .willReturn(List.of(new UserPost()));
 
         // when
-        List<FeedPost> results = postService
+        List<UserPost> results = postService
                 .getFeedForUser_Popular(u, 0L, 5L);
 
         // then
@@ -808,10 +808,10 @@ public class PostServiceTests {
         // given
         given(postRepository
                 .getFeedForAnonymousUser_Popular(dayAgo, 0L, 5L))
-                .willReturn(List.of(new FeedPost()));
+                .willReturn(List.of(new UserPost()));
 
         // when
-        List<FeedPost> oneHourResults = postService
+        List<UserPost> oneHourResults = postService
                 .getFeedForAnonymousUser(0L, 5L);
 
         // then

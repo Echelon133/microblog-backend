@@ -8,6 +8,7 @@ import ml.echelon133.microblog.post.exception.UserCannotDeletePostException;
 import ml.echelon133.microblog.post.model.*;
 import ml.echelon133.microblog.post.service.PostService;
 import ml.echelon133.microblog.user.model.User;
+import ml.echelon133.microblog.user.model.UserPost;
 import ml.echelon133.microblog.user.service.UserService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,11 +54,11 @@ public class PostControllerTests {
     @InjectMocks
     private PostExceptionHandler postExceptionHandler;
 
-    private JacksonTester<FeedPost> jsonFeedPost;
+    private JacksonTester<UserPost> jsonUserPost;
 
     private JacksonTester<PostInfo> jsonPostInfo;
 
-    private JacksonTester<List<FeedPost>> jsonFeedPostList;
+    private JacksonTester<List<UserPost>> jsonUserPostList;
 
     private JacksonTester<PostDto> jsonPostDto;
 
@@ -128,12 +129,12 @@ public class PostControllerTests {
     @Test
     public void getPostWithUuid_ReturnsPost() throws Exception {
         UUID uuid = UUID.randomUUID();
-        FeedPost post = new FeedPost();
+        UserPost post = new UserPost();
         post.setUuid(uuid);
         post.setAuthor(testUser);
 
         // expected json
-        JsonContent<FeedPost> json = jsonFeedPost.write(post);
+        JsonContent<UserPost> json = jsonUserPost.write(post);
 
         // given
         given(postService.getByUuid(uuid)).willReturn(post);
@@ -247,12 +248,12 @@ public class PostControllerTests {
 
     @Test
     public void getResponsesToPost_NoSkipSetsSkipValueToDefault() throws Exception {
-        List<FeedPost> responses = List.of(new FeedPost(), new FeedPost());
+        List<UserPost> responses = List.of(new UserPost(), new UserPost());
 
         UUID uuid = UUID.randomUUID();
 
         // expected json
-        JsonContent<List<FeedPost>> json = jsonFeedPostList.write(responses);
+        JsonContent<List<UserPost>> json = jsonUserPostList.write(responses);
 
         // given
         given(postService.getAllResponsesTo(uuid, 0L, 20L))
@@ -273,12 +274,12 @@ public class PostControllerTests {
 
     @Test
     public void getResponsesToPost_NoLimitSetsLimitValueToDefault() throws Exception {
-        List<FeedPost> responses = List.of(new FeedPost(), new FeedPost());
+        List<UserPost> responses = List.of(new UserPost(), new UserPost());
 
         UUID uuid = UUID.randomUUID();
 
         // expected json
-        JsonContent<List<FeedPost>> json = jsonFeedPostList.write(responses);
+        JsonContent<List<UserPost>> json = jsonUserPostList.write(responses);
 
         // given
         given(postService.getAllResponsesTo(uuid, 10L, 5L))
@@ -299,12 +300,12 @@ public class PostControllerTests {
 
     @Test
     public void getResponsesToPost_DefaultSkipAndLimitIsCorrect() throws Exception {
-        List<FeedPost> responses = List.of(new FeedPost(), new FeedPost());
+        List<UserPost> responses = List.of(new UserPost(), new UserPost());
 
         UUID uuid = UUID.randomUUID();
 
         // expected json
-        JsonContent<List<FeedPost>> json = jsonFeedPostList.write(responses);
+        JsonContent<List<UserPost>> json = jsonUserPostList.write(responses);
 
         // given
         given(postService.getAllResponsesTo(uuid, 0L, 5L))
@@ -325,12 +326,12 @@ public class PostControllerTests {
 
     @Test
     public void getResponsesToPost_ProvidedSkipAndLimitAreUsed() throws Exception {
-        List<FeedPost> responses = List.of(new FeedPost(), new FeedPost());
+        List<UserPost> responses = List.of(new UserPost(), new UserPost());
 
         UUID uuid = UUID.randomUUID();
 
         // expected json
-        JsonContent<List<FeedPost>> json = jsonFeedPostList.write(responses);
+        JsonContent<List<UserPost>> json = jsonUserPostList.write(responses);
 
         // given
         given(postService.getAllResponsesTo(uuid, 10L, 20L))
@@ -387,16 +388,16 @@ public class PostControllerTests {
 
     @Test
     public void getQuotesOfPost_NoSkipSetsSkipValueToDefault() throws Exception {
-        List<FeedPost> reblobbs = List.of(new FeedPost());
+        List<UserPost> quotes = List.of(new UserPost());
 
         UUID uuid = UUID.randomUUID();
 
         // expected json
-        JsonContent<List<FeedPost>> json = jsonFeedPostList.write(reblobbs);
+        JsonContent<List<UserPost>> json = jsonUserPostList.write(quotes);
 
         // given
         given(postService.getAllQuotesOf(uuid, 0L, 20L))
-                .willReturn(reblobbs);
+                .willReturn(quotes);
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
@@ -413,12 +414,12 @@ public class PostControllerTests {
 
     @Test
     public void getQuotesOfPost_NoLimitSetsLimitValueToDefault() throws Exception {
-        List<FeedPost> quotes = List.of(new FeedPost());
+        List<UserPost> quotes = List.of(new UserPost());
 
         UUID uuid = UUID.randomUUID();
 
         // expected json
-        JsonContent<List<FeedPost>> json = jsonFeedPostList.write(quotes);
+        JsonContent<List<UserPost>> json = jsonUserPostList.write(quotes);
 
         // given
         given(postService.getAllQuotesOf(uuid, 10L, 5L))
@@ -439,12 +440,12 @@ public class PostControllerTests {
 
     @Test
     public void getQuotesOfPost_DefaultSkipAndLimitIsCorrect() throws Exception {
-        List<FeedPost> quotes = List.of(new FeedPost());
+        List<UserPost> quotes = List.of(new UserPost());
 
         UUID uuid = UUID.randomUUID();
 
         // expected json
-        JsonContent<List<FeedPost>> json = jsonFeedPostList.write(quotes);
+        JsonContent<List<UserPost>> json = jsonUserPostList.write(quotes);
 
         // given
         given(postService.getAllQuotesOf(uuid, 0L, 5L))
@@ -465,12 +466,12 @@ public class PostControllerTests {
 
     @Test
     public void getQuotesOfPost_ProvidedSkipAndLimitAreUsed() throws Exception {
-        List<FeedPost> quotes = List.of(new FeedPost());
+        List<UserPost> quotes = List.of(new UserPost());
 
         UUID uuid = UUID.randomUUID();
 
         // expected json
-        JsonContent<List<FeedPost>> json = jsonFeedPostList.write(quotes);
+        JsonContent<List<UserPost>> json = jsonUserPostList.write(quotes);
 
         // given
         given(postService.getAllQuotesOf(uuid, 10L, 20L))

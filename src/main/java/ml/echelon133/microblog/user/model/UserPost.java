@@ -18,6 +18,7 @@ public class UserPost {
     private UUID quotes;
     @Convert(value = UuidStringConverter.class)
     private UUID respondsTo;
+    private String respondsToUsername;
 
     public UUID getUuid() {
         return uuid;
@@ -65,5 +66,13 @@ public class UserPost {
 
     public void setRespondsTo(UUID respondsTo) {
         this.respondsTo = respondsTo;
+    }
+
+    public String getRespondsToUsername() {
+        return respondsToUsername;
+    }
+
+    public void setRespondsToUsername(String respondsToUsername) {
+        this.respondsToUsername = respondsToUsername;
     }
 }

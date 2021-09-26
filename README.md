@@ -19,76 +19,41 @@ Simple twitter-like API.
 
 ## API
 
-| Endpoint                                 | Method     | Request body     | Description                                      |
-|------------------------                  |----------  |----------------- |-------------                                     |
-| /api/users/me                            | GET        |                  | Get info about the user that is currently logged in |
-| /api/users/me                            | PUT        | [User details]()     | Update displayed username, description and profile picture of currently logged user |
-| /api/users/{uuid}                        | GET        |                  | Get info about the user with uuid |
-| /api/users/{uuid}/profile                | GET        |                  | Get counters that show how many follows/followers the user with uuid has |
-| /api/users/{uuid}/follow                 | GET        |                  | Get a response that shows whether currently logged user follows the user with uuid |
-| /api/users/{uuid}/follow                 | POST       |                  | Make currently logged user follow the user with uuid |
-| /api/users/{uuid}/unfollow               | POST       |                  | Make currently logged user unfollow the user with uuid |
-| /api/users/{uuid}/followers?skip&limit   | GET        |                  | Get a list of users that follow the user with uuid. Parameters 'skip' and 'limit' are optional. By default they are 0 and 5 respectively |
-| /api/users/{uuid}/follows?skip&limit     | GET        |                  | Get a list of users that are followed by the user with uuid. Parameters 'skip' and 'limit' are optional. By default they are 0 and 5 respectively |
-| /api/users/{uuid}/recentPosts?skip&limit| GET        |                  | Get a list of most recent posts of user with uuid. Parameters 'skip' and 'limit' are optional. By default they are 0 and 10 respectively |
-| /api/users?username                      | GET        |                  | Get the user with exact username as given in the parameter 'username'. This parameter is required |
-| /api/tags?name                           | GET        |                  | Get the tag with exact name. The parameter 'name' is required |
-| /api/tags/popular?since&limit            | GET        |                  | Get a list of tags popular within a certain frame. The parameter 'since' can be set to values: *HOUR/DAY/WEEK*. If not provided, 'since' is set to *HOUR* and 'limit' is set to 5 |
-| /api/tags/{uuid}/recentPosts?skip&limit | GET        |                  | Get a list of most recent posts tagged with the tag with given uuid |                
-| /api/posts/{uuid}                       | GET        |                  | Get the post with uuid |
-| /api/posts/{uuid}/info                  | GET        |                  | Get post's response/like/quote counters |
-| /api/posts/{uuid}                       | DELETE     |                  | Mark the post with uuid as deleted |
-| /api/posts/{uuid}/responses?skip&limit  | GET        |                  | Get responses to the post with uuid. Parameters 'skip' and 'limit' are optional. By default they are 0 and 5 respectively |
-| /api/posts/{uuid}/quotes?skip&limit   | GET        |                  | Get quotes of the post with uuid. Parameters 'skip' and 'limit' are optional. By default they are 0 and 5 respectively |
-| /api/posts/{uuid}/like                  | GET        |                  | Get info whether the currently logged user likes the post with uuid |
-| /api/posts/{uuid}/like                  | POST       |                  | Make the currently logged user like the post with uuid |
-| /api/posts/{uuid}/unlike                | POST       |                  | Make the currently logged user unlike the post with uuid |
-| /api/posts                              | POST       | [Post Content]()    | As the currently logged user, create a post with the content given in the request body |
-| /api/posts/{uuid}/respond               | POST       | [Response Content]() | As the currently logged user, create a response with the content given in the request body, that responds to the post with uuid |
-| /api/posts/{uuid}/quote               | POST       | [Quote Content]()  | As the currently logged user, create a quote with the content given in the request body, that references the post with uuid |
-| /api/feed?skip&limit&since&by            | GET        |                  | Get the feed of the currently logged user. Parameter 'since' can be set to *HOUR/SIX_HOURS/TWELVE_HOURS*. Parameter 'by' set to 'POPULARITY' returns most popular posts in a given frame. By default parameters 'skip' and 'limit' are set to 0 and 20 respectively. Calling this endpoint with no parameters returns at most 20 most recent posts that have been posted in the last hour |
+| Endpoint                         | Method | Request Params                                                               | Request body                                 | Description                                                                                                                                                                  |
+|----------------------------------|--------|------------------------------------------------------------------------------|----------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| /api/users                       | GET    | 'username' or 'search' (either one is required, they are mutually exclusive) | -                                            | Returns a single user's info if the user having a certain 'username' exists.  If 'search' is provided, then it returns a list of users whose names contain a certain phrase. |
+| /api/users/me                    | GET    | -                                                                            | -                                            | Returns the info about the user who is currently logged in.                                                                                                                  |
+| /api/users/me                    | PUT    | -                                                                            | 'displayedUsername', 'description', 'aviURL' | Updates the info of the user who is currently logged in.                                                                                                                     |
+| /api/users/register              | POST   | -                                                                            | 'username', 'email', 'password', 'password2' | Creates a new user using the info from the request body.                                                                                                                     |
+| /api/users/{uuid}                | GET    | -                                                                            | -                                            | Returns the info about the user with specified uuid.                                                                                                                         |
+| /api/users/{uuid}/profile        | GET    | -                                                                            | -                                            | Returns the followers/follows counters of the user with specified uuid.                                                                                                      |
+| /api/users/{uuid}/knownFollowers | GET    | 'skip' and/or 'limit'                                                        | -                                            | Returns a list of users who follow the user with specified uuid, and are also being followed by the user who is currently logged in.                                       |
+| /api/users/{uuid}/follow         | GET    | -                                                                            | -                                            | Returns the info whether currently logged in user follows the user with specified uuid.                                                                                      |
+| /api/users/{uuid}/follow         | POST   | -                                                                            | -                                            | Makes the currently logged in user follow the user with specified uuid.                                                                                                      |
+| /api/users/{uuid}/follow         | DELETE | -                                                                            | -                                            | Makes the currently logged in user unfollow the user with specified uuid.                                                                                                    |
+| /api/users/{uuid}/followers      | GET    | 'skip' and/or 'limit'                                                        | -                                            | Returns a list of users who are following the user with specified uuid.                                                                                                    |
+| /api/users/{uuid}/follows        | GET    | 'skip' and/or 'limit'                                                        | -                                            | Returns a list of users who are being followed by the user with specified uuid.                                                                                            |
+| /api/users/{uuid}/recentPosts    | GET    | 'skip' and/or 'limit'                                                        | -                                            | Returns a list of the most recent posts of the user with specified uuid.                                                                                                   |
+| /api/tags                        | GET    | 'name'                                                                       | -                                            | Returns the tag with specified name.                                                                                                                                         |
+| /api/tags/popular                | GET    | 'since' and/or 'limit'                                                       | -                                            | Returns a list of the most popular tags.                                                                                                                                   |
+| /api/tags/{uuid}/recentPosts     | GET    | 'skip' and/or 'limit'                                                        | -                                            | Returns a list of the most recent posts tagged with the tag with specified uuid.                                                                                           |
+| /api/posts/{uuid}                | GET    | -                                                                            | -                                            | Returns the post with specified uuid.                                                                                                                                        |
+| /api/posts/{uuid}/info           | GET    | -                                                                            | -                                            | Returns the responses/likes/quotes counters of the post with specified uuid.                                                                                                 |
+| /api/posts/{uuid}/responses      | GET    | 'skip' and/or 'limit'                                                        | -                                            | Returns a list of responses to the post with specified uuid.                                                                                                               |
+| /api/posts/{uuid}/quotes         | GET    | 'skip' and/or 'limit'                                                        | -                                            | Returns a list of quotes of the post with specified uuid.                                                                                                                  |
+| /api/posts/{uuid}/like           | GET    | -                                                                            | -                                            | Returns the info whether the user who is currently logged in likes the post with specified uuid.                                                                             |
+| /api/posts/{uuid}/like           | POST   | -                                                                            | -                                            | Makes the currently logged in user like the post with specified uuid.                                                                                                        |
+| /api/posts/{uuid}/like           | DELETE | -                                                                            | -                                            | Makes the currently logged in user unlike the post with specified uuid.                                                                                                      |
+| /api/posts                       | POST   | -                                                                            | 'content'                                    | Creates a new post (the author is the user who makes the request) that contains the text provided in the 'content' field of the request body.                                |
+| /api/posts/{uuid}/respond        | POST   | -                                                                            | 'content'                                    | Creates a response to the post with specified uuid (the author of the response is the user who makes the request).                                                           |
+| /api/posts/{uuid}/quote          | POST   | -                                                                            | 'content'                                    | Creates a quote of the post with specified uuid (the author of the quote is the user who makes the request).                                                                 |
+| /api/posts/{uuid}                | DELETE | -                                                                            | -                                            | Deletes the post with specified uuid (if the user who makes the request is the author of that post).                                                                         |
+| /api/reports                     | GET    | 'skip' and/or 'limit' and/or 'checked'                                       | -                                            | Returns a list of reported posts.                                                                                                                                          |
+| /api/reports                     | POST   | -                                                                            | 'reportedPostUuid', 'reason', 'description'  | Reports the post with uuid given in 'reportedPostUuid'.                                                                                                                      |
+| /api/reports/{uuid}              | POST   | 'accept'                                                                     | -                                            | Marks the report with specified uuid as 'checked'. Whether the reported post gets removed depends on the value of the 'accept' parameter.                                    |
+| /api/notifications               | GET    | 'skip' and/or 'limit'                                                        | -                                            | Returns a list of notifications of the currently logged in user.                                                                                                           |
+| /api/notifications/unreadCounter | GET    | -                                                                            | -                                            | Returns the number of unread notifications of the currently logged in user.                                                                                                  |
+| /api/notifications/readAll       | POST   | -                                                                            | -                                            | Marks all notifications of the currently logged in user as 'read'.                                                                                                           |
+| /api/notifications/{uuid}/read   | POST   | -                                                                            | -                                            | Mark the notification with specified uuid as 'read'.                                                                                                                         |
+| /api/feed                        | GET    | 'by' and/or 'skip' and/or 'limit'                                            | -                                            | Get the feed of the currently logged in user.                                                                                                                                |
 
-## Request bodies
-
-### User details
-
-* displayedUsername valid length is between 1 and 70 characters
-* description valid length is between 1 and 200 characters
-
-```JSON
-{
-  "displayedUsername": "",
-  "description": "",
-  "aviURL": ""
-}
-```
-
-#### Post Content
-
-* content valid length is between 1 and 300 characters
-
-```JSON
-{
-  "content": ""
-}
-```
-
-#### Quote Content
-
-* content valid length is between 0 and 300 characters
-
-```JSON
-{
-  "content": ""
-}
-```
-
-#### Response Content
-
-* content valid length is between 1 and 300 characters
-
-```JSON
-{
-  "content": ""
-}
-```

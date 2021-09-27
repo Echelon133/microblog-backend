@@ -93,6 +93,7 @@ Response body:
 ]
 ```
 
+*** 
 ### GET /api/users/me
 
 Requires auth: yes
@@ -114,7 +115,7 @@ Response body:
    "creationDate":"2021-08-18T13:24:23.702+00:00"
 }
 ```
-
+*** 
 ### PUT /api/users/me
 
 Requires auth: yes
@@ -134,7 +135,7 @@ Requires auth: yes
 }
 ```
 ###### Example request:-
-
+*** 
 ### POST /api/users/register
 
 Requires auth: no
@@ -157,7 +158,7 @@ Requires auth: no
 ```
 
 ###### Example request:-
-
+*** 
 ### GET /api/users/{uuid}
 
 Requires auth: no
@@ -178,7 +179,7 @@ Response body:
     "creationDate":"2021-08-31T13:04:02.305+00:00"
 }
 ```
-
+*** 
 ### GET /api/users/{uuid}/profile
 
 Requires auth: no
@@ -196,7 +197,7 @@ Response body:
     "followers":0
 }
 ```
-
+*** 
 ### GET /api/users/{uuid}/knownFollowers
 
 Requires auth: yes
@@ -222,7 +223,7 @@ Response body:
   }
 ]
 ```
-
+*** 
 ### GET /api/users/{uuid}/follow
 
 Requires auth: yes
@@ -238,7 +239,7 @@ Response body:
     "followed":false
 }
 ```
-
+*** 
 ### POST /api/users/{uuid}/follow
 
 Requires auth: yes
@@ -254,7 +255,7 @@ Response body:
     "follows":true
 }
 ```
-
+*** 
 ### DELETE /api/users/{uuid}/follow
 
 Requires auth: yes
@@ -270,7 +271,7 @@ Response body:
     "follows":false
 }
 ```
-
+*** 
 ### GET /api/users/{uuid}/followers
 
 Requires auth: no
@@ -296,7 +297,7 @@ Response body:
   }
 ]
 ```
-
+*** 
 ### GET /api/users/{uuid}/follows
 
 Requires auth: no
@@ -322,7 +323,7 @@ Response body:
   }
 ]
 ```
-
+*** 
 ### GET /api/users/{uuid}/recentPosts
 
 Requires auth: no
@@ -372,7 +373,7 @@ Response body:
   }
 ]
 ```
-
+*** 
 ### GET /api/tags
 
 Requires auth: no
@@ -391,7 +392,7 @@ Response body:
     "name":"test"
 }
 ```
-
+*** 
 ### GET /api/tags/popular
 
 Requires auth: no
@@ -413,7 +414,7 @@ Response body:
   }
 ]
 ```
-
+*** 
 ### GET /api/tags/{uuid}/recentPosts
 
 Requires auth: no
@@ -476,7 +477,7 @@ Response body:
    }
 ]
 ```
-
+*** 
 ### GET /api/posts/{uuid}
 
 Requires auth: no
@@ -505,7 +506,7 @@ Response body:
    "respondsToUsername":null
 }
 ```
-
+*** 
 ### GET /api/posts/{uuid}/info
 
 Requires auth: no
@@ -524,7 +525,7 @@ Response body:
     "quotes":0
 }
 ```
-
+*** 
 ### GET /api/posts/{uuid}/responses
 
 Requires auth: no
@@ -557,7 +558,7 @@ Response body:
    }
 ]
 ```
-
+*** 
 ### GET /api/posts/{uuid}/quotes
 
 Requires auth: no
@@ -590,7 +591,7 @@ Response body:
   }
 ]
 ```
-
+*** 
 ### GET /api/posts/{uuid}/like
 
 Requires auth: yes
@@ -606,7 +607,7 @@ Response body:
     "liked":false
 }
 ```
-
+*** 
 ### POST /api/posts/{uuid}/like
 
 Requires auth: yes
@@ -622,7 +623,7 @@ Response body:
     "liked":true
 }
 ```
-
+*** 
 ### DELETE /api/posts/{uuid}/like
 
 Requires auth: yes
@@ -638,7 +639,7 @@ Response body:
     "liked":false
 }
 ```
-
+*** 
 ### POST /api/posts
 
 Requires auth: yes
@@ -664,7 +665,7 @@ Response body:
     "uuid":"19b1691f-dfae-4b22-9876-9e6a33e7c9d8"
 }
 ```
-
+*** 
 ### POST /api/posts/{uuid}/respond
 
 Requires auth: yes
@@ -690,7 +691,7 @@ Response body:
     "uuid":"08bd1387-3aeb-403c-9f6a-89ede18dce11"
 }
 ```
-
+*** 
 ### POST /api/posts/{uuid}/quote
 
 Requires auth: yes
@@ -716,7 +717,7 @@ Response body:
     "uuid":"7417443b-f522-4717-b5b7-4100b578151d"
 }
 ```
-
+*** 
 ### DELETE /api/posts/{uuid}
 
 Requires auth: yes
@@ -732,7 +733,7 @@ Response body:
     "deleted": true
 }
 ```
-
+*** 
 ### GET /api/reports
 
 Requires auth: yes (user must have admin privileges)
@@ -762,7 +763,7 @@ Response body:
    }
 ]
 ```
-
+*** 
 ### POST /api/reports
 
 Requires auth: yes
@@ -790,7 +791,7 @@ Response body:
     "created": true
 }
 ```
-
+*** 
 ### POST /api/reports/{uuid}
 
 Requires auth: yes (user must have admin privileges)
@@ -808,7 +809,7 @@ Response body:
     "checked": true
 }
 ```
-
+*** 
 ### GET /api/notifications
 
 Requires auth: yes
@@ -861,7 +862,7 @@ Response body:
    }
 ]
 ```
-
+*** 
 ### GET /api/notifications/unreadCounter
 
 Requires auth: yes
@@ -877,7 +878,7 @@ Response body:
     "unreadCounter":3
 }
 ```
-
+*** 
 ### POST /api/notifications/readAll
 
 Requires auth: yes
@@ -893,7 +894,7 @@ Response body:
     "markedAsRead":3
 }
 ```
-
+*** 
 ### POST /api/notifications/{uuid}/read
 
 Requires auth: yes
@@ -909,7 +910,7 @@ Response body:
     "read":true
 }
 ```
-
+*** 
 ### GET /api/feed
 
 Requires auth: 

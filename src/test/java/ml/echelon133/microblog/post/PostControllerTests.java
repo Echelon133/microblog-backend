@@ -820,7 +820,7 @@ public class PostControllerTests {
 
         // when
         MockHttpServletResponse response1 = mockMvc.perform(
-                post("/api/posts/" + postUuid + "/respond")
+                post("/api/posts/" + postUuid + "/responses")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
                         .contentType(APPLICATION_JSON)
@@ -828,7 +828,7 @@ public class PostControllerTests {
         ).andReturn().getResponse();
 
         MockHttpServletResponse response2 = mockMvc.perform(
-                post("/api/posts/" + postUuid + "/respond")
+                post("/api/posts/" + postUuid + "/responses")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
                         .contentType(APPLICATION_JSON)
@@ -867,7 +867,7 @@ public class PostControllerTests {
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/posts/" + postUuid + "/respond")
+                post("/api/posts/" + postUuid + "/responses")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
                         .contentType(APPLICATION_JSON)
@@ -895,7 +895,7 @@ public class PostControllerTests {
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/posts/" + invalidUuid + "/respond")
+                post("/api/posts/" + invalidUuid + "/responses")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
                         .contentType(APPLICATION_JSON)
@@ -925,7 +925,7 @@ public class PostControllerTests {
 
         // when
         MockHttpServletResponse response1 = mockMvc.perform(
-                post("/api/posts/" + postUuid + "/quote")
+                post("/api/posts/" + postUuid + "/quotes")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
                         .contentType(APPLICATION_JSON)
@@ -933,7 +933,7 @@ public class PostControllerTests {
         ).andReturn().getResponse();
 
         MockHttpServletResponse response2 = mockMvc.perform(
-                post("/api/posts/" + postUuid + "/quote")
+                post("/api/posts/" + postUuid + "/quotes")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
                         .contentType(APPLICATION_JSON)
@@ -972,7 +972,7 @@ public class PostControllerTests {
 
         // when
         MockHttpServletResponse response1 = mockMvc.perform(
-                post("/api/posts/" + postUuid + "/quote")
+                post("/api/posts/" + postUuid + "/quotes")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
                         .contentType(APPLICATION_JSON)
@@ -1000,7 +1000,7 @@ public class PostControllerTests {
 
         // when
         MockHttpServletResponse response = mockMvc.perform(
-                post("/api/posts/" + invalidUuid + "/quote")
+                post("/api/posts/" + invalidUuid + "/quotes")
                         .accept(APPLICATION_JSON)
                         .with(user(testUser))
                         .contentType(APPLICATION_JSON)

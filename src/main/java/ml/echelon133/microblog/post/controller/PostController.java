@@ -127,7 +127,7 @@ public class PostController {
         );
     }
 
-    @PostMapping("/{uuid}/respond")
+    @PostMapping("/{uuid}/responses")
     public ResponseEntity<Map<String, String>> respondToPost(@PathVariable String uuid,
                                                               @Valid @RequestBody ResponseDto responseDto,
                                                               BindingResult result) throws Exception {
@@ -149,7 +149,7 @@ public class PostController {
         );
     }
 
-    @PostMapping("/{uuid}/quote")
+    @PostMapping("/{uuid}/quotes")
     public ResponseEntity<Map<String, String>> quoteOfPost(@PathVariable String uuid,
                                                               @Valid @RequestBody QuotePostDto quotePostDto,
                                                               BindingResult result) throws Exception {

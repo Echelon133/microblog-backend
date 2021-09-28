@@ -277,7 +277,6 @@ public class UserControllerTests {
     public void getUserProfile_ReturnsUserProfileInfo() throws Exception {
         UUID uuid = UUID.randomUUID();
         UserProfileInfo uProfileInfo = new UserProfileInfo();
-        uProfileInfo.setUuid(uuid);
         uProfileInfo.setFollows(1L);
         uProfileInfo.setFollowers(10L);
 
@@ -353,7 +352,7 @@ public class UserControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"followed\":false}");
+                .contains("{\"follows\":false}");
     }
 
     @Test
@@ -374,7 +373,7 @@ public class UserControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"followed\":true}");
+                .contains("{\"follows\":true}");
     }
 
     @Test

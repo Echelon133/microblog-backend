@@ -126,7 +126,7 @@ public class UserController {
         UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Boolean result = userService.checkIfUserFollows(loggedUser, UUID.fromString(uuid));
 
-        Map<String, Boolean> response = Map.of("followed", result);
+        Map<String, Boolean> response = Map.of("follows", result);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

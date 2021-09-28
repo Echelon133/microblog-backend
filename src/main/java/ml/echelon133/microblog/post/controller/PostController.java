@@ -85,7 +85,7 @@ public class PostController {
         UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Boolean result = postService.checkIfUserWithUuidLikes(loggedUser, UUID.fromString(uuid));
 
-        Map<String, Boolean> response = Map.of("liked", result);
+        Map<String, Boolean> response = Map.of("likes", result);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -94,7 +94,7 @@ public class PostController {
         UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Boolean result = postService.likePost(loggedUser, UUID.fromString(uuid));
 
-        Map<String, Boolean> response = Map.of("liked", result);
+        Map<String, Boolean> response = Map.of("likes", result);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -103,7 +103,7 @@ public class PostController {
         UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean result = postService.unlikePost(loggedUser, UUID.fromString(uuid));
 
-        Map<String, Boolean> response = Map.of("liked", !result);
+        Map<String, Boolean> response = Map.of("likes", !result);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -127,7 +127,7 @@ public class PostController {
         );
     }
 
-    @PostMapping("/{uuid}/respond")
+    @PostMapping("/{uuid}/responses")
     public ResponseEntity<Map<String, String>> respondToPost(@PathVariable String uuid,
                                                               @Valid @RequestBody ResponseDto responseDto,
                                                               BindingResult result) throws Exception {
@@ -149,7 +149,7 @@ public class PostController {
         );
     }
 
-    @PostMapping("/{uuid}/quote")
+    @PostMapping("/{uuid}/quotes")
     public ResponseEntity<Map<String, String>> quoteOfPost(@PathVariable String uuid,
                                                               @Valid @RequestBody QuotePostDto quotePostDto,
                                                               BindingResult result) throws Exception {

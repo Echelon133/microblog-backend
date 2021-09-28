@@ -55,7 +55,7 @@ public interface UserRepository extends Neo4jRepository<User, UUID> {
             "WHERE user.uuid = $uuid " +
             "OPTIONAL MATCH (user)-[follows:FOLLOWS]->(o1:User) WHERE o1.uuid <> user.uuid " +
             "OPTIONAL MATCH (o2:User)-[followedBy:FOLLOWS]->(user) WHERE o2.uuid <> user.uuid " +
-            "RETURN user.uuid AS uuid, count(distinct(follows)) AS follows, count(distinct(followedBy)) AS followers")
+            "RETURN count(distinct(follows)) AS follows, count(distinct(followedBy)) AS followers")
     Optional<UserProfileInfo> getUserProfileInfo(UUID uuid);
 
     @Query( "MATCH (u:User)-[:POSTS]->(p:Post) " +

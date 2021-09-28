@@ -26,6 +26,8 @@ public class User implements UserDetails, UserPrincipal {
     private String description;
     private String password;
     private String aviURL;
+
+    @JsonIgnore
     private Date creationDate;
 
     @Relationship(type = "HAS_ROLE")

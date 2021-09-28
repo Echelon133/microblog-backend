@@ -1,28 +1,15 @@
 package ml.echelon133.microblog.post.model;
 
-import org.neo4j.ogm.annotation.typeconversion.Convert;
-import org.neo4j.ogm.typeconversion.UuidStringConverter;
 import org.springframework.data.neo4j.annotation.QueryResult;
-
-import java.util.UUID;
 
 @QueryResult
 public class PostInfo {
-    @Convert(value = UuidStringConverter.class)
-    private UUID uuid;
+
     private Long responses;
     private Long likes;
     private Long quotes;
 
     public PostInfo() {}
-
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
-    }
 
     public Long getResponses() {
         return responses;

@@ -108,14 +108,8 @@ public class UserController {
 
     @GetMapping("/{uuid}/knownFollowers")
     public ResponseEntity<List<User>> getKnownFollowers(@PathVariable String uuid,
-                                                 @RequestParam(required = false) Long skip,
-                                                 @RequestParam(required = false) Long limit) throws Exception {
-        if (skip == null) {
-            skip = 0L;
-        }
-        if (limit == null) {
-            limit = 5L;
-        }
+                                                        @RequestParam(defaultValue = "0") Long skip,
+                                                        @RequestParam(defaultValue = "5") Long limit) throws Exception {
         UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<User> commonFollows = userService.findFollowersUserKnows(loggedUser, UUID.fromString(uuid), skip, limit);
         return new ResponseEntity<>(commonFollows, HttpStatus.OK);
@@ -150,14 +144,8 @@ public class UserController {
 
     @GetMapping("/{uuid}/followers")
     public ResponseEntity<List<User>> getFollowers(@PathVariable String uuid,
-                                                   @RequestParam(required = false) Long skip,
-                                                   @RequestParam(required = false) Long limit) throws Exception {
-        if (skip == null) {
-            skip = 0L;
-        }
-        if (limit == null) {
-            limit = 5L;
-        }
+                                                   @RequestParam(defaultValue = "0") Long skip,
+                                                   @RequestParam(defaultValue = "5") Long limit) throws Exception {
         return new ResponseEntity<>(
                 userService.findAllFollowersOfUser(UUID.fromString(uuid), skip, limit),
                 HttpStatus.OK);
@@ -165,14 +153,8 @@ public class UserController {
 
     @GetMapping("/{uuid}/follows")
     public ResponseEntity<List<User>> getFollows(@PathVariable String uuid,
-                                                 @RequestParam(required = false) Long skip,
-                                                 @RequestParam(required = false) Long limit) throws Exception {
-        if (skip == null) {
-            skip = 0L;
-        }
-        if (limit == null) {
-            limit = 5L;
-        }
+                                                 @RequestParam(defaultValue = "0") Long skip,
+                                                 @RequestParam(defaultValue = "5") Long limit) throws Exception {
         return new ResponseEntity<>(
                 userService.findAllFollowsOfUser(UUID.fromString(uuid), skip, limit),
                 HttpStatus.OK);
@@ -180,15 +162,8 @@ public class UserController {
 
     @GetMapping("/{uuid}/recentPosts")
     public ResponseEntity<List<UserPost>> getRecentPosts(@PathVariable String uuid,
-                                                         @RequestParam(required = false) Long skip,
-                                                         @RequestParam(required = false) Long limit) throws Exception {
-        if (skip == null) {
-            skip = 0L;
-        }
-        if (limit == null) {
-            limit = 10L;
-        }
-
+                                                         @RequestParam(defaultValue = "0") Long skip,
+                                                         @RequestParam(defaultValue = "10") Long limit) throws Exception {
         return new ResponseEntity<>(
                 userService.findRecentPostsOfUser(UUID.fromString(uuid), skip, limit),
                 HttpStatus.OK);

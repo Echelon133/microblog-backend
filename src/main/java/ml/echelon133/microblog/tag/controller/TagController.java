@@ -30,12 +30,7 @@ public class TagController {
 
     @GetMapping("/popular")
     public ResponseEntity<List<Tag>> listPopularTags(@RequestParam(required = false) String since,
-                                                     @RequestParam(required = false) Long limit) throws IllegalArgumentException {
-
-        if (limit == null) {
-            limit = 5L;
-        }
-
+                                                     @RequestParam(defaultValue = "5") Long limit) throws IllegalArgumentException {
         ITagService.PopularSince popularSince = ITagService.PopularSince.ONE_HOUR;
         if (since != null) {
             switch(since.toUpperCase()) {
@@ -59,17 +54,8 @@ public class TagController {
 
     @GetMapping("/{uuid}/recentPosts")
     public ResponseEntity<List<RecentPost>> findRecentPosts(@PathVariable String uuid,
-                                                            @RequestParam(required = false) Long skip,
-                                                            @RequestParam(required = false) Long limit) throws Exception {
-
-        if (skip == null) {
-            skip = 0L;
-        }
-
-        if (limit == null) {
-            limit = 5L;
-        }
-
+                                                            @RequestParam(defaultValue = "0") Long skip,
+                                                            @RequestParam(defaultValue = "5") Long limit) throws Exception {
         List<RecentPost> recent = tagService.findRecentPostsTagged(UUID.fromString(uuid), skip, limit);
         return new ResponseEntity<>(recent, HttpStatus.OK);
     }

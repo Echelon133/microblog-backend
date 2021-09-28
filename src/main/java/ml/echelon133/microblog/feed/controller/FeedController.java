@@ -28,34 +28,16 @@ public class FeedController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserPost>> getUserFeed(@RequestParam(required = false) Long skip,
-                                                      @RequestParam(required = false) Long limit) throws Exception {
-
-        if (skip == null) {
-            skip = 0L;
-        }
-
-        if (limit == null) {
-            limit = 20L;
-        }
-
+    public ResponseEntity<List<UserPost>> getUserFeed(@RequestParam(defaultValue = "0") Long skip,
+                                                      @RequestParam(defaultValue = "20") Long limit) throws Exception {
         UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<UserPost> feed = postService.getFeedForUser(loggedUser, skip, limit);
         return new ResponseEntity<>(feed, HttpStatus.OK);
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<List<UserPost>> getUserFeedPopular(@RequestParam(required = false) Long skip,
-                                                             @RequestParam(required = false) Long limit) throws Exception {
-
-        if (skip == null) {
-            skip = 0L;
-        }
-
-        if (limit == null) {
-            limit = 20L;
-        }
-
+    public ResponseEntity<List<UserPost>> getUserFeedPopular(@RequestParam(defaultValue = "0") Long skip,
+                                                             @RequestParam(defaultValue = "20") Long limit) throws Exception {
         List<UserPost> feed;
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 

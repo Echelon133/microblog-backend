@@ -103,7 +103,6 @@ public class PostServiceTests {
         UUID uuid = UUID.randomUUID();
 
         PostInfo info = new PostInfo();
-        info.setUuid(uuid);
 
         // given
         given(postRepository.getInfoAboutPostWithUuid(uuid)).willReturn(Optional.of(info));

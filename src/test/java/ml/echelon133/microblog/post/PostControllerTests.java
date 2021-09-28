@@ -189,7 +189,6 @@ public class PostControllerTests {
     public void getInfoAboutPostWithUuid_ReturnsPostInfo() throws Exception {
         UUID uuid = UUID.randomUUID();
         PostInfo info = new PostInfo();
-        info.setUuid(uuid);
         info.setLikes(10L);
         info.setQuotes(20L);
         info.setResponses(5L);
@@ -546,7 +545,7 @@ public class PostControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"liked\":false}");
+                .contains("{\"likes\":false}");
     }
 
     @Test
@@ -567,7 +566,7 @@ public class PostControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"liked\":true}");
+                .contains("{\"likes\":true}");
     }
 
     @Test
@@ -625,7 +624,7 @@ public class PostControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"liked\":false}");
+                .contains("{\"likes\":false}");
     }
 
     @Test
@@ -646,7 +645,7 @@ public class PostControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"liked\":true}");
+                .contains("{\"likes\":true}");
     }
 
     @Test
@@ -704,7 +703,7 @@ public class PostControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"liked\":false}");
+                .contains("{\"likes\":false}");
     }
 
     @Test
@@ -725,7 +724,7 @@ public class PostControllerTests {
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
         assertThat(response.getContentAsString())
-                .contains("{\"liked\":true}");
+                .contains("{\"likes\":true}");
     }
 
     @Test

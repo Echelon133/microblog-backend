@@ -414,7 +414,6 @@ public class UserServiceTests {
         UserProfileInfo profileInfo = userService.getUserProfileInfo(uUuid);
 
         // then
-        assertNull(profileInfo.getUuid());
         assertNull(profileInfo.getFollows());
         assertNull(profileInfo.getFollowers());
     }
@@ -424,7 +423,6 @@ public class UserServiceTests {
         UUID uUuid = UUID.randomUUID();
 
         UserProfileInfo mockProfileInfo = new UserProfileInfo();
-        mockProfileInfo.setUuid(uUuid);
         mockProfileInfo.setFollowers(10L);
         mockProfileInfo.setFollows(20L);
 
@@ -436,7 +434,6 @@ public class UserServiceTests {
         UserProfileInfo profileInfo = userService.getUserProfileInfo(uUuid);
 
         // then
-        assertEquals(uUuid, profileInfo.getUuid());
         assertEquals(20L, profileInfo.getFollows());
         assertEquals(10L, profileInfo.getFollowers());
     }

@@ -28,9 +28,25 @@ public class FeedController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserPost>> getUserFeed(@RequestParam(required = false) String by,
-                                                      @RequestParam(required = false) Long skip,
-                                                      @RequestParam(required = false) Long limit) throws IllegalArgumentException {
+    public ResponseEntity<List<UserPost>> getUserFeed(@RequestParam(required = false) Long skip,
+                                                      @RequestParam(required = false) Long limit) throws Exception {
+
+        if (skip == null) {
+            skip = 0L;
+        }
+
+        if (limit == null) {
+            limit = 20L;
+        }
+
+        UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<UserPost> feed = postService.getFeedForUser(loggedUser, skip, limit);
+        return new ResponseEntity<>(feed, HttpStatus.OK);
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<List<UserPost>> getUserFeedPopular(@RequestParam(required = false) Long skip,
+                                                             @RequestParam(required = false) Long limit) throws Exception {
 
         if (skip == null) {
             skip = 0L;
@@ -47,15 +63,7 @@ public class FeedController {
             feed = postService.getFeedForAnonymousUser(skip, limit);
         } else {
             UserPrincipal loggedUser = (UserPrincipal) auth.getPrincipal();
-            if (by != null && by.equalsIgnoreCase("POPULARITY")) {
-                // if 'by' is provided and contains 'POPULARITY'
-                // get most popular posts
-                feed = postService.getFeedForUser_Popular(loggedUser, skip, limit);
-            } else {
-                // if 'by' is not provided or has some different value
-                // get most recent posts
-                feed = postService.getFeedForUser(loggedUser, skip, limit);
-            }
+            feed = postService.getFeedForUser_Popular(loggedUser, skip, limit);
         }
 
         return new ResponseEntity<>(feed, HttpStatus.OK);

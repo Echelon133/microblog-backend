@@ -63,7 +63,7 @@ public interface PostRepository extends Neo4jRepository<Post, UUID> {
             "OPTIONAL MATCH (:User)-[likes:LIKES]->(post:Post) " +
             "OPTIONAL MATCH (res:ResponsePost)-[responses:RESPONDS]->(post) WHERE res.deleted <> true " +
             "OPTIONAL MATCH (q:QuotePost)-[quotes:QUOTES]->(post) WHERE q.deleted <> true " +
-            "RETURN post.uuid AS uuid, count(distinct(responses)) AS responses, count(distinct(likes)) AS likes, " +
+            "RETURN count(distinct(responses)) AS responses, count(distinct(likes)) AS likes, " +
             "count(distinct(quotes)) AS quotes")
     Optional<PostInfo> getInfoAboutPostWithUuid(UUID uuid);
 

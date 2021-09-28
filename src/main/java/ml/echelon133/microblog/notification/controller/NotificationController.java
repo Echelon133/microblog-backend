@@ -25,19 +25,10 @@ public class NotificationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<NotificationResult>> getAllNotifications(@RequestParam(required = false) Long skip,
-                                                                        @RequestParam(required = false) Long limit) {
+    public ResponseEntity<List<NotificationResult>> getAllNotifications(@RequestParam(defaultValue = "0") Long skip,
+                                                                        @RequestParam(defaultValue = "5") Long limit) {
 
         UserPrincipal loggedUser = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (skip == null) {
-            skip = 0L;
-        }
-
-        if (limit == null) {
-            limit = 5L;
-        }
-
         List<NotificationResult> response = notificationService.findAllNotificationsOfUser(loggedUser, skip, limit);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

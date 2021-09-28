@@ -50,15 +50,8 @@ public class PostController {
 
     @GetMapping("/{uuid}/responses")
     public ResponseEntity<List<UserPost>> getResponsesToPost(@PathVariable String uuid,
-                                                              @RequestParam(required = false) Long skip,
-                                                              @RequestParam(required = false) Long limit) throws Exception {
-        if (skip == null) {
-            skip = 0L;
-        }
-        if (limit == null) {
-            limit = 5L;
-        }
-
+                                                             @RequestParam(defaultValue = "0") Long skip,
+                                                             @RequestParam(defaultValue = "5") Long limit) throws Exception {
         return new ResponseEntity<>(
                 postService.getAllResponsesTo(UUID.fromString(uuid), skip, limit),
                 HttpStatus.OK);
@@ -66,15 +59,8 @@ public class PostController {
 
     @GetMapping("/{uuid}/quotes")
     public ResponseEntity<List<UserPost>> getQuotesOfPost(@PathVariable String uuid,
-                                                             @RequestParam(required = false) Long skip,
-                                                             @RequestParam(required = false) Long limit) throws Exception {
-        if (skip == null) {
-            skip = 0L;
-        }
-        if (limit == null) {
-            limit = 5L;
-        }
-
+                                                          @RequestParam(defaultValue = "0") Long skip,
+                                                          @RequestParam(defaultValue = "5") Long limit) throws Exception {
         return new ResponseEntity<>(
                 postService.getAllQuotesOf(UUID.fromString(uuid), skip, limit),
                 HttpStatus.OK);
@@ -129,8 +115,8 @@ public class PostController {
 
     @PostMapping("/{uuid}/responses")
     public ResponseEntity<Map<String, String>> respondToPost(@PathVariable String uuid,
-                                                              @Valid @RequestBody ResponseDto responseDto,
-                                                              BindingResult result) throws Exception {
+                                                             @Valid @RequestBody ResponseDto responseDto,
+                                                             BindingResult result) throws Exception {
 
         if (result.hasErrors()) {
             if (result.getFieldError() != null)
@@ -151,8 +137,8 @@ public class PostController {
 
     @PostMapping("/{uuid}/quotes")
     public ResponseEntity<Map<String, String>> quoteOfPost(@PathVariable String uuid,
-                                                              @Valid @RequestBody QuotePostDto quotePostDto,
-                                                              BindingResult result) throws Exception {
+                                                           @Valid @RequestBody QuotePostDto quotePostDto,
+                                                           BindingResult result) throws Exception {
 
         if (result.hasErrors()) {
             if (result.getFieldError() != null)

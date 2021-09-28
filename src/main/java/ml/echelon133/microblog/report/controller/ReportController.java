@@ -32,16 +32,9 @@ public class ReportController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReportResult>> getAllReports(@RequestParam(required = false) Long skip,
-                                                            @RequestParam(required = false) Long limit,
+    public ResponseEntity<List<ReportResult>> getAllReports(@RequestParam(defaultValue = "0") Long skip,
+                                                            @RequestParam(defaultValue = "20") Long limit,
                                                             @RequestParam(required = false) boolean checked) {
-        if (skip == null) {
-            skip = 0L;
-        }
-        if (limit == null) {
-            limit = 20L;
-        }
-
         return new ResponseEntity<>(reportService.findAllReports(skip, limit, checked), HttpStatus.OK);
     }
 

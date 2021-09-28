@@ -45,8 +45,8 @@ Simple twitter-like API.
 | /api/posts/{uuid}/like           | POST   | -                                                                            | -                                            | Makes the currently logged in user like the post with specified uuid.                                                                                                        |
 | /api/posts/{uuid}/like           | DELETE | -                                                                            | -                                            | Makes the currently logged in user unlike the post with specified uuid.                                                                                                      |
 | /api/posts                       | POST   | -                                                                            | 'content'                                    | Creates a new post (the author is the user who makes the request) that contains the text provided in the 'content' field of the request body.                                |
-| /api/posts/{uuid}/respond        | POST   | -                                                                            | 'content'                                    | Creates a response to the post with specified uuid (the author of the response is the user who makes the request).                                                           |
-| /api/posts/{uuid}/quote          | POST   | -                                                                            | 'content'                                    | Creates a quote of the post with specified uuid (the author of the quote is the user who makes the request).                                                                 |
+| /api/posts/{uuid}/responses      | POST   | -                                                                            | 'content'                                    | Creates a response to the post with specified uuid (the author of the response is the user who makes the request).                                                           |
+| /api/posts/{uuid}/quotes         | POST   | -                                                                            | 'content'                                    | Creates a quote of the post with specified uuid (the author of the quote is the user who makes the request).                                                                 |
 | /api/posts/{uuid}                | DELETE | -                                                                            | -                                            | Deletes the post with specified uuid (if the user who makes the request is the author of that post).                                                                         |
 | /api/reports                     | GET    | 'skip' and/or 'limit' and/or 'checked'                                       | -                                            | Returns a list of reported posts.                                                                                                                                          |
 | /api/reports                     | POST   | -                                                                            | 'reportedPostUuid', 'reason', 'description'  | Reports the post with uuid given in 'reportedPostUuid'.                                                                                                                      |
@@ -55,7 +55,8 @@ Simple twitter-like API.
 | /api/notifications/unreadCounter | GET    | -                                                                            | -                                            | Returns the number of unread notifications of the currently logged in user.                                                                                                  |
 | /api/notifications/readAll       | POST   | -                                                                            | -                                            | Marks all notifications of the currently logged in user as 'read'.                                                                                                           |
 | /api/notifications/{uuid}/read   | POST   | -                                                                            | -                                            | Mark the notification with specified uuid as 'read'.                                                                                                                         |
-| /api/feed                        | GET    | 'by' and/or 'skip' and/or 'limit'                                            | -                                            | Get the feed of the currently logged in user.                                                                                                                                |
+| /api/feed                        | GET    | 'skip' and/or 'limit'                                            | -                                                        | Get the feed of the currently logged in user (only the most recent posts).                                                                                                   |
+| /api/feed/popular                | GET    | 'skip' and/or 'limit'                                            | -                                                        | Get the feed of an anonymous user or the currently logged in user (only the most popular posts).                                                                             |
 
 ### GET /api/users
 
@@ -79,16 +80,14 @@ Response body:
       "username":"testuser",
       "displayedUsername":"testuser",
       "description":"",
-      "aviURL":"",
-      "creationDate":"2021-08-18T13:24:23.702+00:00"
+      "aviURL":""
    },
    {
       "uuid":"b829b4bd-0ee2-443e-aa41-3791913e0f1a",
       "username":"testuser123",
       "displayedUsername":"testuser123",
       "description":"",
-      "aviURL":"",
-      "creationDate":"2021-08-20T13:08:52.424+00:00"
+      "aviURL":""
    }
 ]
 ```
@@ -111,8 +110,7 @@ Response body:
    "username":"testuser",
    "displayedUsername":"testuser",
    "description":"",
-   "aviURL":"",
-   "creationDate":"2021-08-18T13:24:23.702+00:00"
+   "aviURL":""
 }
 ```
 *** 
@@ -175,8 +173,7 @@ Response body:
     "username":"mateusz",
     "displayedUsername":"mateusz",
     "description":"",
-    "aviURL":"",
-    "creationDate":"2021-08-31T13:04:02.305+00:00"
+    "aviURL":""
 }
 ```
 *** 
@@ -192,7 +189,6 @@ Requires auth: no
 Response body:
 ```JSON
 {
-    "uuid":"5f8dc959-611e-4910-a456-68a5e467b859",
     "follows":2,
     "followers":0
 }
@@ -218,8 +214,7 @@ Response body:
       "username":"mateusz",
       "displayedUsername":"mateusz",
       "description":"",
-      "aviURL":"",
-      "creationDate":"2021-08-31T13:04:02.305+00:00"
+      "aviURL":""
   }
 ]
 ```
@@ -236,7 +231,7 @@ Requires auth: yes
 Response body:
 ```JSON
 {
-    "followed":false
+    "follows":false
 }
 ```
 *** 
@@ -292,8 +287,7 @@ Response body:
       "username":"mateusz",
       "displayedUsername":"mateusz",
       "description":"",
-      "aviURL":"",
-      "creationDate":"2021-08-31T13:04:02.305+00:00"
+      "aviURL":""
   }
 ]
 ```
@@ -318,8 +312,7 @@ Response body:
       "username":"test",
       "displayedUsername":"test",
       "description":"",
-      "aviURL":"",
-      "creationDate":"2021-08-31T13:04:52.111+00:00"
+      "aviURL":""
   }
 ]
 ```
@@ -348,8 +341,7 @@ Response body:
       "username":"testmail",
       "displayedUsername":"testmail",
       "description":"",
-      "aviURL":"",
-      "creationDate":"2021-09-26T19:12:21.369+00:00"
+      "aviURL":""
     },
     "quotes":null,
     "respondsTo":null,
@@ -364,8 +356,7 @@ Response body:
       "username":"testmail",
       "displayedUsername":"testmail",
       "description":"",
-      "aviURL":"",
-      "creationDate":"2021-09-26T19:12:21.369+00:00"
+      "aviURL":""
     },
     "quotes":null,
     "respondsTo":null,
@@ -439,8 +430,7 @@ Response body:
          "username":"testmail",
          "displayedUsername":"testmail",
          "description":"",
-         "aviURL":"",
-         "creationDate":"2021-09-26T19:12:21.369+00:00"
+         "aviURL":""
       },
       "quotes":null,
       "respondsTo":null
@@ -454,8 +444,7 @@ Response body:
          "username":"newuser",
          "displayedUsername":"New User",
          "description":"This is my description",
-         "aviURL":"",
-         "creationDate":"2021-09-08T13:37:19.856+00:00"
+         "aviURL":""
       },
       "quotes":null,
       "respondsTo":null
@@ -469,8 +458,7 @@ Response body:
          "username":"testuser",
          "displayedUsername":"Test user",
          "description":"My description",
-         "aviURL":"",
-         "creationDate":"2021-08-18T13:24:23.702+00:00"
+         "aviURL":""
       },
       "quotes":null,
       "respondsTo":null
@@ -498,8 +486,7 @@ Response body:
       "username":"testmail",
       "displayedUsername":"testmail",
       "description":"",
-      "aviURL":"",
-      "creationDate":"2021-09-26T19:12:21.369+00:00"
+      "aviURL":""
    },
    "quotes":null,
    "respondsTo":null,
@@ -519,7 +506,6 @@ Requires auth: no
 Response body:
 ```JSON
 {
-    "uuid":"d784bf6a-0c28-42aa-9eb8-510a1faf726d",
     "responses":0,
     "likes":0,
     "quotes":0
@@ -549,8 +535,7 @@ Response body:
          "username":"newuser",
          "displayedUsername":"New User",
          "description":"This is my description",
-         "aviURL":"",
-         "creationDate":"2021-09-08T13:37:19.856+00:00"
+         "aviURL":""
       },
       "quotes":null,
       "respondsTo":"0c66c0b9-e7f6-4c28-8927-66e5e176b237",
@@ -582,8 +567,7 @@ Response body:
       "username":"test",
       "displayedUsername":"test",
       "description":"",
-      "aviURL":"",
-      "creationDate":"2021-08-31T13:04:52.111+00:00"
+      "aviURL":""
     },
     "quotes":"ffd8cedf-442d-43b1-a553-032983a41fbc",
     "respondsTo":null,
@@ -604,7 +588,7 @@ Requires auth: yes
 Response body:
 ```JSON
 {
-    "liked":false
+    "likes":false
 }
 ```
 *** 
@@ -620,7 +604,7 @@ Requires auth: yes
 Response body:
 ```JSON
 {
-    "liked":true
+    "likes":true
 }
 ```
 *** 
@@ -636,7 +620,7 @@ Requires auth: yes
 Response body:
 ```JSON
 {
-    "liked":false
+    "likes":false
 }
 ```
 *** 
@@ -666,7 +650,7 @@ Response body:
 }
 ```
 *** 
-### POST /api/posts/{uuid}/respond
+### POST /api/posts/{uuid}/responses
 
 Requires auth: yes
 
@@ -683,7 +667,7 @@ Words that start with '@' and are valid usernames are recognized as attempts of 
 }
 ```
 ###### Example request:
-**POST /api/posts/19b1691f-dfae-4b22-9876-9e6a33e7c9d8/respond**
+**POST /api/posts/19b1691f-dfae-4b22-9876-9e6a33e7c9d8/responses**
 
 Response body:
 ```JSON
@@ -692,7 +676,7 @@ Response body:
 }
 ```
 *** 
-### POST /api/posts/{uuid}/quote
+### POST /api/posts/{uuid}/quotes
 
 Requires auth: yes
 
@@ -709,7 +693,7 @@ Words that start with '@' and are valid usernames are recognized as attempts of 
 }
 ```
 ###### Example request:
-**POST /api/posts/19b1691f-dfae-4b22-9876-9e6a33e7c9d8/quote**
+**POST /api/posts/19b1691f-dfae-4b22-9876-9e6a33e7c9d8/quotes**
 
 Response body:
 ```JSON
@@ -913,18 +897,15 @@ Response body:
 *** 
 ### GET /api/feed
 
-Requires auth: 
-* if auth is provided, the returned feed will contain posts specifically chosen for the currently logged in user
-* if auth is not provided, the returned feed will contain posts chosen for the anonymous user
+Requires auth: yes
 
 ###### Request params: 
 * skip - how many posts should be skipped (defaults to 0 if not provided)
 * limit - how many posts at most should be returned (defaults to 20 if not provided)
-* by - the criteria by which feed should be generated (if not provided then the most recent posts are returned, if 'popularity' is provided then the most popular posts are returned)
 
 ###### Request body: -
 ###### Example request:
-**GET /api/feed?by=POPULARITY&skip=0**
+**GET /api/feed**
 
 Response body:
 ```JSON
@@ -938,8 +919,42 @@ Response body:
          "username":"mateusz",
          "displayedUsername":"mateusz",
          "description":"",
-         "aviURL":"",
-         "creationDate":"2021-08-31T13:04:02.305+00:00"
+         "aviURL":""
+      },
+      "quotes":null,
+      "respondsTo":"19b1691f-dfae-4b22-9876-9e6a33e7c9d8",
+      "respondsToUsername":"mateusz"
+   }
+]
+```
+*** 
+### GET /api/feed/popular
+
+Requires auth:
+* if provided, the response contains the most popular posts selected for the currently logged in user
+* if not provided, the response contains the most popular posts globally in the previous 24 hours
+
+###### Request params:
+* skip - how many posts should be skipped (defaults to 0 if not provided)
+* limit - how many posts at most should be returned (defaults to 20 if not provided)
+
+###### Request body: -
+###### Example request:
+**GET /api/feed/popular**
+
+Response body:
+```JSON
+[
+   {
+      "uuid":"08bd1387-3aeb-403c-9f6a-89ede18dce11",
+      "content":"Test @mateusz :)",
+      "date":"2021-09-27T13:23:49.569+00:00",
+      "author":{
+         "uuid":"5f8dc959-611e-4910-a456-68a5e467b859",
+         "username":"mateusz",
+         "displayedUsername":"mateusz",
+         "description":"",
+         "aviURL":""
       },
       "quotes":null,
       "respondsTo":"19b1691f-dfae-4b22-9876-9e6a33e7c9d8",
@@ -954,8 +969,7 @@ Response body:
          "username":"mateusz",
          "displayedUsername":"mateusz",
          "description":"",
-         "aviURL":"",
-         "creationDate":"2021-08-31T13:04:02.305+00:00"
+         "aviURL":""
       },
       "quotes":null,
       "respondsTo":null,
